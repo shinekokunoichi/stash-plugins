@@ -1,0 +1,11 @@
+name: Tag-Coloring
+description: Ads a function to color tag group
+version: 1.0
+ui:
+  javascript:
+  - Tag-Coloring.js
+settings:
+  Colors:
+    displayName: Colors
+    description: TagName:ColorHex separated by comma
+    type: STRING
