@@ -1,5 +1,6 @@
 # Stash Plugins
 ## Installation
+https://shinekokunoichi.github.io/stash-plugins/main/index.yml
 <img width="446" height="354" alt="image" src="https://github.com/user-attachments/assets/96151086-5ae3-410c-b9ec-8d234418693e" />
 
 ## Plugins
