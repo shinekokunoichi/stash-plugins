@@ -183,7 +183,6 @@
 
     //HOOK
     async function scrapeOne(data) {
-        sk.notify(`Starting hook on Scene Update - ScrapeOne at ${getDate()}`);
         await scrapeScene([data]);
         checkFinish();
     };
@@ -191,7 +190,6 @@
     //TASK
 
     async function scrapeAll() {
-        sk.notify(`Starting task Scrape all at ${getDate()}`);
         const scenes = await sk.stash.findScenes();
         sk.notify(`Searching for JAV in ${scenes.length} scenes...`);
         await scrapeScene(scenes);
@@ -201,7 +199,6 @@
     function checkFinish() {
         if (totalScene === searchedScene) {
             sk.notify(`Finished scraping, found a total of ${scrapedScene} JAV scene`);
-            sk.notify(`Finished task Scraping all at ${getDate()}`);
         } else {
             setTimeout(checkFinish, 1000);
         };
@@ -210,10 +207,10 @@
     //MAIN
 
     async function main() {
+        if (!settings) settings = defaultSettings;
         settings.create === 'all' ? settings.create = 'performers, studios, groups, tags' : null;
         settings.updateFilter === 'all' ? settings.updateFilter = 'performers, studios, groups, tags' : null;
         await sk.useNotification('JAV-Finder');
-        if (!settings) settings = defaultSettings;
         //HOOK
         if (settings.autoUpdate) sk.hook.watch('scene update', scrapeOne);
         //TASK

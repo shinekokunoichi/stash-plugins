@@ -1,7 +1,7 @@
 name: JAV-Finder
 description: Custom metadata scraper for JAV
 # requires: Shinobi-Api
-version: 1.0
+version: 1.1
 ui:
   javascript:
     - JAV-Finder.js
@@ -10,15 +10,12 @@ ui:
   # content-security policy overrides
   csp:
     connect-src:
-      - https://stashdb.org
       - https://njavtv.com
       - https://fourhoi.com
     script-src:
-      - https://stashdb.org
       - https://njavtv.com
       - https://fourhoi.com
     style-src:
-      - https://stashdb.org
       - https://njavtv.com
       - https://fourhoi.com
 settings:
@@ -35,7 +32,7 @@ settings:
       description: Enable auto updating on scene update.
       type: BOOLEAN
     updateFilter:
-      displayName: Update Filter
+      displayName: Update filter
       description: Value - All, performers, studios, groups and tags. Default - All.
       type: STRING
     language:
