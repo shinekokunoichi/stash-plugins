@@ -1,0 +1,34 @@
+name: StashDB-Scraper
+description: Auto metadata scraper from StashDB (based on title and name)
+# requires: Shinobi-Api
+version: 1.0
+ui:
+  javascript:
+    - StashDB-Scraper.js
+  requires:
+    - Shinobi-Api
+  # content-security policy overrides
+  csp:
+    connect-src:
+      - https://stashdb.org
+    script-src:
+      - https://stashdb.org
+    style-src:
+      - https://stashdb.org
+settings:
+    update:
+      displayName: Update
+      description: Value - All, performers, studios and tags. Default - All.
+      type: STRING
+    autoCreate:
+      displayName: Auto create
+      description: Enable the creation of missing data.
+      type: BOOLEAN
+    create:
+      displayName: Auto create options
+      description: Value - All, performers, studios and tags. Default - All.
+      type: STRING
+    genderFilter:
+      displayName: Gender filter
+      description: Which gender auto create. Value - both, female and male. Default - both.
+      type: STRING
