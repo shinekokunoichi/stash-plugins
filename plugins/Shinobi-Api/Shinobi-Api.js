@@ -415,6 +415,7 @@ skGraphic.prototype.container = function (width, height, position) {
 
 /**
  * Create a divider
+ * @constructor
  */
 skGraphic.prototype.divider = function () {
     this.set('hr');
@@ -624,23 +625,23 @@ skStash.prototype.setField = function () {
             _stashID: 'stashs_id'
         },
         update: {
-            scenes: 'id title code details director url urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
-            images: 'id title code rating100 organized url urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
+            scenes: 'id title code details director urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
+            images: 'id title code rating100 organized urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
             groups: 'id name aliases duration date rating100 studio_id director synopsis urls tag_ids containing_groups { group_id description } sub_groups { group_id description } front_image back_image',
             markers: 'id title seconds end_seconds scene_id primary_tag_id tag_ids',
-            galleries: 'id title code url urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
-            performers: 'id name disambiguation url urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcsed career_length tattoos piercings alias_list twitter instangram favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag custom_fields { full partial remove }',
-            studios: 'id name url urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
+            galleries: 'id title code urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
+            performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag',
+            studios: 'id name urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
             tags: 'id name sort_name description aliases ignore_auto_tag favorite image stash_ids parent_ids child_ids'
         },
         bulkUpdate: {
-            scenes: 'ids title code details director url urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
-            images: 'ids title code rating100 organized url urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
+            scenes: 'ids title code details director urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
+            images: 'ids title code rating100 organized urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
             groups: 'ids name aliases duration date rating100 studio_id director synopsis urls tag_ids containing_groups { group_id description } sub_groups { group_id description } front_image back_image',
             markers: 'ids title seconds end_seconds scene_id primary_tag_id tag_ids',
-            galleries: 'ids title code url urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
-            performers: 'ids name disambiguation url urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcsed career_length tattoos piercings alias_list twitter instangram favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag custom_fields { full partial remove }',
-            studios: 'ids name url urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
+            galleries: 'ids title code urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
+            performers: 'ids name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag',
+            studios: 'ids name urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
             tags: 'ids name sort_name description aliases ignore_auto_tag favorite image stash_ids parent_ids child_ids'
         }
     };
@@ -893,11 +894,10 @@ skStash.prototype.findFormatQuery = function (query, configuration, category) {
 /**
  * Check if the find filter.q will be the id or a string
  * @param {string|number} search String to search or specific id
- * @returns {string}
+ * @returns {boolean}
  */
 skStash.prototype.findIsID = function (search) {
-    if (typeof search === Number) return search.toString();
-    return search;
+    if (typeof search === Number || !isNaN(search)) return true
 };
 
 /**
@@ -916,7 +916,7 @@ skStash.prototype.findAllSearch = function (search) {
  * @returns {string} Search query
  */
 skStash.prototype.findSetSearch = function (search) {
-    search = this.findIsID(search);
+    if (this.findIsID(search)) search = '';
     search = this.findAllSearch(search);
     return search;
 };
@@ -962,6 +962,20 @@ skStash.prototype.findGetResponse = function (category, response) {
 };
 
 /**
+ * Return the correct response based on the given id
+ * @param {string|number} id Id to find
+ * @param {object} response Fetched data
+ * @returns {object} Id response
+ */
+skStash.prototype.findSearchId = function (id, response) {
+    let find = false;
+    response.forEach((item) => {
+        if (item.id == id || item.name == id || item.title == id) find = item;
+    });
+    return find;
+};
+
+/**
  * Initialize the find query and send the request
  * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
  * @param {string|number} search String to search or exact id
@@ -984,13 +998,13 @@ skStash.prototype.findDo = async function (category, search, configuration) {
     query = this.findFormatQuery(query, configuration, category);
     let response = await this.GQL(query);
     response = this.findGetResponse(category, response);
-    if (configuration.exact) return response[0];
+    if (configuration.exact) response = this.findSearchId(search, response);
     return response;
 };
 
 /**
  * Search for scenes
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash scene find filter
@@ -1003,13 +1017,13 @@ skStash.prototype.findScenes = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for scene
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash scene find filter
@@ -1022,13 +1036,12 @@ skStash.prototype.findScene = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for images
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash image find filter
@@ -1041,13 +1054,13 @@ skStash.prototype.findImages = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for image
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash image find filter
@@ -1060,13 +1073,12 @@ skStash.prototype.findImage = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for groups
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash group find filter
@@ -1079,13 +1091,13 @@ skStash.prototype.findGroups = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for group
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash group find filter
@@ -1098,13 +1110,12 @@ skStash.prototype.findGroup = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for markers
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash marker find filter
@@ -1117,13 +1128,13 @@ skStash.prototype.findMarkers = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for marker
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash marker find filter
@@ -1136,13 +1147,12 @@ skStash.prototype.findMarker = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for galleries
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash gallery find filter
@@ -1155,13 +1165,13 @@ skStash.prototype.findGalleries = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for gallery
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash gallery find filter
@@ -1174,13 +1184,12 @@ skStash.prototype.findGallery = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for performers
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash performer find filter
@@ -1193,13 +1202,13 @@ skStash.prototype.findPerformers = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for performer
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash performer find filter
@@ -1212,13 +1221,12 @@ skStash.prototype.findPerformer = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for studios
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash studio find filter
@@ -1231,13 +1239,13 @@ skStash.prototype.findStudios = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for studio
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash studio find filter
@@ -1250,13 +1258,12 @@ skStash.prototype.findStudio = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
 /**
  * Search for tags
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search String to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash tag find filter
@@ -1269,13 +1276,13 @@ skStash.prototype.findTags = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = false;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
+    if (this.findAllSearch(search) === '') this.setCache(category, result);
     return result
 };
 
 /**
  * Search for tag
- * @param {string|number} search String to search or exact id
+ * @param {string|number} search Id to search
  * @param {object} [configuration] Filter object
  * @param {object} [configuration.filter] Stash general find filter
  * @param {object} [configuration.fieldFilter] Stash tag find filter
@@ -1288,7 +1295,6 @@ skStash.prototype.findTag = async function (search, configuration) {
     if (!configuration) configuration = {};
     configuration.exact = true;
     const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search)) this.setCache(category, result);
     return result
 };
 
@@ -1569,7 +1575,7 @@ skStash.prototype.updateTag = async function (input) {
 skStash.prototype.createFormatQuery = function (query, category) {
     if (category != 'gallery') category += 's';
     if (category === 'gallery') category = 'galleries';
-    const value = this.formatField(this.getField('update', category));
+    const value = this.formatField(this.getField('default', category));
     query = query.replace('@input@', value);
     return query;
 };
@@ -1581,8 +1587,8 @@ skStash.prototype.createFormatQuery = function (query, category) {
  */
 skStash.prototype.createSetQuery = function (category) {
     const upperCase = category[0].toUpperCase() + category.slice(1);
-    if (!category === 'marker') return `mutation {${category}Create($input:${upperCase}CreateInput!){${category}Create(input: $input){@input@}}`
-    return 'mutation {sceneMarkerCreate($input:SceneMarkerCreateInput!){sceneMarkerCreate(input: $input){@input@}}';
+    if (category != 'marker') return `mutation ${category}Create($input:${upperCase}CreateInput!){${category}Create(input: $input){@input@}}`
+    return 'mutation sceneMarkerCreate($input:SceneMarkerCreateInput!){sceneMarkerCreate(input: $input){@input@}}';
 };
 
 
@@ -1605,10 +1611,10 @@ skStash.prototype.createGetResponse = function (category, response) {
  * @async
  */
 skStash.prototype.createDo = async function (category, input) {
-    let query = this.createSetQuery();
+    let query = this.createSetQuery(category);
     query = this.createFormatQuery(query, category);
     const response = await this.GQL(query, input);
-    return this.createGetResponse(response);
+    return this.createGetResponse(category, response);
 };
 
 /**
@@ -1629,7 +1635,7 @@ skStash.prototype.createScene = async function (input) {
  * @returns {object} Image created data
  * @async
  */
-skStash.prototype.createImages = async function (input) {
+skStash.prototype.createImage = async function (input) {
     const created = await this.createDo('image', input);
     this.updateCache('images', created);
     return created;
@@ -1637,11 +1643,11 @@ skStash.prototype.createImages = async function (input) {
 
 /**
  * Create a new group
- * @param {object} input Groups data
- * @returns {object} Groups created data
+ * @param {object} input Group data
+ * @returns {object} Group created data
  * @async
  */
-skStash.prototype.createGroups = async function (input) {
+skStash.prototype.createGroup = async function (input) {
     const created = await this.createDo('group', input);
     this.updateCache('groups', created);
     return created;
@@ -1696,9 +1702,9 @@ skStash.prototype.createStudio = async function (input) {
 };
 
 /**
- * Create a new tags
- * @param {object} input Tags data
- * @returns {object} Tags created data
+ * Create a new tag
+ * @param {object} input Tag data
+ * @returns {object} Tag created data
  * @async
  */
 skStash.prototype.createTags = async function (input) {
@@ -1870,7 +1876,7 @@ skStashDB.prototype.getGQL = function () {
  * Set StashDB api key
  */
 skStashDB.prototype.setApiKey = function () {
-    this._apiKey = this.getConfiguration().apiKey;
+    this._apiKey = this.getConfiguration().api_key;
 };
 
 /**
@@ -1908,8 +1914,8 @@ skStashDB.prototype.getHeaders = function () {
  */
 skStashDB.prototype.setField = function () {
     this._field = {
-        scene: 'id code release_data production_date title details director urls { url } images { url } studio {@studio@} performers {@performer@} tags {@tag@}',
-        studio: 'id name aliases urls { url } parent { name } child_studio { name }',
+        scene: 'id code release_date production_date title details director urls { url } images { url } studio {@studio@} performers { performer {@performer@} } tags {@tag@}',
+        studio: 'id name aliases urls { url } parent { name } child_studios { name }',
         performer: 'id name disambiguation aliases gender birth_date death_date age height hair_color eye_color ethnicity country career_end_year career_start_year breast_type waist_size hip_size band_size cup_size tattoos { location description } piercings { location description } urls { url } images { url }',
         tag: 'id name description aliases'
     };
@@ -1935,6 +1941,8 @@ skStashDB.prototype.initialize = async function () {
     this.setGQL();
     this.setApiKey();
     this.setHeaders();
+    this.setBaseQuery();
+    this.setCategoryQuery();
     this.setField();
     this._initializated = true;
 };
@@ -1949,8 +1957,7 @@ skStashDB.prototype.initialize = async function () {
 skStashDB.prototype.GQL = async function (query, search) {
     if (!query) throw Error('Query must be defined', query);
     let configuration = this.getHeaders();
-    configuration.body = JSON.stringify({ query });
-    configuration.variables.input = { term: search, limit: 1 };
+    configuration.body = JSON.stringify({ query: query, variables: { limit: 1, term: search } });
     const response = await fetch(this.getGQL(), configuration);
     let result = await response.json();
     result._type = 'stashDB';
@@ -1978,9 +1985,9 @@ skStashDB.prototype.getBaseQuery = function () {
 skStashDB.prototype.setCategoryQuery = function () {
     this._categoryQuery = {
         scene: 'searchScene(term:$term,limit:$limit){@scene@}',
-        studio: 'searchStudio(term:$term,limit:$limit){@performer@}',
+        studio: 'searchStudio(term:$term,limit:$limit){@studio@}',
         performer: 'searchPerformer(term:$term,limit:$limit){@performer@}',
-        tag: 'searchPerformer(term:$term,limit:$limit){@performer@}'
+        tag: 'searchTag(term:$term,limit:$limit){@tag@}'
     };
 };
 
@@ -2013,7 +2020,7 @@ skStashDB.prototype.formatField = function (query) {
  */
 skStashDB.prototype.formatQuery = function (category) {
     let query = this.getBaseQuery();
-    query.replace('@category@', this.getCategoryQuery(category));
+    query = query.replace('@category@', this.getCategoryQuery(category));
     query = this.formatField(query);
     return query;
 };
@@ -2026,8 +2033,9 @@ skStashDB.prototype.formatQuery = function (category) {
  */
 skStashDB.prototype.scene = async function (search) {
     const query = this.formatQuery('scene');
-    let data = await this.GQL(query, search).data.searchScene[0];
-    data._category = 'Scene';
+    let data = await this.GQL(query, search);
+    data = data.data.searchScene[0];
+    if (data) data._category = 'Scene';
     return data;
 };
 
@@ -2039,8 +2047,10 @@ skStashDB.prototype.scene = async function (search) {
  */
 skStashDB.prototype.performer = async function (search) {
     const query = this.formatQuery('performer');
-    let data = await this.GQL(query, search).data.searchPerformer[0];
-    data._category = 'Performer';
+    let data = await this.GQL(query, search);
+    data = data.data.searchPerformer[0];
+    if (data) data._category = 'Performer';
+    return data;
 };
 
 /**
@@ -2051,8 +2061,9 @@ skStashDB.prototype.performer = async function (search) {
  */
 skStashDB.prototype.studio = async function (search) {
     const query = this.formatQuery('studio');
-    let data = await this.GQL(query, search).data.searchStudio[0];
-    data._category = 'Studio';
+    let data = await this.GQL(query, search);
+    data = data.data.searchStudio[0];
+    if (data) data._category = 'Studio';
     return data;
 };
 
@@ -2064,8 +2075,9 @@ skStashDB.prototype.studio = async function (search) {
  */
 skStashDB.prototype.tag = async function (search) {
     const query = this.formatQuery('tag');
-    let data = await this.GQL(query, search).data.searchTag[0];
-    data._category = 'Tag';
+    let data = await this.GQL(query, search);
+    data = data.data.searchTag[0];
+    if (data) data._category = 'Tag';
     return data;
 };
 
@@ -2075,7 +2087,7 @@ skStashDB.prototype.tag = async function (search) {
  * @returns {array.<object>} StashID instance
  */
 skStashDB.prototype.toStashIDs = function (idDB) {
-    const data = new Date();
+    const date = new Date();
     return [{ stash_id: idDB, endpoint: this.getGQL(), updated_at: date.toISOString() }];
 };
 
@@ -2099,53 +2111,56 @@ skStashDB.prototype.toStashURL = function (urlsDB) {
  * @async
 */
 skStashDB.prototype.studioExist = async function (studio) {
+    if (!studio || !isNaN(studio)) return;
     let find = false;
-    find = sk.stash.findStudio(studio.name);
-    if (!find) studio.aliases.forEach((alias) => {
-        if (!find) find = sk.stash.findStudio(alias);
-    });
-    return find.id || false;
+    find = await sk.stash.findStudio(studio.name);
+    if (!find) for (alias of studio.aliases) {
+        if (!find) find = await sk.stash.findStudio(alias);
+    };
+    return find.id || studio;
 };
 
 /**
  * Check if the StashDB performers already exist inside Stash
  * @param {array.<object>} performers StashDB performers
- * @returns {number|boolean} Stash id or false
+ * @returns {object} Find and notFind array
  * @async
 */
 skStashDB.prototype.performersExist = async function (performers) {
+    if (!performers || !isNaN(performers[0])) return {find:performers};
     let find = false;
-    let ids = [];
-    performers.forEach((performer) => {
-        find = sk.stash.findPerformer(performer.name);
-        if (!find) performer.aliases.forEach((alias) => {
-            if (!find) find = sk.stash.findPerformer(alias);
-        });
-        if (find) ids.push(find.id);
+    let ids = { find: [], notFind: [] };
+    for (let performer of performers) {
+        performer = performer.performer;
+        find = await sk.stash.findPerformer(performer.name);
+        if (!find) for (alias of performer.aliases) {
+            if (!find) find = await sk.stash.findPerformer(alias);
+        };
+        find ? ids.find.push(find.id) : ids.notFind.push(performer);
         find = false;
-    });
-    if (!ids[0]) return false;
+    };
     return ids;
 };
 
 /**
  * Check if the StashDB tags already exist inside Stash
  * @param {array.<object>} tags StashDB tags
- * @returns {number|boolean} Stash id or false
+ * @returns {object} Find and notFind array
  * @async
 */
 skStashDB.prototype.tagsExist = async function (tags) {
+    if (!tags || !isNaN(tags[0])) return {find:tags};
     let find = false;
-    let ids = [];
-    tags.forEach((tag) => {
-        find = sk.stash.findTag(tag.name);
-        if (!find) tag.aliases.forEach((alias) => {
-            if (!find) find = sk.stash.findTag(alias);
-        });
-        if (find) ids.push(find.id);
+    let ids = { find: [], notFind: [] };
+
+    for (tag of tags) {
+        find = await sk.stash.findTag(tag.name);
+        if (!find) for (alias of tag.aliases) {
+            if (!find) find = await sk.stash.findTag(alias);
+        };
+        find ? ids.find.push(find.id) : ids.notFind.push(find.id);
         find = false;
-    });
-    if (!ids[0]) return false;
+    };
     return ids;
 };
 
@@ -2154,38 +2169,45 @@ skStashDB.prototype.tagsExist = async function (tags) {
  * @param {object} sceneDB StashDB scene data
  * @param {string} sceneDB.id Scene StashDB id
  * @param {string} sceneDB.title Scene title
+ * @param {array.<object>} sceneDB.images Scene images
  * @param {string|number} sceneDB.code Scene code
  * @param {string} sceneDB.details Scene details
  * @param {string} sceneDB.director Scene director
  * @param {array.<object>} sceneDB.urls Scene urls data
- * @param {string} sceneDB.release_data Scene release date (yyyy-mm-dd)
+ * @param {string} sceneDB.release_date Scene release date (yyyy-mm-dd)
  * @param {object} sceneDB.studio Scene studio
  * @param {array.<object>} sceneDB.performers Scene performers
  * @param {array.<object>} sceneDB.tags Scene tags
  * @param {number|string} [sceneId] Stash scene id to update
- * @param {boolean} find Need to check if performers, studio and tags already exist in stash
+ * @param {boolean} find If return not found data
  * @returns {object} Stash scene data
  * @async
  */
 skStashDB.prototype.toStashScene = async function (sceneDB, sceneId, find) {
     let scene = {};
+    const studio = await this.studioExist(sceneDB.studio);
+    const performers = await this.performersExist(sceneDB.performers);
+    const tags = await this.tagsExist(sceneDB.tags);
+
     if (sceneId != undefined) scene.id = sceneId;
-    scene.title = sceneDB.title;
-    scene.code = sceneDB.code;
-    scene.details = sceneDB.details;
-    scene.director = sceneDB.director;
-    scene.urls = this.toStashURL(sceneDB.urls);
-    scene.date = scene.release_date;
-    scene.stash_ids = this.toStashIDs(sceneDB.id);
+    if (sceneDB.images) scene.cover_image = sceneDB.images[0].url;
+    if (sceneDB.title) scene.title = sceneDB.title;
+    if (sceneDB.code) scene.code = sceneDB.code;
+    if (sceneDB.details) scene.details = sceneDB.details;
+    if (sceneDB.director) scene.director = sceneDB.director;
+    if (sceneDB.urls) scene.urls = this.toStashURL(sceneDB.urls);
+    if (sceneDB.release_date) scene.date = scene.release_date;
+    if (sceneDB.id) scene.stash_ids = this.toStashIDs(sceneDB.id);
+    if (!isNaN(studio)) scene.studio_id = studio;
+    scene.performer_ids = performers.find;
+    scene.tag_ids = tags.find;
+
     if (find) {
-        const studio = await this.studioExist(sceneDB.studio);
-        if (studio) scene.studio_id = studio;
-        const performers = await this.performersExist(sceneDB.performers);
-        if (performers) scene.performer_ids = performers;
-        const tags = await this.tagsExist(sceneDB.tags);
-        if (tags) scene.tag_ids = tags;
+        if (isNaN(studio)) find.studio = studio;
+        if (performers.notFind) find.performers = performers.notFind;
+        if (tags.notFind) find.tags = tags.notFind;
     };
-    return scene;
+    return find ? { scene: scene, find: find } : scene;
 };
 
 /**
@@ -2195,7 +2217,7 @@ skStashDB.prototype.toStashScene = async function (sceneDB, sceneId, find) {
  */
 skStashDB.prototype.toStashTattoosPiercings = function (listDB) {
     let list = [];
-    listDB.forEach((item) => {
+    if (listDB) listDB.forEach((item) => {
         const description = item.description;
         const location = item.location;
         let toStash = description;
@@ -2240,27 +2262,28 @@ skStashDB.prototype.toStashTattoosPiercings = function (listDB) {
 skStashDB.prototype.toStashPerformer = async function (performerDB, performerId) {
     let performer = {};
     if (performerId != undefined) performer.id = performerId;
-    performer.name = performerDB.name;
-    performer.disambiguation = performerDB.disambiguation;
-    performer.urls = this.toStashURL(performerDB.urls);
-    performer.gender = performerDB.gender;
-    performer.birthdate = performerDB.birth_date
-    performer.ethnicity = performerDB.ethnicity[0] + performerDB.ethnicity.slice(1).toLowerCase();
-    performer.country = performerDB.country;
-    performer.eye_color = performerDB.eye_color;
-    performer.height_cm = performerDB.height;
-    performer.measurements = `${performerDB.band_size}${performerDB.cup_size}-${performerDB.waist_size}-${performerDB.hip_size}`;
-    performer.fake_tits = performerDB.breast_type[0] + performerDB.breast_type.slice(1).toLowerCase();
-    performer.penis_length = performerDB.penis_length;
-    performer.circumcised = performerDB.circumcised;
-    performer.career_length = performerDB.career_end_year ? `${performerDB.career_start_year} -` : `${performerDB.career_start_year} - ${performerDB.career_end_year}`;
-    performer.tattoos = this.toStashTattoosPiercings(performerDB.tattoos);
-    performer.piercing = this.toStashTattoosPiercings(performerDB.piercings);
-    performer.alias_list = performerDB.aliases;
-    performer.stash_ids = this.toStashIDs(performerDB.id);
-    performer.death_date = performerDB.death_date;
-    performer.hair_color = performerDB.hair_color[0] + performerDB.hair_color.slice(1).toLowerCase();
-    performer.weight = performerDB.weight;
+    if (performerDB.images) performer.image = performerDB.images[0].url;
+    if (performerDB.name) performer.name = performerDB.name;
+    if (performerDB.disambiguation) performer.disambiguation = performerDB.disambiguation;
+    if (performerDB.urls) performer.urls = this.toStashURL(performerDB.urls);
+    if (performerDB.gender) performer.gender = performerDB.gender;
+    if (performerDB.birthdate) performer.birthdate = performerDB.birth_date
+    if (performerDB.ethnicity) performer.ethnicity = performerDB.ethnicity[0] + performerDB.ethnicity.slice(1).toLowerCase();
+    if (performerDB.country) performer.country = performerDB.country;
+    if (performerDB.eye_color) performer.eye_color = performerDB.eye_color;
+    if (performerDB.height) performer.height_cm = performerDB.height;
+    if (performerDB.band_size && performerDB.cup_size && performerDB.waist_size && performerDB.hip_size) performer.measurements = `${performerDB.band_size}${performerDB.cup_size}-${performerDB.waist_size}-${performerDB.hip_size}`;
+    if (performerDB.breast_type) performer.fake_tits = performerDB.breast_type[0] + performerDB.breast_type.slice(1).toLowerCase();
+    if (performerDB.penis_length) performer.penis_length = performerDB.penis_length;
+    if (performerDB.circumcised) performer.circumcised = performerDB.circumcised;
+    if (performerDB.career_start_year) performer.career_length = performerDB.career_end_year ? `${performerDB.career_start_year} -` : `${performerDB.career_start_year} - ${performerDB.career_end_year}`;
+    if (performerDB.tattoos) performer.tattoos = this.toStashTattoosPiercings(performerDB.tattoos);
+    if (performerDB.piercings) performer.piercings = this.toStashTattoosPiercings(performerDB.piercings);
+    if (performerDB.aliases) performer.alias_list = performerDB.aliases;
+    if (performerDB.id) performer.stash_ids = this.toStashIDs(performerDB.id);
+    if (performerDB.death_date) performer.death_date = performerDB.death_date;
+    if (performerDB.hair_color) performer.hair_color = performerDB.hair_color[0] + performerDB.hair_color.slice(1).toLowerCase();
+    if (performerDB.weight) performer.weight = performerDB.weight;
     return performer;
 };
 
@@ -2273,22 +2296,25 @@ skStashDB.prototype.toStashPerformer = async function (performerDB, performerId)
  * @param {array.<object>} studioDB.url Studio urls data
  * @param {object} studioDB.parent Studio parent object
  * @param {string|number} studioId Stash studio id to update
- * @param {boolean} find Need to check if parent studio already exist in stash
+ * @param {boolean} find If return not found data
  * @returns {object} Stash studio data
  * @async
  */
 skStashDB.prototype.toStashStudio = async function (studioDB, studioId, find) {
     let studio = {};
+    const parent = await this.studioExist(studioDB.parent);
+
     if (studioId != undefined) studio.id = studioId;
-    studio.name = studioDB.name;
-    studio.aliases = studioDB.aliases;
-    studio.urls = this.toStashURL(studioDB.urls);
-    studio.stash_ids = this.toStashIDs(studioDB.id);
+    if (studioDB.name) studio.name = studioDB.name;
+    if (studioDB.aliases) studio.aliases = studioDB.aliases;
+    if (studioDB.urls) studio.urls = this.toStashURL(studioDB.urls);
+    if (studioDB.id) studio.stash_ids = this.toStashIDs(studioDB.id);
+    if (!isNaN(parent)) studio.parent_id = parent.id;
+
     if (find) {
-        const parent = await this.studioExist(studioDB.parent);
-        if (parent) studio.parent_id = parent.id;
+        if (isNaN(parent)) find.parent = parent;
     };
-    return studio;
+    return find ? {scene:scene, find:find} : studio;
 };
 
 /**
@@ -2305,10 +2331,10 @@ skStashDB.prototype.toStashStudio = async function (studioDB, studioId, find) {
 skStashDB.prototype.toStashTag = async function (tagDB, tagId) {
     let tag = {};
     if (tagId != undefined) tag.id = tagId;
-    tag.name = tagDB.name;
-    tag.description = tagDB.description;
-    tag.aliases = tagDB.aliases;
-    tag.stash_ids = this.toStashIDs(tagDB.id);
+    if (tagDB.name) tag.name = tagDB.name;
+    if (tagDB.description) tag.description = tagDB.description;
+    if (tagDB.aliases) tag.aliases = tagDB.aliases;
+    if (tagDB.id) tag.stash_ids = this.toStashIDs(tagDB.id);
     return tag;
 };
 
@@ -2319,7 +2345,7 @@ skStashDB.prototype.toStashTag = async function (tagDB, tagId) {
  * @returns
  */
 skStashDB.prototype.toStash = async function (stashDB, id) {
-    const stashData = await sk.stashDB[`toStash${stashDB._category}`](stashDB, id, true);
+    const stashData = await sk.stashDB[`toStash${stashDB._category}`](stashDB, id);
     if (id != undefined) await sk.stash[`update${stashDB._category}`](stashData);
     return stashData;
 };
@@ -2345,7 +2371,7 @@ skHook.prototype.isInitializated = function () {
  * Clone the default fetch
  */
 skHook.prototype.setFetch = function () {
-    this._fetch = window.fetch;
+    this._fetch = window.fetch.bind(this);
 };
 
 /**
@@ -2463,8 +2489,10 @@ skHook.prototype.setFakeFetch = function () {
         if (gql === 'http://localhost:9999/graphql' || gql === '/graphql') watch = sk.hook.needWatch(query);
         return Promise.resolve(sk.hook.getFetch().apply(window, args))
             .then((resp) => {
-                const resp2 = resp.clone();
-                if (watch.functions) watch.functions.forEach((watcher) => { sk.hook.prepareResponse(watcher, resp2, watch.query) });
+                if (watch.functions) watch.functions.forEach((watcher) => {
+                    const resp2 = resp.clone();
+                    sk.hook.prepareResponse(watcher, resp2, watch.query);
+                });
                 return resp;
             })
     };
