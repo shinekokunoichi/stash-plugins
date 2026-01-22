@@ -8,13 +8,3 @@ ui:
   csp:
     connect-src:
       - https://stashdb.org
-      - https://njavtv.com
-      - https://fourhoi.com
-    script-src:
-      - https://stashdb.org
-      - https://njavtv.com
-      - https://fourhoi.com
-    style-src:
-      - https://stashdb.org
-      - https://njavtv.com
-      - https://fourhoi.com

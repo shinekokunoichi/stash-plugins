@@ -136,10 +136,10 @@ function skGraphicBase() { };
 
 /**
  * Set and create the graphic element
- * @param {string} element HTML Tag
+ * @param {string|HTMLElement} element HTML Tag or HTML element
  */
 skGraphicBase.prototype.set = function (element) {
-    this._container = document.createElement(element);
+    this._container = typeof element === 'string' ? document.createElement(element) : element;
 };
 
 /**
@@ -164,8 +164,8 @@ skGraphicBase.prototype.remove = function () {
  * @returns {string} If the value is not defined return the option
  */
 skGraphicBase.prototype.css = function (option, value) {
-    if (option && !value) return this.get().style[option];
-    if (option && value) this.get().style[option] = value;
+    if (option && value === undefined) return this.get().style[option];
+    if (option && value != undefined) this.get().style[option] = value;
 };
 
 /**
@@ -175,8 +175,8 @@ skGraphicBase.prototype.css = function (option, value) {
  * @returns {string} If the value is not defined return the option
  */
 skGraphicBase.prototype.attribute = function (option, value) {
-    if (option && !value) return this.get().getAttribute(option);
-    if (option && value) this.get().setAttribute(option, value);
+    if (option && value === undefined) return this.get().getAttribute(option);
+    if (option && value != undefined) this.get().setAttribute(option, value);
 };
 
 /**
@@ -197,17 +197,19 @@ skGraphicBase.prototype.id = function (id) {
  */
 skGraphicBase.prototype.class = function (value, replace) {
     if (!replace && !value) return this.get().className;
-    if (!replace && value) this.get().classList.toggle(value);
+    if (!replace && value && !value.includes(' ')) this.get().classList.toggle(value);
+    if (!replace && value && value.includes(' ')) value.split(' ').forEach((cls) => { this.get().classList.toggle(cls) });
     if (replace && value) this.get().className = value;
 };
 
 /**
  * Get or append child
  * @param {HTMLElement} child Child to append
- * @returns {ChildNode} If the child is not defined return the childList
+ * @returns {ChildNode|object} ChildNode or skGraphicBase object. If the child is not defined return the childList
  */
 skGraphicBase.prototype.child = function (child) {
     if (!child) return this.get().childList;
+    if (child.constructor === skGraphicBase) child = child.get();
     this.get().appendChild(child);
 };
 
@@ -278,10 +280,10 @@ skGraphicBase.prototype.autoSize = function (size) {
  * @returns {string|number} Translated margin or given
  */
 skGraphicBase.prototype.autoMargin = function (size) {
-    if (size === 100) return '0%'
-    if (size === 75) return '12.5%';
-    if (size === 50) return '25%';
-    if (size === 25) return '37.5%';
+    if (size === '100%') return '0%'
+    if (size === '75%') return '12.5%';
+    if (size === '50%') return '25%';
+    if (size === '25%') return '37.5%';
     return size;
 };
 
@@ -387,6 +389,46 @@ skGraphic.prototype.initialize = async function () {
 };
 
 /**
+ * Get element in the dom
+ * @param {string} selector
+ * @returns {object}skGraphiBase element
+ */
+skGraphic.prototype.get = function (selector) {
+    const element = document.querySelector(selector);
+    return new this.transform(element);
+};
+
+/**
+ * Get elements in the dom
+ * @param {string} selector
+ * @returns {array.<object>}skGraphiBase elements
+ */
+skGraphic.prototype.getAll = function (selector) {
+    const elements = document.querySelectorAll(selector);
+    return this.transform(elements);
+};
+
+/**
+ * Transform a HTML element/s in skGraphicBase element/s
+ * @param {HTMLElement|array.<HTMLElement>} elements
+ * @returns {object|array.<object>} skGraphiBase element/s
+ */
+skGraphic.prototype.transform = function (elements) {
+    if (!elements[0]) {
+        let tempConstructor = {};
+        tempConstructor.__proto__ = new skGraphicBase();
+        tempConstructor.set(elements);
+        return tempConstructor;
+    } else {
+        let list = [];
+        elements.forEach((element) => {
+            list.push(this.transform(element));
+        });
+        return list;
+    };
+};
+
+/**
  * Create a popUp
  * @constructor
  * @param {string} width full|big|half|small & any
@@ -394,6 +436,7 @@ skGraphic.prototype.initialize = async function () {
  * @param {string} position Ex: 'center'|'top left'
  */
 skGraphic.prototype.popUp = function (width, height, position) {
+    this.__proto__ = new skGraphicBase()
     this.set('div');
     this.default(width, height, position);
     this.css('position', 'fixed');
@@ -409,6 +452,7 @@ skGraphic.prototype.popUp = function (width, height, position) {
  * @param {string} position Ex: 'center'|'top left'
  */
 skGraphic.prototype.container = function (width, height, position) {
+    this.__proto__ = new skGraphicBase()
     this.set('div');
     this.default(width, height, position);
 };
@@ -418,6 +462,7 @@ skGraphic.prototype.container = function (width, height, position) {
  * @constructor
  */
 skGraphic.prototype.divider = function () {
+    this.__proto__ = new skGraphicBase()
     this.set('hr');
 };
 
@@ -427,6 +472,7 @@ skGraphic.prototype.divider = function () {
  * @param {string} text Default text
  */
 skGraphic.prototype.title = function (text) {
+    this.__proto__ = new skGraphicBase()
     this.set('h1');
     if (text) this.text(text);
 };
@@ -437,6 +483,7 @@ skGraphic.prototype.title = function (text) {
  * @param {string} text Default text
  */
 skGraphic.prototype.subTitle = function (text) {
+    this.__proto__ = new skGraphicBase()
     this.set('h3');
     if (text) this.text(text);
 };
@@ -447,6 +494,7 @@ skGraphic.prototype.subTitle = function (text) {
  * @param {string} text Default text
  */
 skGraphic.prototype.description = function (text) {
+    this.__proto__ = new skGraphicBase()
     this.set('p');
     if (text) this.text(text);
 };
@@ -457,6 +505,7 @@ skGraphic.prototype.description = function (text) {
  * @param {string} url Default url
  */
 skGraphic.prototype.link = function (url) {
+    this.__proto__ = new skGraphicBase()
     this.set('a');
     if (url) this.url(url);
 };
@@ -468,11 +517,39 @@ skGraphic.prototype.link = function (url) {
  * @param {object} options Video attribute
  */
 skGraphic.prototype.video = function (url, options) {
+    this.__proto__ = new skGraphicBase()
     this.set('video');
     if (url) this.url(url);
     if (options.autoPlay) this.attribute('autoplay', options.autoPlay);
     if (options.muted) this.attribute('muted', options.muted);
     if (options.loop) this.attribute('loop', options.loop);
+};
+
+/**
+ * Create a button
+ * @constructor
+ * @param {string} value Button value
+ */
+skGraphic.prototype.button = function (value) {
+    this.__proto__ = new skGraphicBase();
+    this.set('button');
+    this.attribute('type', 'button');
+    if (value) this.attribute('value', value);
+};
+
+/**
+ * Create a svg
+ * @constructor
+ * @param {string} fill Path fill
+ * @param {string} d Path d
+ */
+skGraphic.prototype.svg = function (fill, d) {
+    this.__proto__ = new skGraphicBase();
+    this.set('svg');
+    const path = document.createElement('path');
+    path.setAttribute('fill', fill);
+    path.setAttribute('d', d);
+    this.child(path);
 };
 
 //BOOKMARK skStash
@@ -2371,7 +2448,7 @@ skHook.prototype.isInitializated = function () {
  * Clone the default fetch
  */
 skHook.prototype.setFetch = function () {
-    this._fetch = window.fetch.bind(this);
+    this._fetch = window.fetch.bind(window);
 };
 
 /**
@@ -2680,7 +2757,7 @@ skTask.prototype.isSetted = function () {
  * @returns {skGraphic.contaier} Card element
  */
 skTask.prototype.makeContainer = function () {
-    const panelTasks = document.querySelector('.tasks-panel-tasks');
+    const panelTasks = sk.ui.get('.tasks-panel-tasks');
     const hr = new sk.ui.divider();
     const formGroup = new sk.ui.container();
     formGroup.class('form-group', true);
@@ -2690,8 +2767,8 @@ skTask.prototype.makeContainer = function () {
     const card = new sk.ui.container();
     card.class('card', true);
 
-    panelTasks.appendChild(hr);
-    panelTasks.appendChild(formGroup);
+    panelTasks.child(hr);
+    panelTasks.child(formGroup);
     formGroup.child(settingSection);
     settingSection.child(title);
     settingSection.child(card);
@@ -2704,8 +2781,8 @@ skTask.prototype.makeContainer = function () {
  */
 skTask.prototype.getContainer = function () {
     let pluginCard;
-    const pluginSection = document.querySelectorAll('.form-group');
-    if (pluginSection.length === 3) pluginCard = pluginSection[2].firstChild.lastChild;
+    const pluginSection = sk.ui.getAll('.form-group');
+    if (pluginSection.length === 3) pluginCard = sk.ui.transform(pluginSection[2].firstChild.lastChild);
     if (pluginSection.length != 3) pluginCard = this.makeContainer();
     return pluginCard;
 };
@@ -2729,8 +2806,8 @@ skTask.prototype.groupTasks = function () {
  * @returns {HTMLElement} Settings group container
  */
 skTask.prototype.makeSettingsGroup = function () {
-    const settingsGroup = document.createElement('div');
-    settingsGroup.className = 'skTask setting-group collapsible';
+    const settingsGroup = new sk.ui.container();
+    settingsGroup.class('skTask setting-group collapsible', true);
     return settingsGroup;
 };
 
@@ -2739,36 +2816,30 @@ skTask.prototype.makeSettingsGroup = function () {
  * @returns {HTMLElement} Settings header
  */
 skTask.prototype.makeSettingsHeader = function (group) {
-    const settingsHeader = document.createElement('div');
-    settingsHeader.className = 'setting';
-    const titleContainer = document.createElement('div');
-    const title = document.createElement('h3');
-    title.innerText = group;
-    const buttonContainer = document.createElement('div');
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'setting-group-collapse-button btn btn-minimal';
-    const arrow = document.createElement('svg');
-    arrow.ariaHidden = 'true';
-    arrow.focusable = 'false';
-    arrow['data-prefix'] = 'fas';
-    arrow['data-icon'] = 'chevron-up'
-    arrow.className = 'svg-inline--fa fa-chevron-up fa-icon fa-fw';
-    arrow.role = 'img';
-    arrow.xmlns = 'http://www.w3.org/2000/svg';
-    arrow.viewBox = '0 0 512 512';
-    const arrowPath = document.createElement('path');
-    arrowPath.fill = 'currentColor';
-    arrowPath.d = 'M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z';
+    const settingsHeader = new sk.ui.container();
+    settingsHeader.class('setting');
+    const titleContainer = new sk.ui.container();
+    const title = new sk.ui.subTitle(group);
+    const buttonContainer = new sk.ui.container();
+    const button = new sk.ui.button();
+    button.class('setting-group-collapse-button btn btn-minimal');
+    const arrow = new sk.ui.svg('currentColor', 'M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z');
+    arrow.class('svg-inline--fa fa-chevron-up fa-icon fa-fw');
+    arrow.attribute('aria-hidden', true);
+    arrow.attribute('focusable', false);
+    arrow.attribute('data-prefix', 'fas');
+    arrow.attribute('data-icon', 'chevron-up');
+    arrow.attribute('role', 'img');
+    arrow.attribute('xmlns', 'http://www.w3.org/2000/svg');
+    arrow.attribute('viewBox', '0 0 512 512');
 
-    settingsHeader.appendChild(titleContainer);
-    titleContainer.appendChild(title);
-    settingsHeader.appendChild(buttonContainer);
-    buttonContainer.appendChild(button);
-    button.appendChild(arrow);
-    arrow.appendChild(arrowPath);
+    settingsHeader.child(titleContainer);
+    titleContainer.child(title);
+    settingsHeader.child(buttonContainer);
+    buttonContainer.child(button);
+    button.child(arrow);
 
-    button.onclick = () => { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); };
+    button.event('click', function () { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); });
     return settingsHeader;
 };
 
@@ -2827,9 +2898,9 @@ skTask.prototype.setTasks = function () {
             const settingsTask = this.makeSettingsTask(task);
             settingsSection.appendChild(settingsTask);
         });
-        container.appendChild(settingsGroup);
-        settingsGroup.appendChild(settingsHeader);
-        settingsGroup.appendChild(settingsSection);
+        container.child(settingsGroup);
+        settingsGroup.child(settingsHeader);
+        settingsGroup.child(settingsSection);
     };
 };
 

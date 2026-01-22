@@ -1,0 +1,13 @@
+name: JAV-Downloader
+description: Suggestion and downloader of JAV directly from Stash. Read the guide. Need CORS
+# requires: Shinobi-Api
+version: 1.0
+ui:
+  javascript:
+    - JAV-Downloader.js
+  requires:
+    - Shinobi-Api
+  language:
+    displayName: Language
+    description: Video language. Value - en, ja. Default - en.
+    type: STRING
