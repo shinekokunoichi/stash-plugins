@@ -31,7 +31,7 @@ Description: Custom JAV scraper. Require CORS
 - Fallback option to change metadata language temporarily for the current scraping scene
 ### JAV-Downloader
 Examples of the tasks "Search by code"
-<img width="1846" height="495" alt="image" src="https://github.com/user-attachments/assets/99398c51-7f94-41dd-834e-42315231d133" />
+<img width="1846" height="495" alt="Untitled (1)" src="https://github.com/user-attachments/assets/be5a6048-0fa4-4abd-89c5-4ca49cc2a9b7" />
 
 Version: 1.0
 Description: Suggestion and downloader of JAV directly from Stash. Read the guide. Need CORS
