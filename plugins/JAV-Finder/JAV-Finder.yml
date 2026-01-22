@@ -7,6 +7,11 @@ ui:
     - JAV-Finder.js
   requires:
     - Shinobi-Api
+  # content-security policy overrides
+  csp:
+    connect-src:
+      - https://njavtv.com
+      - https://fourhoi.com
 settings:
     autoCreate:
       displayName: Auto create

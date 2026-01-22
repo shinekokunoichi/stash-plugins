@@ -7,6 +7,13 @@ ui:
     - JAV-Downloader.js
   requires:
     - Shinobi-Api
+  # content-security policy overrides
+  csp:
+    connect-src:
+      - https://njavtv.com
+      - https://fourhoi.com
+      - https://surrit.com
+settings:
   language:
     displayName: Language
     description: Video language. Value - en, ja. Default - en.
