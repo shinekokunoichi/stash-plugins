@@ -1,10 +1,10 @@
-name: JAV-Downloader
+name: skDownloader - JAV
 description: Suggestion and downloader of JAV directly from Stash. Read the guide. Need CORS
 # requires: Shinobi-Api
 version: 1.0
 ui:
   javascript:
-    - JAV-Downloader.js
+    - skDownloader - JAV.js
   requires:
     - Shinobi-Api
   # content-security policy overrides

@@ -1,5 +1,5 @@
 (async function () {
-	let settings = sk.plugins.get('StashDB-Scraper');
+	let settings = sk.plugins.get('skScraper - StashDB');
     const defaultSettings = {
         update: 'all',
         autoCreate: true,
@@ -147,22 +147,22 @@
 
     async function main() {
         if (!settings) settings = defaultSettings;
-		if (sk.stashDB.);
+		if (!sk.stashDB.getGQL()) throw Error("StashDB Endpoint doesn't exist");
         settings.update === 'all' ? settings.update = 'scenes, performers, studios, tags' : null;
         settings.create === 'all' ? settings.create = 'scenes, performers, studios, tags' : null;
         settings.genderFilter === 'both' ? settings.genderFilter = 'male, female' : null;
-        await sk.useNotification('StashDB-Scraper');
+        await sk.useNotification('skScraper - StashDB');
         //HOOK
         if (settings.update.includes('scenes')) sk.hook.watch('scene update', scrapeScene);
         if (settings.update.includes('performers')) sk.hook.watch('performer create', scrapePerformer);
         if (settings.update.includes('studios')) sk.hook.watch('studio create', scrapeStudio);
         if (settings.update.includes('tags')) sk.hook.watch('tag create', scrapeTag);
         //TASK
-        sk.task.new('StashDB-Scraper', 'Scrape all', 'Scrape all scene', scrapeAll);
-        sk.task.new('StashDB-Scraper', 'Scrape scene', 'Scrape all scene', scrapeScenes);
-        sk.task.new('StashDB-Scraper', 'Scrape performer', 'Scrape all scene', scrapePerformers);
-        sk.task.new('StashDB-Scraper', 'Scrape studio', 'Scrape all scene', scrapeStudios);
-        sk.task.new('StashDB-Scraper', 'Scrape tag', 'Scrape all scene', scrapeTags);
+        sk.task.new('skScraper - StashDB', 'Scrape all', 'Scrape all scene', scrapeAll);
+        sk.task.new('skScraper - StashDB', 'Scrape scene', 'Scrape all scene', scrapeScenes);
+        sk.task.new('skScraper - StashDB', 'Scrape performer', 'Scrape all scene', scrapePerformers);
+        sk.task.new('skScraper - StashDB', 'Scrape studio', 'Scrape all scene', scrapeStudios);
+        sk.task.new('skScraper - StashDB', 'Scrape tag', 'Scrape all scene', scrapeTags);
     };
 
     main();
