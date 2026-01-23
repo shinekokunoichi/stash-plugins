@@ -6,9 +6,9 @@ https://shinekokunoichi.github.io/stash-plugins/main/index.yml
 <img width="446" height="354" alt="image" src="https://github.com/user-attachments/assets/96151086-5ae3-410c-b9ec-8d234418693e" />
 
 ## Note
-Change plugins settings after installing them otherwise will use the default settings!
-Issues/Suggestion: If you have some issues with my plugins, open a new issue with title "{Plugin Name} - Shortened Problem". I will fix it as fast as I can.
-CORS: When a plugin have the CORS requirement you need a special CORS addon to bypass bad request from website server. I suggest <a href="https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc">this addons</a> as it can be enabled only for stash host. Thanks to my main API any request that are not from stash and my plugins to external server will be blocked anyway!
+- Change plugins settings after installing them otherwise will use the default settings!
+- Issues/Suggestion: If you have some issues with my plugins, open a new issue with title "{Plugin Name} - Shortened Problem". I will fix it as fast as I can.
+- CORS: When a plugin have the CORS requirement you need a special CORS addon to bypass bad request from website server. I suggest <a href="https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc">this addons</a> as it can be enabled only for stash host. Thanks to my main API any request that are not from stash and my plugins to external server will be blocked anyway!
 ## API
 ### Shinobi-Api
 Version: 1.1
