@@ -494,8 +494,10 @@ skGraphic.prototype.make = {
         const svg = new skGraphicBase();
         svg.set('svg');
         const path = new skGraphicBase();
+        path.set('path');
         path.attribute({ fill: fill, d: d });
         svg.child(path);
+        return svg;
     },
     //INPUT
     button: function (value) {
@@ -2159,7 +2161,7 @@ skStashDB.prototype.studioExist = async function (studio) {
  * @async
 */
 skStashDB.prototype.performersExist = async function (performers) {
-    if (!performers || !isNaN(performers[0])) return {find:performers};
+    if (!performers || !isNaN(performers[0])) return { find: performers };
     let find = false;
     let ids = { find: [], notFind: [] };
     for (let performer of performers) {
@@ -2181,7 +2183,7 @@ skStashDB.prototype.performersExist = async function (performers) {
  * @async
 */
 skStashDB.prototype.tagsExist = async function (tags) {
-    if (!tags || !isNaN(tags[0])) return {find:tags};
+    if (!tags || !isNaN(tags[0])) return { find: tags };
     let find = false;
     let ids = { find: [], notFind: [] };
 
@@ -2346,7 +2348,7 @@ skStashDB.prototype.toStashStudio = async function (studioDB, studioId, find) {
     if (find) {
         if (isNaN(parent)) find.parent = parent;
     };
-    return find ? {scene:scene, find:find} : studio;
+    return find ? { scene: scene, find: find } : studio;
 };
 
 /**
