@@ -145,7 +145,8 @@
         if (!javCode) return;
         let javData = await searchJav(javCode);
         if (!javData && settings.fallback) javData = await searchJav(javCode, fallback())
-        if (!javData[0] || javData[0].getAttribute('x-show').includes('recommendItems')) {
+        const isRecommend = javData[0].getAttribute('x-show');
+        if (!javData[0] || !isRecommend || isRecommend.includes('recommendItems')) {
             sk.notify('skScraper - JAV', `${javCode} not found`);
             return;
         }
