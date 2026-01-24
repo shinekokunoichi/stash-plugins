@@ -145,8 +145,8 @@
         if (!javCode) return;
         let javData = await searchJav(javCode);
         if (!javData && settings.fallback) javData = await searchJav(javCode, fallback())
-        if (!javData) {
-            sk.notify(`${javCode} not found`);
+        if (!javData[0]) {
+            sk.notify('skScraper - JAV', `${javCode} not found`);
             return;
         }
         let scene = await javScene(javData[0]);
@@ -192,14 +192,14 @@
 
     async function scrapeAll() {
         const scenes = await sk.stash.findScenes();
-        sk.notify(`Searching for JAV in ${scenes.length} scenes...`);
+        sk.notify('skScraper - JAV', `Searching for JAV in ${scenes.length} scenes...`);
         await scrapeScene(scenes);
         checkFinish();
     };
 
     function checkFinish() {
         if (totalScene === searchedScene) {
-            sk.notify(`Finished scraping, found a total of ${scrapedScene} JAV scene`);
+            sk.notify('skScraper - JAV', `Finished scraping, found a total of ${scrapedScene} JAV scene`);
         } else {
             setTimeout(checkFinish, 1000);
         };
@@ -211,7 +211,7 @@
         settings = defaultSettings();
         settings.create === 'all' ? settings.create = 'performers, studios, groups, tags' : null;
         settings.updateFilter === 'all' ? settings.updateFilter = 'performers, studios, groups, tags' : null;
-        await sk.useNotification('skScraper - JAV');
+        await sk.useNotification();
         //HOOK
         if (settings.autoUpdate) sk.hook.watch('scene update', scrapeOne);
         //TASK

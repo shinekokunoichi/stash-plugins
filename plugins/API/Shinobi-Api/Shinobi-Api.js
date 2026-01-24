@@ -89,27 +89,10 @@ ShinobiApi.prototype.notificationPermission = async function () {
 };
 
 /**
- * Set the notification name
- * @param {string} name Plugin id
- */
-ShinobiApi.prototype.setNotificationName = function (name) {
-    this._notificationName = name;
-};
-
-/**
- * Get the notification name
- * @returns {string} Plugin id
- */
-ShinobiApi.prototype.getNotificationName = function () {
-    return this._notificationName;
-};
-
-/**
  * Enable notification for stash
  * @returns If is already granted
  */
 ShinobiApi.prototype.useNotification = async function (name) {
-    this.setNotificationName(name);
     if (this.getNotification() === 'granted') return;
     const permission = await this.notificationPermission();
     this.setNotification();
@@ -119,14 +102,13 @@ ShinobiApi.prototype.useNotification = async function (name) {
  * Make a notification
  * @param {strng} message
  */
-ShinobiApi.prototype.notify = function (message) {
+ShinobiApi.prototype.notify = function (title, message) {
     if (this.getNotification !== 'granted') {
-        console.log(`${this.getNotificationName()} - ${message}`);
+        console.log(message);
         return;
     };
-    const name = this.getNotificationName();
     const logo = document.querySelector("link[rel='shortcut icon']").href;
-    const notify = new Notification(name, { body: message, icon: logo });
+    const notify = new Notification(title, { body: message, icon: logo });
 };
 
 //BOOKMARK skGraphicBase
@@ -475,7 +457,7 @@ skGraphic.prototype.make = {
         const description = new skGraphicBase();
         description.set('p');
         if (text) description.text(text);
-        return text;
+        return description;
     },
     //MEDIA
     link: function (url) {

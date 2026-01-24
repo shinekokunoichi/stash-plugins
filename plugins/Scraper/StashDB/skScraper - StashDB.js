@@ -71,7 +71,7 @@
         stashDB.performers = await findPerformers(stashDB.performers);
         stashDB.tags = await findTags(stashDB.tags);
         await sk.stashDB.toStash(stashDB, scene.id);
-        if (!all) sk.notify(`Scraped ${stashDB.title}`);
+        if (!all) sk.notify('skScraper - StashDB', `Scraped ${stashDB.title}`);
     };
 
     async function scrapePerformer(data, all) {
@@ -80,7 +80,7 @@
         const stashDB = await sk.stashDB.performer(data.name);
         if (!stashDB) return;
         await sk.stashDB.toStash(stashDB, performer.id);
-        if (!all) sk.notify(`Scraped ${stashDB.name}`);
+        if (!all) sk.notify('skScraper - StashDB', `Scraped ${stashDB.name}`);
     };
 
     async function scrapeStudio(data, all) {
@@ -90,7 +90,7 @@
         if (!stashDB) return;
         stashDB.parent = await createStudio(stashDB.parent);
         await sk.stashDB.toStash(stashDB, scene.id);
-        if (!all) sk.notify(`Scraped ${stashDB.name}`);
+        if (!all) sk.notify('skScraper - StashDB', `Scraped ${stashDB.name}`);
     };
 
     async function scrapeTag(data, all) {
@@ -99,7 +99,7 @@
         const stashDB = await sk.stashDB.tag(data.name);
         if (!stashDB) return;
         await sk.stashDB.toStash(stashDB, tag.id);
-        if (!all) sk.notify(`Scraped ${tag.name}`);
+        if (!all) sk.notify('skScraper - StashDB', `Scraped ${tag.name}`);
     };
 
     //TASK
@@ -112,38 +112,38 @@
 
     async function scrapeScenes() {
         const scenes = await sk.stash.findScenes();
-        sk.notify(`Scraping ${scenes.length} scenes`);
+        sk.notify('skScraper - StashDB', `Scraping ${scenes.length} scenes`);
         for (scene of scenes) {
             await scrapeScene(scene);
         };
-        sk.notify(`Finished scraping scenes`);
+        sk.notify('skScraper - StashDB', `Finished scraping scenes`);
     };
 
     async function scrapePerformers() {
         const performers = await sk.stash.findPerformers();
-        sk.notify(`Scraping ${performers.length} performers`);
+        sk.notify('skScraper - StashDB', `Scraping ${performers.length} performers`);
         for (performer of performers) {
             await scrapePerformer(performer);
         };
-        sk.notify(`Finished scraping performers`);
+        sk.notify('skScraper - StashDB', `Finished scraping performers`);
     };
 
     async function scrapeStudios() {
         const studios = await sk.stash.findStudios();
-        sk.notify(`Scraping ${studios.length} studios`);
+        sk.notify('skScraper - StashDB', `Scraping ${studios.length} studios`);
         for (studio of studios) {
             await scrapeStudio(studio);
         };
-        sk.notify(`Finished scraping studios`);
+        sk.notify('skScraper - StashDB', `Finished scraping studios`);
     };
 
     async function scrapeTags() {
         const tags = await sk.stash.findTag();
-        sk.notify(`Scraping ${tags.length} tags`);
+        sk.notify('skScraper - StashDB', `Scraping ${tags.length} tags`);
         for (tag of tags) {
             await scrapeTag(tag);
         };
-        sk.notify(`Finished scraping tags`);
+        sk.notify('skScraper - StashDB', `Finished scraping tags`);
     };
 
     async function main() {
@@ -152,7 +152,7 @@
         settings.update === 'all' ? settings.update = 'scenes, performers, studios, tags' : null;
         settings.create === 'all' ? settings.create = 'scenes, performers, studios, tags' : null;
         settings.genderFilter === 'both' ? settings.genderFilter = 'male, female' : null;
-        await sk.useNotification('skScraper - StashDB');
+        await sk.useNotification();
         //HOOK
         if (settings.update.includes('scenes')) sk.hook.watch('scene update', scrapeScene);
         if (settings.update.includes('performers')) sk.hook.watch('performer create', scrapePerformer);

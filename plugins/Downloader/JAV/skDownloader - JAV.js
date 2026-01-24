@@ -119,7 +119,7 @@
         const url = video.getAttribute('_link');
         const code = video.getAttribute('_code');
         let progress = 0;
-        sk.notify(`Download started for ${code}`);
+        sk.notify('skDownloader - JAV', `Download started for ${code}`);
 
         function makePlaylist() {
             console.log(progress);
@@ -261,7 +261,7 @@
 
     function unlocker() {
         if (!settings) settings = defaultSetting;
-        sk.useNotification('skDownloader - JAV');
+        await sk.useNotification();
         sk.task.new('skDownloader - JAV', 'Favorite performers suggestion', 'Suggest scene by your current favorite performer', favoritePerformersSuggestion);
         sk.task.new('skDownloader - JAV', 'Favorite tags suggestion', 'Suggest scene by your current favorite tags', favoriteTagsSuggestion);
         sk.task.new('skDownloader - JAV', 'Search scene by code', 'Search scene by the given code', searchCodeSuggestion);
