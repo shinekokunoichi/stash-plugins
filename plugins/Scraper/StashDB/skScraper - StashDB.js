@@ -1,12 +1,13 @@
 (async function () {
 	let settings = sk.plugins.get('skScraper - StashDB');
-    const defaultSettings = {
-        update: 'all',
-        autoCreate: true,
-        create: 'all',
-        genderFilter: 'both'
+    function defaultSettings() {
+        return {
+            update: settings.update === undefined ? 'all' : settings.update,
+            autoCreate: settings.autoCreate === undefined ? true : settings.autoCreate,
+            create: settings.create === undefined ? 'all' : settings.create,
+            genderFilter: settings.genderFilter === undefined ? 'both' : settings.genderFilter
+        };
     };
-
     function genderFilter(gender) {
         let notFilter = true;
         const genderList = gender.split(' ');
@@ -146,7 +147,7 @@
     };
 
     async function main() {
-        if (!settings) settings = defaultSettings;
+        settings = defaultSettings();
 		if (!sk.stashDB.getGQL()) throw Error("StashDB Endpoint doesn't exist");
         settings.update === 'all' ? settings.update = 'scenes, performers, studios, tags' : null;
         settings.create === 'all' ? settings.create = 'scenes, performers, studios, tags' : null;

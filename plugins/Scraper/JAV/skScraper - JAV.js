@@ -2,15 +2,16 @@
     let totalScene, searchedScene, scrapedScene;
     let settings = sk.plugins.get('skScraper - JAV');
     const jav = 'https://njavtv.com'
-    const defaultSettings = {
-        autoCreate: false,
-        create: 'all',
-        autoUpdate: true,
-        updateFilter: 'all',
-        language: 'en',
-        fallback: false
+    function defaultSettings() {
+        return {
+            autoCreate: settings.autoCreate === undefined ? false : settings.autoCreate,
+            create: settings.create === undefined ? 'all' : settings.create,
+            autoUpdate: settings.autoUpdate === undefined ? true : settings.autoCreate,
+            updateFilter: settings.updateFilter === undefined ? 'all' : settings.updateFilter,
+            language: settings.language === undefined ? 'en' : settings.language,
+            fallback: settings.fallback === undefined ? false : settings.fallback
+        };
     };
-
     //JAV SEARCH
     function fallback() {
         return settings.language === 'en' ? 'ja' : 'en';
@@ -207,7 +208,7 @@
     //MAIN
 
     async function main() {
-        if (!settings) settings = defaultSettings;
+        settings = defaultSettings();
         settings.create === 'all' ? settings.create = 'performers, studios, groups, tags' : null;
         settings.updateFilter === 'all' ? settings.updateFilter = 'performers, studios, groups, tags' : null;
         await sk.useNotification('skScraper - JAV');

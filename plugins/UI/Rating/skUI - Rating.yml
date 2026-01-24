@@ -14,21 +14,21 @@ settings:
       type: BOOLEAN
     rating1:
       displayName: Rating 1
-      description: Background color (name/rgb/rgba/hex) for card with 1 star rating. Default - black
+      description: Background color (name/rgb/rgba) for card with 1 star rating. Default - black
       type: STRING
     rating2:
       displayName: Rating 2
-      description: Background color (name/rgb/rgba/hex) for card with 1 star rating. Default - darkgreen
+      description: Background color (name/rgb/rgba) for card with 1 star rating. Default - darkgreen
       type: STRING
     rating3:
       displayName: Rating 3
-      description: Background color (name/rgb/rgba/hex) for card with 1 star rating. Default - steelblue
+      description: Background color (name/rgb/rgba) for card with 1 star rating. Default - steelblue
       type: STRING
     rating4:
       displayName: Rating 4
-      description: Background color (name/rgb/rgba/hex) for card with 1 star rating. Default - rebeccapurple
+      description: Background color (name/rgb/rgba) for card with 1 star rating. Default - rebeccapurple
       type: STRING
     rating5:
       displayName: Rating 5
-      description: Background color (name/rgb/rgba/hex) for card with 1 star rating. Default - darkorange
+      description: Background color (name/rgb/rgba) for card with 1 star rating. Default - darkorange
       type: STRING
