@@ -259,7 +259,7 @@
         popUp.css('display', 'block');
     };
 
-    function unlocker() {
+    async function unlocker() {
         if (!settings) settings = defaultSetting;
         await sk.useNotification();
         sk.task.new('skDownloader - JAV', 'Favorite performers suggestion', 'Suggest scene by your current favorite performer', favoritePerformersSuggestion);
