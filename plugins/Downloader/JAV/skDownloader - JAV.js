@@ -242,7 +242,7 @@
         currentIndex = 0;
         currentSearch = 'code';
         codeToSearch = prompt('Code to search');
-        const videos = await downloadData(codeToSearch + '-');
+        const videos = codeToSearch.includes('-') ? await downloadData(codeToSearch) : await downloadData(codeToSearch + '-');
         searchCode = [{ title: codeToSearch, videos: videos }];
         await makeCard();
         popUp.css('display', 'block');

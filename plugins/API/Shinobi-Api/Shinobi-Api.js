@@ -423,8 +423,8 @@ skGraphic.prototype.make = {
         popUp.set('div');
         popUp.default(width, height, position);
         popUp.css('position', 'fixed');
-        popUp.css('zIndex', 9999);
-        popUp.css('textAlign', 'center');
+        popUp.css('z-index', 9999);
+        popUp.css('text-align', 'center');
         return popUp;
     },
     //CONTAINER
