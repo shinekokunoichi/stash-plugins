@@ -2875,6 +2875,7 @@ skScraper.prototype.initialize = async function () {
  * @param {string} url Url to scrape
  * @param {object} [option] Parsing option if not defined parse as text
  * @param {boolean} [option.json] If true return json data
+ * @param {boolean} [option.blob] if true return blob data
  * @param {boolean} [option.html] if true return scraper object
  * @returns {object|string} JSON data, text or scraper object
  */
@@ -2883,6 +2884,7 @@ skScraper.prototype.scrape = async function (url, option) {
     let data;
     if (!option) return await response.text();
     if (option.json) return await response.json();
+    if (option.blob) return await response.blob();
     if (option.html) {
         data = await response.text();
         return new skScraperBase(data, url);

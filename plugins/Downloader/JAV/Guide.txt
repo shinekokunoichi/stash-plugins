@@ -1,4 +1,0 @@
-After downloading the video you need to do:
-1 - Open VLC or other media converter
-2 - Convert to H.264 + MP3
-3 - Done
