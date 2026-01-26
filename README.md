@@ -39,12 +39,12 @@ Description: Auto update scenes, performers, groups and tags using StashDB (base
 - Filter for auto creation
 - Filter for performers gender creation
 ## UI
-### Rating Colors
+### Rating
 Version: 1.1
 Description: Style card based on rating
 - Color cards based on given color code for each rating
 - Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 3 with low intensity.
-## Tags Colors
+## Tags
 Version: 1.1
 Description: Colorize tags based on their parent tag/s
 - Colorize every tags with colors based on their parents tag
