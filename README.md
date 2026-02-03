@@ -48,10 +48,6 @@ Description: Style card based on rating
 Version: 1.1
 Description: Colorize tags based on their parent tag/s
 - Colorize every tags with colors based on their parents tag
-## Downloader
-### JAV
-Examples of the tasks "Search by code"
-<img width="1846" height="495" alt="Untitled (1)" src="https://github.com/user-attachments/assets/be5a6048-0fa4-4abd-89c5-4ca49cc2a9b7" />
 
 Version: 2.0
 Description: Suggestion and downloader of JAV directly from Stash. Need CORS
