@@ -1,4 +1,4 @@
-(function () {
+(() => {
     const pluginName = 'skScraper - StashDB';
     let settings, category, total, searched, scraped, alreadyScraped;
 

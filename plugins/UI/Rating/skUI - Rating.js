@@ -1,4 +1,4 @@
-(async function () {
+(() => {
     const pluginName = 'skUI - Rating'
     let settings, rating;
 
