@@ -1,0 +1,13 @@
+name: skUI - All
+description: Install all UI customization at once
+# requires: Shinobi-Api
+# requires: skUI - Assets
+version: 1.0
+ui:
+  requires:
+    - Shinobi-Api
+    - skUI - Assets
+    - skUI - Brand
+    - skUI - Rating
+    - skUI - Search
+    - skUI - Tags

@@ -1,0 +1,6 @@
+name: skUI - Assets
+description: Assets images used by others skPlugins
+version: 1.0
+ui:
+  assets:
+    /: .

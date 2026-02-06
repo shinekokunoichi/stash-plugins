@@ -37,18 +37,30 @@ https://shinekokunoichi.github.io/stash-plugins/main/index.yml
   - Filter for auto creation
   - Filter for performers gender creation
 ## UI
+### All
+- Version: 1.0
+- Description: Install all UI customization at once.
+### Assets
+- Version: 1.0
+- Description: Assets images used by others skPlugins
+### Brand
+- Version: 1.0
+- Description: UI customization for Stash name, logo and icon.
+  - Change Brand name with text or a custom logo
+  - Remove brand or brand in tabs name
+  - Can set a custom icon
 ### Rating
 - Version: 2.0
 - Description: Style card based on rating.
   - Color cards based on given color code for each rating
   - Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 3 with low intensity.
-## Search
+### Search
 <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/b8c24736-f2ae-4428-9953-a0313e8322bd" />
 
 - Version: 1.0
 - Description: Set a custom search filter by alphabetical order. Note: after selecting a filter you need to double-click the next one! 
   - Avaiable for every category.
-## Tags
+### Tags
 - Version: 2.0
 - Description: Colorize tags based on their parent tag/s.
   - Colorize every tags with colors based on their parents tag
