@@ -11,8 +11,8 @@ https://shinekokunoichi.github.io/stash-plugins/main/index.yml
 - CORS: When a plugin have the CORS requirement you need a special CORS addon to bypass bad request from website server. I suggest <a href="https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc">this addons</a> as it can be enabled only for stash host. Thanks to my main API any request that are not from stash and my plugins to external server will be blocked anyway!
 ## API
 ### Shinobi-Api
-Version: 1.2
-Description: Custom Stash API powers all my plugins. It's free to use for others under the CC-BY-NC-ND-4.0 copyright. The API is fully commented in ECMA Script. If I get multiple requests for the API, I'll create a page with instructions for the basic functions.
+Version: 2.0
+Description: Custom Stash API powers all my plugins. It's free to use for others under the CC-BY-NC-ND-4.0 copyright. The API is fully commented in JSDoc. If I get multiple requests for the API, I'll create a page with instructions for the basic functions.
 Current Modules:
 - UI: Graphic manipulator
 - Stash: Stash interaction
@@ -23,8 +23,8 @@ Current Modules:
 - Scraper: Integrated scraper
 ## Scraper
 ### JAV
-Version: 1.1.4
-Description: Custom JAV scraper. Require CORS
+Version: 2.0
+Description: Custom JAV scraper. Require CORS.
 - Metadata in english and japanese
 - Auto updater on scene updating
 - Filter for field during scraping
@@ -32,7 +32,7 @@ Description: Custom JAV scraper. Require CORS
 - Filter for auto creation
 - Fallback option to change metadata language temporarily for the current scraping scene
 - ### StashDB
-Version: 1.0
+Version: 2.0
 Description: Auto update scenes, performers, groups and tags using StashDB (based on name and title)
 - Auto update and task update
 - Auto creation missing data
@@ -40,18 +40,17 @@ Description: Auto update scenes, performers, groups and tags using StashDB (base
 - Filter for performers gender creation
 ## UI
 ### Rating
-Version: 1.1
-Description: Style card based on rating
+Version: 2.0
+Description: Style card based on rating.
 - Color cards based on given color code for each rating
 - Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 3 with low intensity.
-## Tags
-Version: 1.1
-Description: Colorize tags based on their parent tag/s
-- Colorize every tags with colors based on their parents tag
+## Search
+<img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/b8c24736-f2ae-4428-9953-a0313e8322bd" />
 
+Version: 1.0
+Description: Set a custom search filter by alphabetical order. Note: after selecting a filter you need to double-click the next one! 
+- Avaiable for every category.
+## Tags
 Version: 2.0
-Description: Suggestion and downloader of JAV directly from Stash. Need CORS
-- Download avaiable in english and japanese
-- Make a custom pop-up to show all the video previews
-- Suggest by favorite performers/tags or by custom search (see plugin tasks)
-- When searching by code will show related video code
+Description: Colorize tags based on their parent tag/s.
+- Colorize every tags with colors based on their parents tag
