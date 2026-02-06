@@ -1,2964 +1,1907 @@
-//BOOKMARK skBase
+const sk = {};
+//BOOKMARK skTool
+
 /**
- * @file Custom StashApp API.
- * @copyright ShinekoKunoichi
- * @license CC-BY-NC-ND-4.0
+ * Create and return the Tool module
+ * @returns {object} skTool module
  */
-
-/**
- * The main constructor for the API
- * @constructor
-*/
-function ShinobiApi() {
-    this.initialize.call(this);
-};
-
-/**
- * Check if the API is already initializated
- * @returns {boolean}
- */
-ShinobiApi.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Initialize the API
- * @returns If is already initialized
- * @async
- */
-ShinobiApi.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this.ui = await new skGraphic();
-    this.stash = await new skStash();
-    this.plugins = await new skPlugins();
-    this.stashDB = await new skStashDB();
-    this.hook = await new skHook();
-    this.task = await new skTask();
-    this.scraper = await new skScraper();
-    this._initializated = true;
-};
-
-/**
- * Check if the selected element appear on page
- * @param {string} selector Query selector
- * @param {function} callback Function to run with selected element as parameter
- * @param {boolean} keepWatching If true remove the observer
- */
-ShinobiApi.prototype.observe = function (selector, callback, stopWatching) {
-    const observer = new MutationObserver((mutation, obs) => {
-        const wait = document.querySelector(selector);
-        if (wait) {
-            if (stopWatching) obs.disconnect();
-            callback(wait);
-        };
-    });
-    observer.observe(document, { childList: true, subtree: true });
-};
-
-/**
- * Set up a new observer
- * @param {string} selector Query selector
- * @param {function} callback Function to run with selected element as parameter
- * @param {boolean} stopWatching If true remove the observer
- */
-ShinobiApi.prototype.wait = function (selector, callback, stopWatching) {
-    PluginApi.Event.addEventListener('stash:location', this.observe(selector, callback, stopWatching));
-};
-
-
-/**
- * Set current notification permission
- */
-ShinobiApi.prototype.setNotification = function () {
-    this._notificationPermission = Notification.permission;
-};
-
-/**
- * Return current notification permission
- * @returns {boolean}
- */
-ShinobiApi.prototype.getNotification = function () {
-    return this._notificationPermission;
-}
-
-/**
- * Ask for notification permission
- */
-ShinobiApi.prototype.notificationPermission = async function () {
-    Notification.requestPermission().then((result) => { return result });
-};
-
-/**
- * Enable notification for stash
- * @returns If is already granted
- */
-ShinobiApi.prototype.useNotification = async function (name) {
-    if (this.getNotification() === 'granted') return;
-    const permission = await this.notificationPermission();
-    this.setNotification();
-};
-
-/**
- * Make a notification
- * @param {strng} message
- */
-ShinobiApi.prototype.notify = function (title, message) {
-    if (this.getNotification !== 'granted') {
-        console.log(message);
-        return;
+sk.tool = function skTool() {
+    /**
+     * Wait for a UI element then execute a function
+     * @param {string} selector Query selector for the waiting element
+     * @param {function} callback What execute when the element is displayed
+     * @param {boolean} [stopWatching] If true remove the observer
+    */
+    const wait = (selector, callback, stopWatching) => {
+        const observer = new MutationObserver((mutation, obs) => {
+            const wait = get(selector);
+            if (wait) {
+                if (stopWatching) obs.disconnect();
+                callback(callback);
+            };
+        });
+        observer.observe(document, { childList: true, subtree: true });
     };
-    const logo = document.querySelector("link[rel='shortcut icon']").href;
-    const notify = new Notification(title, { body: message, icon: logo });
-};
+
+    /**
+     * Create a notification, if the permission is denied console.log
+     * @param {string} title
+     * @param {string} message
+     */
+    const notify = (title, message) => {
+        let _notification;
+        if (Notification.permission === 'granted') _notification = new Notification(title, { body: message });
+        if (Notification.permission === 'denied') console.log(`${title} - ${message}`);
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+            notify(title, message);
+        };
+    };
+
+    /**
+     * Return an array of skUI objects {@see skUI} selected inside the document or the given HTML Element/skUI object
+     * @param {string} selector Query selector
+     * @param {skUI|HTMLElement} [searchIn=document] Where execute the query
+     * @returns {skUI[]} Selected elements
+     */
+    const getAll = (selector, searchIn = document) => {
+        let elements = [];
+        if (searchIn.element) {
+            getAll(selector, searchIn.element);
+            return;
+        };
+        const list = searchIn.querySelectorAll(selector);
+        for (el of list) { elements.push(skGraphicBase(el)) };
+        return elements;
+    };
+
+    /**
+     * Return a skUI object {@see skUI} selected inside the document or the given HTML Element/skUI object
+     * @param {string} selector Query selector
+     * @param {skUI|HTMLElement} [searchIn=document] Where execute the query
+     * @returns {skUI} Selected element
+     */
+    const get = (selector, searchIn = document) => {
+        if (searchIn.element) {
+            get(selector, searchIn.element);
+            return;
+        };
+        return skGraphicBase(searchIn.querySelector(selector));
+    };
+
+    /**
+     * Scrape a website. If no options given parse as text
+     * @param {string} url Website url
+     * @param {object} [options] Parser options
+     * @param {boolean} [options.json] Parse as json
+     * @param {boolean} [options.blob] Parse as blob
+     * @param {boolean} [options.html] Parse as html (skUI object)
+     * @returns {string|json|blob|skUI} Parse data
+     */
+    const scrape = async (url, options) => {
+        const response = await fetch(url);
+        if (!options) return await response.text();
+        if (options.json) return await response.json();
+        if (options.blob) return await response.blob();
+        if (options.html) {
+            const data = await response.text();
+            const parser = new DOMParser();
+            return skGraphicBase(parser.parseFromString(data, 'text/html'));
+        };
+    };
+    return { wait, notify, get, getAll, scrape };
+}();
+
+//BOOKMARK skHook
+
+/**
+ * Create and return the Hook module
+ * @returns {object} skHook module
+ */
+sk.hook = function skHook() {
+    /**
+     * @typedef {object} skHookWatcher Hook watcher object
+     * @property {string} category scene, marker, image, gallery, group, performer, studio, tag
+     * @property {string} operation create, update, destroy, merge
+     * @property {function} callback Function to execute on hook trigger
+     */
+
+    // Original fetch
+    const _fetch = window.fetch.bind(window);
+
+    // Custom fetch
+    window.fetch = async (...args) => {
+        let query;
+        const url = args[0];
+        if (args[1]) {
+            args[1].signal = undefined;
+            query = JSON.parse(args[1].body).query;
+        };
+        let watcher = false;
+        if (url.includes('graphql')) watcher = find(query);
+        const response = await _fetch.apply(window, args);
+        const backup = response.clone();
+        if (watcher) for (watch of watcher.functions) {
+            const clone = response.clone();
+            const cloneResponse = await response.json();
+            console.log(cloneResponse, cloneResponse.data, cloneResponse.data[watcher.query]);
+            watch(cloneResponse.data[watcher.query])
+        };
+        return response.bodyUsed ? backup : response;
+    };
+
+    const _category = ['scene', 'marker', 'image', 'gallery', 'group', 'performer', 'studio', 'tag'];
+    const _operation = ['create', 'update', 'destroy', 'merge'];
+    let _watch = {};
+
+    //Populate watcher placeholders
+    _category.forEach((cat) => {
+        _watch[cat] = {};
+        _operation.forEach((ope) => {
+            const uppercase = ope[0].toUpperCase() + ope.slice(1);
+            _watch[cat][ope] = { query: cat + uppercase, functions: [] };
+        });
+    });
+
+    /**
+     * Return watcher for given query
+     * @param {string} query GQL query
+     * @returns {skHookWatcher|boolean} False or watcher object
+     */
+    const find = (query) => {
+        let find = false;
+        _category.forEach((cat) => {
+            _operation.forEach((ope) => {
+                watcher = _watch[cat][ope];
+                if (query.includes(watcher.query)) find = watcher;
+            });
+        });
+        return find;
+    };
+
+    /**
+     * Add a new hook
+     * @param {skHookWatcher[]} watcher Watcher objects
+     */
+    const add = (watcher) => {
+        if (!watcher[0]) watcher = [watcher];
+        watcher.forEach((watch) => {
+            const category = watch.category.toLowerCase();
+            const operation = watch.operation.toLowerCase();
+            if (_category.includes(category) && _operation.includes(operation)) _watch[category][operation].functions.push(watch.callback);
+        });
+    };
+
+    return { add };
+}();
+
+//BOOKMARK skTask
+
+/**
+ * Create and return the Task module
+ * @returns {object} skTool module
+ */
+sk.task = function skTask() {
+    let _tasksList = {};
+
+    /**
+     * @typedef {object} skTaskWatcher Task object
+     * @property {string} id Task id - Your plugin name
+     * @property {string} name Task name
+     * @property {string} description Task description
+     * @property {function} callback Function to execute on task run
+     * @property {*} arg Arguments to pass to the callback function
+     */
+
+    /**
+     * Add new tasks
+     * @param {skTaskWatcher[]} tasks Task object or tasks list
+     */
+    const add = (tasks) => {
+        if (!tasks[0]) tasks = [tasks];
+        tasks.forEach((task) => {
+            if (!_tasksList[task.id]) _tasksList[task.id] = [];
+            _tasksList[task.id].push(task);
+        });
+    };
+
+    /**
+     * Set custom tasks inside the tasks UI
+     * @returns If is already setted
+     */
+    const set = () => {
+        if (sk.tool.get('.skTask')) return;
+        let pluginCard;
+        const pluginSection = sk.tool.getAll('.form-group');
+        if (pluginSection.length === 3) pluginCard = pluginSection[2];
+        if (!pluginCard) {
+            const panelTasks = sk.tool.get('.tasks-panel-tasks');
+            const hr = sk.ui.make.divider();
+            const formGroup = sk.ui.make.container({ class: 'form-group' });
+            const settingSection = sk.ui.make.container({ class: 'setting-section' });
+            const title = sk.ui.make.title({ text: 'Plugin Tasks' });
+            const card = sk.ui.make.container({ class: 'card' });
+            panelTasks.append([hr, formGroup]);
+            formGroup.append(settingSection);
+            settingSection.append([title, card]);
+            pluginCard = card;
+        };
+        for (taskId in _tasksList) {
+            const group = sk.ui.make.container({ class: 'skTask setting-group collapsible' });
+            const header = sk.ui.make.container({ class: 'setting' });
+            const titleContainer = sk.ui.make.container();
+            const title = sk.ui.make.subTitle({ text: taskId });
+            const buttonContainer = sk.ui.make.container();
+            const button = sk.ui.make.button({ class: 'setting-group-collapse-button btn btn-minimal', event: { type: 'click', callback: function () { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); } } });
+            header.append([titleContainer, buttonContainer]);
+            titleContainer.append(title);
+            buttonContainer.append(button);
+            const section = sk.ui.make.container({ class: 'collapsible-section collapse show' });
+            pluginCard.append(group);
+            group.append([header, section]);
+            _tasksList[taskId].forEach((task) => {
+                const settingTask = sk.ui.make.container({ class: 'setting' });
+                const settingInfo = sk.ui.make.container();
+                const settingTitle = sk.ui.make.subTitle({ text: task.name });
+                const settingDescription = sk.ui.make.container({ class: 'sub-heading', text: task.description });
+                const runContainer = sk.ui.make.container();
+                const runButton = sk.ui.make.button({ class: 'btn btn-secondary btn-sm', text: task.name, event: { type: 'click', callback: () => { task.callback(task.arg) } } });
+                settingTask.append([settingInfo, runContainer]);
+                settingInfo.append([settingTitle, settingDescription]);
+                runContainer.append(runButton);
+                section.append(settingTask);
+            });
+        };
+    };
+
+    sk.tool.wait('#configuration-tabs-tabpane-tasks', set, true);
+    return { add };
+}();
 
 //BOOKMARK skGraphicBase
-/**
- * Base constructor for graphic elements
- * @constructor
- */
-function skGraphicBase() { };
 
 /**
- * Set and create the graphic element
- * @param {string|HTMLElement} element HTML Tag or HTML element
+ * @typedef {object} skUI Custom UI element
+ * @property {HTMLElement}element The original HTML element
+ * @property {function} get Return the selected element inside skUI.element {@see sk.get}
+ * @property {function} getAll Return the selected elements inside skUI.element {@see sk.getAll}
+ * @property {function} id Return or change id
+ * @property {function} class Return the classname, enable or disable class or replace it
+ * @property {function} read Return HTML or Text
+ * @property {function} write Write HTML or Text
+ * @property {function} url Set or return src/href of the element
+ * @property {function} child Return element children
+ * @property {function} append Append children (skUI or HTML element)
+ * @property {function} event Add events to the element
+ * @property {function} style Return or change the element styles
+ * @property {function} attribute Return or change the element attributes
+ * @property {function} flex Set a preset to make the element a flex
+ * @property {function} size Set width and height of the element
  */
-skGraphicBase.prototype.set = function (element) {
-    this._container = typeof element === 'string' ? document.createElement(element) : element;
-};
 
 /**
- * Get the graphic element
- * @returns {HTMLElement}
+ * @typedef {object} skUIOptions skUI options
+ * @property {string} [id] Element id
+ * @property {string|array} [class] String or array of classes. Ex for string 'a b c'
+ * @property {string} [text] Element inner text
+ * @property {string} [html] Element inner HTML
+ * @property {string} [url] Element src/href
+ * @property {HTMLElement|HTMLCollection[]|skUI|skUI[]} [append] Children to append
+ * @property {object|object[]} [event] Events to add {type, callback}
+ * @property {object} [style] Style to apply {css:value}
+ * @property {object} [attribute] Attribute to apply {name:value}
+ * @property {boolean} [flex] Set a preset to make the element a flex
  */
-skGraphicBase.prototype.get = function () {
-    return this._container;
-};
+
 
 /**
- * Delete the element
+ * Create and return a skUI object
+ * @param {string} tag HTML element tag to create
+ * @param {skUIOptions} [options] skUI options
+ * @returns {skUI} The created skUI object
  */
-skGraphicBase.prototype.remove = function () {
-    this.get().remove();
-};
+function skGraphicBase(tag, options = {}) {
+    const base = {};
 
-/**
- * Get or set style
- * @param {string|object} option Style name or object with multiple value
- * @param {string|number} value Value to set
- * @param {boolean} important If need to set priority
- * @returns {string} If the value is not defined return the option
- */
-skGraphicBase.prototype.css = function (option, value, important) {
-    if (!important) important = '';
-    if (option && value === undefined) return this.get().style.getPropertyValue(option);
-    if (option && value !== undefined) this.get().style.setProperty(option, value, important);
-    if (typeof option !== 'string' && value === undefined) for (opt in option) { this.get().style[opt] = option[opt]; };
-};
+    /** @const {HTMLElement} base.element The HTML element created */
+    base.element = typeof tag === 'string' ? document.createElement(tag) : tag;
 
-/**
- * Get or set attribute
- * @param {string|object} option Attribute name or object with multiple value
- * @param {string|number} value Value to set
- * @returns {string} If the value is not defined return the option
- */
-skGraphicBase.prototype.attribute = function (option, value) {
-    if (option && value === undefined) return this.get().getAttribute(option);
-    if (option && value !== undefined) this.get().setAttribute(option, value);
-    if (typeof option !== 'string' && value === undefined) for (opt in option) { this.get().setAttribute(opt, option[opt]); };
-};
+    /**
+     * Remove the element
+     */
+    base.remove = () => { base.element.remove(); };
 
-/**
- * Get or set id
- * @param {string} id Id value
- * @returns {string} If the id is not defined return the current id
- */
-skGraphicBase.prototype.id = function (id) {
-    if (id === undefined) return this.get().id;
-    this.get().id = id;
-};
+    /**
+     * Return the selected elements inside skUI.element {@see sk.tool.getAll}
+     * @param {string} selector Query selector
+     * @returns {skUI[]} Selected elements
+     */
+    base.getAll = (selector) => { return sk.tool.getAll(selector, base.element); };
 
-/**
- * Get or toggle class
- * @param {string} value Class name
- * @param {boolean} replace If replace all the class instead of toggle them
- * @returns {string} If the value is not defined return the className
- */
-skGraphicBase.prototype.class = function (value, replace) {
-    if (!replace && !value) return this.get().className;
-    if (!replace && value && !value.includes(' ')) this.get().classList.toggle(value);
-    if (!replace && value && value.includes(' ')) value.split(' ').forEach((cls) => { this.get().classList.toggle(cls) });
-    if (replace && value) this.get().className = value;
-};
+    /**
+     * Return the selected element inside skUI.element {@see sk.tool.get}
+     * @param {string} selector Query selector
+     * @returns {skUI} Selected element
+     */
+    base.get = (selector) => { return sk.tool.get(selector, base.element); };
 
-/**
- * Get or append child
- * @param {HTMLElement} child Child to append
- * @returns {ChildNode|object} ChildNode or skGraphicBase object. If the child is not defined return the childList
- */
-skGraphicBase.prototype.child = function (child) {
-    if (!child) return this.get().childList;
-    if (child.constructor === skGraphicBase) child = child.get();
-    this.get().appendChild(child);
-};
+    /**
+     * Return or change id
+     * @param {string} [id] Element id
+     * @returns {string} Element id
+     */
+    base.id = (id) => {
+        if (id === undefined) return base.element.id;
+        base.element.id = id;
+    };
 
-/**
- * Set a event
- * @param {string} type Event Type
- * @param {function} callback Function to run on event trigger
- */
-skGraphicBase.prototype.event = function (type, callback) {
-    this.get().addEventListener(type, callback);
-};
+    /**
+     * Return the classname, enable/disable class or replace it
+     * @param {string|array} classList String or array of classes. Ex for string 'a b c'
+     * @param {boolean} [replace] If should replace all classList with the new one
+     * @returns {string} Classname
+     */
+    base.class = (classList = [], replace) => {
+        if (!classList && !replace) return base.element.className;
+        if (replace) base.element.className = classList.join(' ');
+        if (typeof classList === 'string') classList = classList.split(' ');
+        if (!replace) for (className of classList) { base.element.classList.toggle(className); };
+    };
 
-/**
- * Get or set text
- * @param {string} text Text to insert
- * @returns {string} If the text is not defined return current text
- */
-skGraphicBase.prototype.text = function (text) {
-    if (text === undefined) return this.get().innerText;
-    this.get().innerText = text;
-};
+    /**
+     * Return HTML or text
+     * @param {boolean} [html] If true return HTML else text
+     * @returns {string} inner Text or inner HTML
+     */
+    base.read = (html) => {
+        if (html) return base.element.innerHTML;
+        return base.element.innerText;
+    };
 
-/**
- * Get or set inner html
- * @param {string} text HTML string to insert
- * @returns {string} If the text is not defined return current innerHTML
- */
-skGraphicBase.prototype.html = function (text) {
-    if (text === undefined) return this.get().innerHTML;
-    this.get().innerHTML = text;
-};
+    /**
+     * Write HTML or text
+     * @param {string} text Text to write
+     * @param {boolean} [html] If true write inner HTML else inner text
+     */
+    base.write = (text, html) => html ? base.element.innerHTML = text : base.element.innerText = text;
 
-/**
- * Set a url automatically detecting if src or href
- * @param {string} url Url to set
- */
-skGraphicBase.prototype.url = function (url) {
-    const tag = this.get().tagName.toLowerCase();
-    if (tag === 'a') this.get().href = url;
-    if (tag === 'img' || tag === 'video') this.get().src = url;
-};
+    /**
+     * Set or return src or href of the element
+     * @param {string} [url] If given apply it else return the src or href
+     * @returns {string} Src or href of the element
+     */
+    base.url = (url) => {
+        const tag = base.element.tagName.toLowerCase();
+        if (tag === 'a') {
+            if (!url) return base.attribute('href');
+            base.element.href = url;
+        };
+        if (tag === 'img' || tag === 'video') {
+            if (!url) return base.attribute('src');
+            base.element.src = url;
+        };
+    };
 
-/**
- * Set default value to make a flex
- */
-skGraphicBase.prototype.flex = function () {
-    this.css('display', 'flex');
-    this.css('justifyContent', 'center');
-    this.css('align-items', 'center');
-};
+    /**
+     * Return the element children
+     * @returns {HTMLCollection} Children
+     */
+    base.child = () => { return base.element.children };
 
-/**
- * Get the size of the element based on default value or given one
- * @param {string|number} size full|big|half|small & any
- * @returns {string|number} Translated size or given
- */
-skGraphicBase.prototype.autoSize = function (size) {
-    if (size === 'full') return '100%';
-    if (size === 'big') return '75%';
-    if (size === 'half') return '50%';
-    if (size === 'small') return '25%';
-    return size;
-};
+    /**
+     * Append children (skUI or HTML element)
+     * @param {HTMLElement|HTMLCollection[]|skUI|skUI[]} [options.append] Children to append
+     */
+    base.append = (children) => {
+        if (!children[0]) children = [children];
+        children.forEach((child) => { child.element ? base.element.appendChild(child.element) : base.element.appendChild(child); });
+    };
 
-/**
- * Get the margin of the element based on default value or given one
- * @param {string|number} size full|big|half|small & any
- * @returns {string|number} Translated margin or given
- */
-skGraphicBase.prototype.autoMargin = function (size) {
-    if (size === '100%') return '0%'
-    if (size === '75%') return '12.5%';
-    if (size === '50%') return '25%';
-    if (size === '25%') return '37.5%';
-    return size;
-};
+    /**
+     * Add events to the element
+     * @param {object|object[]} eventList Events to add
+     * @param {string} eventList[].type Event type
+     * @param {function} eventList[].callback Function to execute
+     */
+    base.event = (eventsList) => {
+        if (!eventsList[0]) eventsList = [eventsList];
+        eventsList.forEach((ev) => { base.element.addEventListener(ev.type, ev.callback); });
+    };
 
-/**
- * Set the element to the center
- */
-skGraphicBase.prototype.center = function () {
-    const top = this.autoMargin(this.css('height'));
-    const left = this.autoMargin(this.css('width'));
-    this.css('margin', `${top} ${left}`);
-};
+    /**
+     * Return or change the element styles
+     * @param {string|object} styles Styles to apply or the style to get {css:value}
+     * @param {boolean} [important] If true apply the styles as important
+     * @returns {string} Style value
+     */
+    base.style = (styles, important = false) => {
+        if (typeof styles === 'string') return base.element.style.getPropertyValue(styles);
+        important = important ? 'important' : '';
+        for (style in styles) { base.element.style.setProperty(style, styles[style], important) };
+    };
 
-/**
- * Set the element to the top
- */
-skGraphicBase.prototype.top = function () {
-    this.css('top', 0);
-    this.css('margin-top', 0);
-};
+    /**
+     * Return or change the element attributes
+     * @param {string|object} attributes Attributes to apply or the attribute to get {name:value}
+     * @returns {string} Attribute value
+     */
+    base.attribute = (attributes) => {
+        if (typeof attributes === 'string') return base.element.getAttribute(attributes);
+        for (attribute in attributes) { base.element.setAttribute(attribute, attributes[attribute]) };
+    };
 
-/**
- * Set the element to the bottom
- */
-skGraphicBase.prototype.bottom = function () {
-    this.css('bottom', 0);
-    this.css('margin-bottom', 0);
-};
+    /**
+     * Set a preset to make the element a flex
+     */
+    base.flex = () => { base.style({ 'display': 'flex', 'justify-content': 'center', 'aling-items': 'center' }); };
 
-/**
- * Set the element to the left
- */
-skGraphicBase.prototype.left = function () {
-    this.css('left', 0);
-    this.css('margin-left', 0);
-};
+    /**
+     * Set width and height of the element
+     * @param {string} [width] Width to set
+     * @param {string} [height] Height to set
+     */
+    base.size = (width, height) => {
+        const size = {};
+        if (width) size.width = width;
+        if (height) size.height = height;
+        base.style({ size });
+    };
 
-/**
- * Set the element to the right
- */
-skGraphicBase.prototype.right = function () {
-    this.css('right', 0);
-    this.css('margin-right', 0);
-};
-
-/**
- * Set the default position
- * @param {string} position Where set the element. Ex: 'center'|'top left'
- */
-skGraphicBase.prototype.defaultPosition = function (position) {
-    if (position.includes('center')) this.center();
-    if (position.includes('top')) this.top();
-    if (position.includes('bottom')) this.bottom();
-    if (position.includes('left')) this.left();
-    if (position.includes('right')) this.right();
-};
-
-/**
- * Set width and height
- * @param {string} width full|big|half|small & any
- * @param {string} height full|big|half|small & any
- */
-skGraphicBase.prototype.size = function (width, height) {
-    this.css('width', this.autoSize(width));
-    this.css('height', this.autoSize(height));
-};
-
-/**
- * Initialize the graphic element
- * @param {string} width full|big|half|small & any
- * @param {string} height full|big|half|small & any
- * @param {string} position Ex: 'center'|'top left'
- */
-skGraphicBase.prototype.default = function (width, height, position) {
-    if (width && height) this.size(width, height);
-    if (position) this.defaultPosition(position);
+    for (init in options) {
+        if (init !== 'text' && init !== 'html') base[init](options[init]);
+        if (init === 'text') base.write(options[init]);
+        if (init === 'html') base.write(options[init], true);
+    };
+    return base.element ? base : false;
 };
 
 //BOOKMARK skGraphic
-/**
- * The Graphic module
- * @constructor
- */
-function skGraphic() {
-    this.initialize.call(this);
-};
 
 /**
- * Check if the module skGraphic is already initializated
- * @returns {boolean}
+ * Create and return the UI module
+ * @returns {object} skGraphic module
  */
-skGraphic.prototype.isInitializated = function () {
-    return this._initializated;
-};
+sk.ui = function skGraphic() {
+    // UI Selector
+    const get = {
+        //GENERAL
 
-/**
- * Initialize the module
- * @returns If is already initialized
- * @async
- */
-skGraphic.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this._initializated = true;
-};
+        /**
+         * Return the navbar UI element
+         * @returns {skUI} Navbar
+         */
+        navbar: () => {
+            const navbar = sk.tool.get('nav');
+            navbar.brand = sk.tool.get('.navbar-brand');
+            navbar.nav = sk.tool.get('.navbar-nav');
+            navbar.buttons = sk.tool.get('.navbar-buttons');
 
-/**
- * Get element in the dom
- * @param {string} selector
- * @returns {object} skGraphiBase element
- */
-skGraphic.prototype.get = function (selector) {
-    const element = document.querySelector(selector);
-    return new this.transform(element);
-};
+            /**
+            * Create, append and return a new navbar button
+            * @param {string} name Button name
+            * @param {function} callback Function to execute when clicked
+            * @param {string} [where=nav] Where append the button. brand/nav/buttons
+            * @returns {skUI} Button element
+            */
+            navbar.add = (name, callback, where) => {
+                const div = make.container({ class: 'col-4 col-sm-3 col-md-2 col-1 g-auto nav-link' });
+                const a = make.link({ class: 'minimal p-4 p-xl-2 d-flex d-xl-inline-block flex-column justify-content-between align-items-center btn btn-primary' });
+                a.event({ type: 'click', callback: callback });
+                const text = make.span({ text: name });
+                navbar[where].append(div)
+                div.append(a);
+                a.append(text)
+                return div;
+            };
+            return navbar;
+        },
+        /**
+         * Return the main content container UI
+         * @returns {skUI} Main container
+         */
+        container: () => {
+            const container = sk.tool.get('.main.container-fluid');
 
-/**
- * Get elements in the dom
- * @param {string} selector
- * @returns {array.<object>} skGraphiBase elements
- */
-skGraphic.prototype.getAll = function (selector) {
-    const elements = document.querySelectorAll(selector);
-    return this.transform(elements);
-};
+            /**
+             * Create a custom content container
+             * @param {skUIOptions} options Options
+             * @returns {skUI} Custom content container
+             */
+            container.custom = (options) => {
+                if (options.class === 'string') options.class = `${options.class} skContainer`;
+                if (Array.isArray(options.class)) options.class.push('skContainer');
+                if (!options.class) options.class = 'skContainer';
+                const custom = sk.ui.make.container(options);
+                container.append(custom);
+                get.navbar().nav.getAll('a').forEach((a) => { a.event({ type: 'click', callback: () => { const all = sk.tool.getAll('.skContainer'); all.forEach((c) => { c.style({ display: 'none' }); }); }}) });
+                return custom;
+            };
+            /**
+             * Return the current active Stash content container
+             * @returns {skUI} Content container
+             */
+            container.active = () => { return sk.tool.get('.item-list-container') || sk.tool.get('.recommendations-container'); };
+            return container;
+        },
+        //PERFORMERS
 
-/**
- * Transform a HTML element/s in skGraphicBase element/s
- * @param {HTMLElement|array.<HTMLElement>} elements
- * @returns {object|array.<object>} skGraphiBase element/s
- */
-skGraphic.prototype.transform = function (elements) {
-    if (!elements[0]) {
-        let tempConstructor = {};
-        tempConstructor.__proto__ = new skGraphicBase();
-        tempConstructor.set(elements);
-        return tempConstructor;
-    } else {
-        let list = [];
-        elements.forEach((element) => {
-            list.push(this.transform(element));
-        });
-        return list;
+        /**
+         * Return all performers cards
+         * @returns {skUI[]} Performers cards
+         */
+        performersCard: () => {
+            const cards = sk.tool.getAll('.performer-card');
+            for (card of cards) {
+                const data = {};
+                const isFavorite = card.get('.favorite');
+                const notFavorite = card.get('.not-favorite');
+                data.topSection = card.get('.thumbnail-section');
+                data.ratingBanner = card.get('.rating-banner');
+                data.rating = data.ratingBanner.read(true);
+                data.page = data.topSection.get('a').url();
+                data.id = data.page.split('performers/')[1];
+                data.image = data.topSection('img');
+                card.middleSection = card.get('.card-section');
+                card.name = card.get('.performer-name');
+                card.disambiguation = card.get('.performer-disambiguation');
+                card.gender = card.get('.gender-icon');
+                card.popOver = card.get('.card-popovers');
+                card.scenesCount = card.get('.scene-count span');
+                card.imagesCount = card.get('.image-count span');
+                card.galleriesCount = card.get('.gallery-count span');
+                card.tagsCount = card.get('.tag-count span');
+                data.favorite = isFavorite.element ? isFavorite : notFavorite;
+                card._data = data;
+            };
+            return cards;
+        },
+        /**
+         * Get details element of the performer page
+         * @returns {skUI} Performer details
+         */
+        performerDetail: () => {
+            const data = {};
+            const isFavorite = sk.tool.get('.favorite');
+            const notFavorite = sk.tool.get('.not-favorite');
+            const ratingStar = sk.tool.get('.star-rating-number');
+            const ratingDecimal = sk.tool.get('.rating-number span');
+            data.container = sk.tool.get('.detail-container');
+            data.headers = sk.tool.get('.detail-header-image');
+            data.image = sk.tool.get('img.performer');
+            data.name = sk.tool.get('.performer-name');
+            data.disambiguation = sk.tool.get('.performer-disambiguation');
+            data.details = sk.tool.get('.detail.group');
+            data.customFields = sk.tool.get('.custom-fields');
+            data.navbar = sk.tool.get('.nav.nav-tabs');
+            data.tabContent = sk.tool.get('.tab-content');
+            data.favorite = isFavorite.element ? isFavorite : notFavorite;
+            data.rating = ratingStar.element ? ratingStar : ratingDecimal;
+            /**
+             * Get a details
+             * @param {string} name Detail name
+             * @returns {skUI} Detail element
+             */
+            data.getDetails = (name) => {
+                name = name.toLowerCase();
+                return sk.tool.get(`.detail-item.${name}`);
+            };
+            return data;
+        },
+        //TAGS
+
+        /**
+         * Return tags popups element
+         * @returns {skUI} Tags popups
+         */
+        tagsPopUps: () => { return sk.tool.getAll('.tag-item')}
     };
-};
+    // UI creator
+    const make = {
+        /**
+         * Create a preset popUp
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Popup
+         */
+        popUp: (options = {}) => {
+            for (key in options.style) { options.style[key] = options.style[key].toString(); };
+            const style = options.style;
+            style.position = style.position || 'fixed';
+            style.width = style.width || '75%';
+            style.height = style.height || '50%';
+            style.top = style.top || '25%';
+            style['z-index'] = style['z-index'] || 9999;
+            style['text-align'] = style['text-align'] || 'center';
+            options.style = style;
+            return skGraphicBase('div', options);
+        },
+        /**
+         * Create a container
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Container
+         */
+        container: (options = {}) => { return skGraphicBase('div', options) },
 
-skGraphic.prototype.make = {
-    //PRESET
-    popUp: function (width, height, position) {
-        const popUp = new skGraphicBase()
-        popUp.set('div');
-        popUp.default(width, height, position);
-        popUp.css('position', 'fixed');
-        popUp.css('z-index', 9999);
-        popUp.css('text-align', 'center');
-        return popUp;
-    },
-    //CONTAINER
-    container: function (width, height, position) {
-        const container = new skGraphicBase();
-        container.set('div');
-        container.default(width, height, position);
-        return container;
-    },
-    //DIVIDER
-    divider: function () {
-        const divider = new skGraphicBase();
-        divider.set('hr');
-        return divider;
-    },
-    //TEXT
-    title: function (text) {
-        const title = new skGraphicBase();
-        title.set('h1');
-        if (text) title.text(text);
-        return title;
-    },
-    subTitle: function (text) {
-        const subTitle = new skGraphicBase();
-        subTitle.set('h3');
-        if (text) subTitle.text(text);
-        return subTitle;
-    },
-    description: function (text) {
-        const description = new skGraphicBase();
-        description.set('p');
-        if (text) description.text(text);
-        return description;
-    },
-    //MEDIA
-    link: function (url) {
-        const link = new skGraphicBase();
-        link.set('a');
-        if (url) link.url(url);
-        return link;
-    },
-    video: function (url) {
-        const video = new skGraphicBase();
-        video.set('video');
-        if (url) video.url(url);
-        return video;
-    },
-    svg: function (fill, d) {
-        const svg = new skGraphicBase();
-        svg.set('svg');
-        const path = new skGraphicBase();
-        path.set('path');
-        path.attribute({ fill: fill, d: d });
-        svg.child(path);
-        return svg;
-    },
-    //INPUT
-    button: function (value) {
-        const button = new skGraphicBase();
-        button.set('button');
-        button.attribute('type', 'button');
-        if (value) button.attribute('value', value);
-        return button;
-    }
-};
+        /**
+         * Create a divider
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Divider
+         */
+        divider: (options = {}) => { return skGraphicBase('hr', options) },
+
+        /**
+         * Create a title
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Title
+         */
+        title: (options = {}) => { return skGraphicBase('h1', options) },
+
+        /**
+         * Create a sub title
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Sub title
+         */
+        subTitle: (options = {}) => { return skGraphicBase('h3', options) },
+
+        /**
+         * Create a span
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Span
+         */
+        span: (options = {}) => { return skGraphicBase('span', options) },
+
+        /**
+         * Create a description
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Description
+         */
+        description: (options = {}) => { return skGraphicBase('p', options) },
+
+        /**
+         * Create a anchor
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Anchor
+         */
+        link: (options = {}) => { return skGraphicBase('a', options) },
+
+        /**
+         * Create a video
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Video
+         */
+        video: (options = {}) => { return skGraphicBase('video', options) },
+
+        /**
+         * Create a button
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Button
+         */
+        button: (options = {}) => { return skGraphicBase('button', options) }
+    };
+
+    return { get, make };
+}();
 
 //BOOKMARK skStash
-/**
- * The Stash module
- * @constructor
- * @private
- */
-function skStash() {
-    this.initialize.call(this);
-};
 
 /**
- * Check if the module skStash is already initializated
- * @returns {boolean}
- */
-skStash.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Set Stash configuration
- */
-skStash.prototype.setConfiguration = function () {
-    this._configuration = window.__APOLLO_CLIENT__.cache.data.data.ROOT_QUERY.configuration;
-};
-
-/**
- * Get Stash configuration
- * @returns {object} Stash configuration
- */
-skStash.prototype.getConfiguration = function () {
-    return this._configuration;
-};
-
-/**
- * Get Stash protocol
- * @returns {string} Protocol
- */
-skStash.prototype.getProtocol = function () {
-    return window.location.protocol;
-};
-
-/**
- * Get Stash host
- * @returns {string} Host
- */
-skStash.prototype.getHost = function () {
-    return window.location.host;
-};
-
-/**
- * Set Stash server url
- */
-skStash.prototype.setServer = function () {
-    this._server = `${this.getProtocol()}//${this.getHost()}`;
-};
-
-/**
- * Get Stash server url
- * @returns {string} Stash url
- */
-skStash.prototype.getServer = function () {
-    return this._server;
-};
-
-/**
- * Set GraphQL url
- */
-skStash.prototype.setGQL = function () {
-    this._gql = this.getServer() + '/graphql';
-};
-
-/**
- * Get GraphQL url
- * @returns {string} GraphQL url
- */
-skStash.prototype.getGQL = function () {
-    return this._gql;
-};
-
-/**
- * Set Stash api key
- */
-skStash.prototype.setApiKey = function () {
-    this._apiKey = this.getConfiguration().general.apiKey;
-};
-
-/**
- * Get Stash api key
- * @returns {string} Api key
- */
-skStash.prototype.getApiKey = function () {
-    return this._apiKey;
-};
-
-/**
- * set base GraphQL headers
- */
-skStash.prototype.setHeaders = function () {
-    this._headers = this.getHeaders();
-};
-
-/**
- * Get the default headers for GraphQL
- * @returns {object} Headers data
- */
-skStash.prototype.getHeaders = function () {
-    return {
+  * Create and return the Stash module
+  * @returns {object} skStash module
+  */
+sk.stash = function skStash() {
+    /** @const {object} configuration Stash configuration */
+    const configuration = window.__APOLLO_CLIENT__.cache.data.data.ROOT_QUERY.configuration;
+    const _server = `${window.location.protocol}//${window.location.host}`;
+    const _defaulHeaders = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'ApiKey': this.getApiKey()
-        },
-        variables: {}
-    };
-};
-
-/**
- * Set field placeholder
- */
-skStash.prototype.setField = function () {
-    this._field = {
-        default: {
-            scenes: 'id title code details director urls date rating100 organized o_counter interactive interactive_speed captions {@caption@} created_at updated_at last_played_at resume_time play_duration play_count play_history o_history files {@videoFile@} paths {@videoPath@} scene_markers {@markers@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@} stash_ids {@stashID@} sceneStreams {@sceneStream@}',
-            images: 'id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {@imagePath@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}',
-            groups: 'id name aliases duration date rating100 studio {@studios@} director synopsis urls tags {@tags@} created_at updated_at containing_groups { group {@groups@} description } sub_groups { group {@groups@} description } front_image_path back_image_path scene_count performer_count sub_group_count scenes {@scenes@} o_counter',
-            markers: 'id scene {@scenes@} title seconds end_seconds primary_tag {@tags@} tags {@tags@} created_at updated_at stream preview screenshot',
-            galleries: 'id title code urls date details photographer rating100 organized created_at updated_at files {@baseFile@} folder {@folder@} chapters {@chapter@} scenes {@scenes@} studio {@studios@} image_count tags {@tags@} performers {@performers@} cover {@imageFile@} paths {@galleryPath@}',
-            performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count performer_count o_counter scenes {@scenes@} stash_ids {@stashID@} rating100 details death_date hair_color weight created_at updated_at groups {@groups@} custom_fields',
-            studios: 'id name urls parent_studio {@studios@} child_studios {@studios@} aliases tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count stash_ids {@stashID@} rating100 favorite details created_at updated_at groups {@groups@} o_counter',
-            tags: 'id name sort_name description aliases ignore_auto_tag created_at updated_at favorite stash_ids {@stashID@} image_path scene_count scene_marker_count image_count gallery_count performer_count studio_count group_count parent_count child_count parents {@tags@} children {@tags@}',
-            folder: 'id path parent_folder {@folder@} mod_time created_at updated_at',
-            baseFile: 'id path basename mod_time size created_at updated_at',
-            videoFile: 'id path basename mod_time size format width height duration video_codec audio_codec frame_rate bit_rate created_at updated_at',
-            imageFile: 'id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {@imagePath@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}',
-            caption: 'language_code caption_type',
-            videoPath: 'screenshot preview stream webp vtt sprite funscript interactive_heatmap caption',
-            imagePath: 'thumbnail preview image',
-            galleryPath: 'cover preview',
-            sceneStream: 'url mime_type label',
-            chapter: 'id  gallery {@galleries@} title image_index created_at updated_at',
-            stashID: 'endpoint stash_id updated_at',
-            _id: 'id',
-            _caption: 'language_code',
-            _videoPath: 'preview',
-            _imagePath: 'preview',
-            _galleryPath: 'preview',
-            _sceneStream: 'url',
-            _stashID: 'stashs_id'
-        },
-        update: {
-            scenes: 'id title code details director urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
-            images: 'id title code rating100 organized urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
-            groups: 'id name aliases duration date rating100 studio_id director synopsis urls tag_ids containing_groups { group_id description } sub_groups { group_id description } front_image back_image',
-            markers: 'id title seconds end_seconds scene_id primary_tag_id tag_ids',
-            galleries: 'id title code urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
-            performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag',
-            studios: 'id name urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
-            tags: 'id name sort_name description aliases ignore_auto_tag favorite image stash_ids parent_ids child_ids'
-        },
-        bulkUpdate: {
-            scenes: 'ids title code details director urls date rating100 o_counter organized studio_id gallery_ids performer_ids groups movies tag_ids cover_image stash_ids resume_time play_duration play_count primary_file_id',
-            images: 'ids title code rating100 organized urls date details photographer studio_id performer_ids tag_ids gallery_ids primary_file_id',
-            groups: 'ids name aliases duration date rating100 studio_id director synopsis urls tag_ids containing_groups { group_id description } sub_groups { group_id description } front_image back_image',
-            markers: 'ids title seconds end_seconds scene_id primary_tag_id tag_ids',
-            galleries: 'ids title code urls date details photographer rating100 organized scene_ids studio_id tag_ids performer_ids primary_file_id',
-            performers: 'ids name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tag_ids image stash_ids {endpoint stash_id updated_at} rating100 details death_date hair_color weight ignore_auto_tag',
-            studios: 'ids name urls parent_id image stash_ids rating100 favorite details aliases tag_ids ignore_auto_tag',
-            tags: 'ids name sort_name description aliases ignore_auto_tag favorite image stash_ids parent_ids child_ids'
+            ApiKey: configuration.general.ApiKey || ''
         }
     };
-};
-
-/**
- * Get given field placeholder
- * @param {string} type
- * @param {string} field
- * @returns {string} Field placeholder
- */
-skStash.prototype.getField = function (type, field) {
-    return this._field[type][field];
-};
-
-/**
- * Initialize skStash module
- * @returns If is already initialized
- * @async
- */
-skStash.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this._cache = {};
-    this.setConfiguration();
-    this.setServer();
-    this.setGQL();
-    this.setApiKey();
-    this.setHeaders();
-    this.setField();
-    this._initializated = true;
-};
-
-/**
- * Get all stash boxes
- * @returns {array.<object>} Stash boxes
- */
-skStash.prototype.getStashBoxes = function () {
-    return this.getConfiguration().general.stashBoxes;
-};
-
-/**
- * Find the given stash box
- * @param {string} name Stash box name
- * @returns {object} Stash box data
- */
-skStash.prototype.findStashBox = function (name) {
-    const stashBoxes = this.getStashBoxes();
-    let find = false;
-    stashBoxes.forEach((stashBox) => {
-        if (stashBox.name.toLowerCase() === name.toLowerCase()) find = stashBox;
-    });
-    return find;
-};
-
-/**
- * Get cached data
- * @param {string} [category] scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {object|array} Cached data
- */
-skStash.prototype.getCache = function (category) {
-    if (!category) return this._cache;
-    return this._cache[category];
-};
-
-/**
- * Set new cached data for given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} data Category data
- */
-skStash.prototype.setCache = function (category, data) {
-    this._cache[category] = data;
-};
-
-/**
- * Return finded cached data
- * @param {string} categoryscenes scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} filter Filter object
- * @returns {array.<object>} Result data
- */
-skStash.prototype.findCache = function (category, filter) {
-    const data = this.getCache(category);
-    const max = filter.per_page;
-    const search = filter.q;
-    if (max === 1 && search === '') return data[0];
-    if (max === -1 && search === '') return data;
-    let result = [];
-    data.forEach((item) => {
-        let match = false;
-        const name = item.name || item.title;
-        const aliases = item.aliases || item.alias_list;
-        if (name.includes(search)) match = item;
-        if (!name.includes(search)) aliases.forEach((alias) => {
-            if (alias.includes(search)) match = item;
-        });
-        if (match) result.push(item);
-    });
-    if (result.length > max) result = result.splice(0, max);
-    return result;
-};
-
-/**
- * Update cached data with the new scraped content
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} input scene|image|group|marker|gallery|performer|studio|tag
- * @param {number} input.id Object id
- * @returns {boolean} If the category is empty
- */
-skStash.prototype.updateCache = function (category, input) {
-    if (!this.getCache(category)) return;
-    this.getCache(category).forEach((value, i) => { if (input.id === value.id) this[category][i] = input });
-};
-
-/**
- * Send a request to GraphQL interface
- * @param {string} query Complete query
- * @param {object} input Stash input object
- * @returns {object} Result data
- * @async
- */
-skStash.prototype.GQL = async function (query, input) {
-    if (!query) throw Error('Query must be defined', query);
-    let configuration = this.getHeaders();
-    configuration.body = JSON.stringify({ query: query, variables: { input: input } });
-    const response = await sk.hook._fetch(this.getGQL(), configuration);
-    let result = await response.json();
-    result._type = 'stash';
-    return result.data;
-};
-
-/**
- * Replace all field placeholder and return the finished field
- * @param {string} field Field placeholder
- * @returns {string} Complete field
- */
-skStash.prototype.removeField = function (field) {
-    if (field.includes('@scenes@')) field = field.replaceAll('@scenes@', this.getField('default', '_id'));
-    if (field.includes('@images@')) field = field.replaceAll('@images@', this.getField('default', '_id'));
-    if (field.includes('@groups@')) field = field.replaceAll('@groups@', this.getField('default', '_id'));
-    if (field.includes('@markers@')) field = field.replaceAll('@markers@', this.getField('default', '_id'));
-    if (field.includes('@galleries@')) field = field.replaceAll('@galleries@', this.getField('default', '_id'));
-    if (field.includes('@performers@')) field = field.replaceAll('@performers@', this.getField('default', '_id'));
-    if (field.includes('@studios@')) field = field.replaceAll('@studios@', this.getField('default', '_id'));
-    if (field.includes('@tags@')) field = field.replaceAll('@tags@', this.getField('default', '_id'));
-    if (field.includes('@folder@')) field = field.replaceAll('@folder@', this.getField('default', '_id'));
-    if (field.includes('@baseFile@')) field = field.replaceAll('@baseFile@', this.getField('default', '_id'));
-    if (field.includes('@videoFile@')) field = field.replaceAll('@videoFile@', this.getField('default', '_id'));
-    if (field.includes('@imageFile@')) field = field.replaceAll('@imageFile@', this.getField('default', '_id'));
-    if (field.includes('@caption@')) field = field.replaceAll('@caption@', this.getField('default', '_caption'));
-    if (field.includes('@videoPath@')) field = field.replaceAll('@videoPath@', this.getField('default', '_videoPath'));
-    if (field.includes('@imagePath@')) field = field.replaceAll('@imagePath@', this.getField('default', '_imagePath'));
-    if (field.includes('@galleryPath@')) field = field.replaceAll('@galleryPath@', this.getField('default', '_galleryPath'));
-    if (field.includes('@sceneStream@')) field = field.replaceAll('@sceneStream@', this.getField('default', '_sceneStream'));
-    if (field.includes('@chapter@')) field = field.replaceAll('@chapter@', this.getField('default', '_id'));
-    if (field.includes('@stashID@')) field = field.replaceAll('@stashID@', this.getField('default', 'stashID'));
-    return field;
-};
-
-/**
- * Replace all field placeholder and return the complete field
- * @param {string} field Field placeholder
- * @returns {string} Complete field
- */
-skStash.prototype.formatField = function (field) {
-    if (field.includes('@scenes@')) field = field.replaceAll('@scenes@', this.getField('default', 'scenes'));
-    if (field.includes('@images@')) field = field.replaceAll('@images@', this.getField('default', 'images'));
-    if (field.includes('@groups@')) field = field.replaceAll('@groups@', this.getField('default', 'groups'));
-    if (field.includes('@markers@')) field = field.replaceAll('@markers@', this.getField('default', 'markers'));
-    if (field.includes('@galleries@')) field = field.replaceAll('@galleries@', this.getField('default', 'galleries'));
-    if (field.includes('@performers@')) field = field.replaceAll('@performers@', this.getField('default', 'performers'));
-    if (field.includes('@studios@')) field = field.replaceAll('@studios@', this.getField('default', 'studios'));
-    if (field.includes('@tags@')) field = field.replaceAll('@tags@', this.getField('default', 'tags'));
-    if (field.includes('@folder@')) field = field.replaceAll('@folder@', this.getField('default', 'folder'));
-    if (field.includes('@baseFile@')) field = field.replaceAll('@baseFile@', this.getField('default', 'baseFile'));
-    if (field.includes('@videoFile@')) field = field.replaceAll('@videoFile@', this.getField('default', 'videoFile'));
-    if (field.includes('@imageFile@')) field = field.replaceAll('@imageFile@', this.getField('default', 'imageFile'));
-    if (field.includes('@caption@')) field = field.replaceAll('@caption@', this.getField('default', 'caption'));
-    if (field.includes('@videoPath@')) field = field.replaceAll('@videoPath@', this.getField('default', 'videoPath'));
-    if (field.includes('@imagePath@')) field = field.replaceAll('@imagePath@', this.getField('default', 'imagePath'));
-    if (field.includes('@galleryPath@')) field = field.replaceAll('@galleryPath@', this.getField('default', 'galleryPath'));
-    if (field.includes('@sceneStream@')) field = field.replaceAll('@sceneStream@', this.getField('default', 'sceneStream'));
-    if (field.includes('@chapter@')) field = field.replaceAll('@chapter@', this.getField('default', 'chapter'));
-    if (field.includes('@stashID@')) field = field.replaceAll('@stashID@', this.getField('default', 'stashID'));
-    if (field.includes('@')) field = this.removeField(field);
-    return field;
-};
-
-/**
- * Preload All stash objects and cache it
- */
-skStash.prototype.preLoad = function () {
-    this.findScenes();
-    this.findImages();
-    this.findGroups();
-    this.findMarkers();
-    this.findGalleries();
-    this.findPerformers();
-    this.findStudios();
-    this.findTags();
-}
-
-//BOOKMARK skStash.Find
-
-/**
- * Return the correct field_filter for find query
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} category_filter;
- */
-skStash.prototype.findFieldFilter = function (category) {
-    if (category === 'scenes') return 'scene_filter';
-    if (category === 'images') return 'image_filter';
-    if (category === 'groups') return 'group_filter';
-    if (category === 'markers') return 'scene_marker_filter';
-    if (category === 'galleries') return 'gallery_filter';
-    if (category === 'performers') return 'performer_filter';
-    if (category === 'studios') return 'studio_filter';
-    if (category === 'tags') return 'tag_filter';
-};
-
-/**
- * Return the full query replacing placeholders
- * @param {string} query Base query of category type
- * @param {object} configuration Filter object
- * @param {boolean} configuration.exact If the query should look only for the most corresponding result
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash Category find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} Full query
- */
-skStash.prototype.findFormatQuery = function (query, configuration, category) {
-    const value = this.formatField(this.getField('default', category));
-    const search = configuration.filter.q;
-    let filterList = '';
-    let fieldFilterName = this.findFieldFilter(category);
-    let filter = JSON.stringify(configuration.filter);
-    let fieldFilter = JSON.stringify(configuration.fieldFilter);
-    let ids = JSON.stringify(configuration.ids);
-
-    if (configuration.filter) filterList += `filter:${filter}`;
-    if (configuration.fieldFilter) filterList += `,${fieldFilterName}:${fieldFilter}`;
-    if (configuration.ids) filterList += `,ids:${ids}`;
-
-    filterList = filterList.replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`);
-    query = query.replace('@configuration@', filterList);
-    query = query.replace('@field@', value);
-
-    return query
-};
-
-/**
- * Check if the find filter.q will be the id or a string
- * @param {string|number} search String to search or specific id
- * @returns {boolean}
- */
-skStash.prototype.findIsID = function (search) {
-    if (typeof search === Number || !isNaN(search)) return true
-};
-
-/**
- * If need to search all replace the string
- * @param {string} search Search string
- * @returns {string} Search query
- */
-skStash.prototype.findAllSearch = function (search) {
-    if (!search || search === '' || search === 'all') return '';
-    return search;
-};
-
-/**
- * Check if need to find all items or search for something
- * @param {string|number} search String to search or specific id
- * @returns {string} Search query
- */
-skStash.prototype.findSetSearch = function (search) {
-    if (this.findIsID(search)) search = '';
-    search = this.findAllSearch(search);
-    return search;
-};
-
-/**
- * If the filter.per_page is not defined set it based on configuration.exact
- * @param {object} configuration Filter object
- * @param {boolean} configuration.exact If the query should look only for the most corresponding result
- * @param {object} configuration.filter Stash general find filter
- * @param {number} configuration.filter.per_page How many item will search
- * @returns {object} Configuration with setted filter.per_page (default 1 if exact or -1)
- */
-skStash.prototype.findSetResult = function (configuration) {
-    const exact = configuration.exact;
-    let per_page = configuration.filter.per_page;
-    if (exact) per_page = 1;
-    if (!exact && !per_page) per_page = -1;
-    configuration.filter.per_page = per_page;
-    return configuration;
-};
-
-/**
- * Return the base query based on the given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} Base query for category
- */
-skStash.prototype.findSetQuery = function (category) {
-    const uppercase = category[0].toUpperCase() + category.slice(1);
-    if (category !== 'markers') return `query {find${uppercase}(@configuration@){${category}{@field@}}}`
-    return 'query {findSceneMarkers(@configuration@){scene_markers{@field@}}}';
-};
-
-/**
- * Return the correct response based on the given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} response Fetched data
- * @returns {object} Category response
- */
-skStash.prototype.findGetResponse = function (category, response) {
-    const uppercase = category[0].toUpperCase() + category.slice(1);
-    if (category !== 'markers') return response[`find${uppercase}`][category];
-    return response[`findSceneMarkers`][`scene_markers`];
-};
-
-/**
- * Return the correct response based on the given id
- * @param {string|number} id Id to find
- * @param {object} response Fetched data
- * @returns {object} Id response
- */
-skStash.prototype.findSearchId = function (id, response) {
-    let find = false;
-    response.forEach((item) => {
-        if (item.id == id || item.name == id || item.title == id) find = item;
-    });
-    return find;
-};
-
-/**
- * Initialize the find query and send the request
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {string|number} search String to search or exact id
- * @param {object} configuration Filter object
- * @param {boolean} configuration.exact If the query should look only for the most corresponding result
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash Category find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Response data
- * @async
- */
-skStash.prototype.findDo = async function (category, search, configuration) {
-    if (!configuration.filter) configuration.filter = {};
-    configuration.filter.q = this.findSetSearch(search);
-    configuration = this.findSetResult(configuration);
-
-    if (this.getCache(category) && !configuration.fieldFilter) return this.findCache(category, configuration.filter);
-
-    let query = this.findSetQuery(category);
-    query = this.findFormatQuery(query, configuration, category);
-    let response = await this.GQL(query);
-    response = this.findGetResponse(category, response);
-    if (configuration.exact) response = this.findSearchId(search, response);
-    return response;
-};
-
-/**
- * Search for scenes
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash scene find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Scenes data
- * @async
- */
-skStash.prototype.findScenes = async function (search, configuration) {
-    const category = 'scenes';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for scene
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash scene find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Scene data
- * @async
- */
-skStash.prototype.findScene = async function (search, configuration) {
-    const category = 'scenes';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for images
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash image find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Images data
- * @async
- */
-skStash.prototype.findImages = async function (search, configuration) {
-    const category = 'images';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for image
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash image find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Image data
- * @async
- */
-skStash.prototype.findImage = async function (search, configuration) {
-    const category = 'images';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for groups
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash group find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Groups data
- * @async
- */
-skStash.prototype.findGroups = async function (search, configuration) {
-    const category = 'groups';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for group
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash group find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Group data
- * @async
- */
-skStash.prototype.findGroup = async function (search, configuration) {
-    const category = 'groups';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for markers
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash marker find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Markers data
- * @async
- */
-skStash.prototype.findMarkers = async function (search, configuration) {
-    const category = 'markers';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for marker
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash marker find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Marker data
- * @async
- */
-skStash.prototype.findMarker = async function (search, configuration) {
-    const category = 'markers';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for galleries
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash gallery find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Galleries data
- * @async
- */
-skStash.prototype.findGalleries = async function (search, configuration) {
-    const category = 'galleries';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for gallery
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash gallery find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Gallery data
- * @async
- */
-skStash.prototype.findGallery = async function (search, configuration) {
-    const category = 'galleries';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for performers
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash performer find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Performers data
- * @async
- */
-skStash.prototype.findPerformers = async function (search, configuration) {
-    const category = 'performers';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for performer
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash performer find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Performer data
- * @async
- */
-skStash.prototype.findPerformer = async function (search, configuration) {
-    const category = 'performers';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for studios
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash studio find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Studios data
- * @async
- */
-skStash.prototype.findStudios = async function (search, configuration) {
-    const category = 'studios';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for studio
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash studio find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Studio data
- * @async
- */
-skStash.prototype.findStudio = async function (search, configuration) {
-    const category = 'studios';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-/**
- * Search for tags
- * @param {string|number} search String to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash tag find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Tags data
- * @async
- */
-skStash.prototype.findTags = async function (search, configuration) {
-    const category = 'tags';
-    if (!configuration) configuration = {};
-    configuration.exact = false;
-    const result = await this.findDo(category, search, configuration);
-    if (this.findAllSearch(search) === '') this.setCache(category, result);
-    return result
-};
-
-/**
- * Search for tag
- * @param {string|number} search Id to search
- * @param {object} [configuration] Filter object
- * @param {object} [configuration.filter] Stash general find filter
- * @param {object} [configuration.fieldFilter] Stash tag find filter
- * @param {array.<number>} [configuration.ids] Specific ids to find
- * @returns {object} Tag data
- * @async
- */
-skStash.prototype.findTag = async function (search, configuration) {
-    const category = 'tags';
-    if (!configuration) configuration = {};
-    configuration.exact = true;
-    const result = await this.findDo(category, search, configuration);
-    return result
-};
-
-//BOOKMARK skStash.Update
-
-/**
- * Return the full query replacing placeholder
- * @param {string} query Base query for category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} Full query
- */
-skStash.prototype.updateFormatQuery = function (query, category) {
-    let field = category === 'gallery' ? 'galleries' : `${category}s`;
-    field = this.getField('default', field);
-    const value = this.formatField(field);
-    query = query.replace('@input@', value);
-    return query;
-};
-
-/**
- * Get the base query based on given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {boolean} multiple If need to update multiple object
- * @returns {string} Base query
- */
-skStash.prototype.updateSetQuery = function (category, multiple) {
-    const upperCase = category[0].toUpperCase() + category.slice(1);
-    if (multiple && category !== 'marker') return `mutation bulk${upperCase}Update($input:Bulk${upperCase}UpdateInput!){bulk${upperCase}Update(input:$input){@input@}}`;
-    if (multiple && category === 'marker') return 'mutation bulkSceneMarkerUpdate($input:BulkSceneMarkerUpdateInput!){bulkSceneMarkerUpdate(input:$input){@input@}}';
-    if (!multiple && category !== 'marker') return `mutation ${category}Update($input:${upperCase}UpdateInput!){${category}Update(input:$input){@input@}}`;
-    if (!multiple && category === 'marker') return 'mutation sceneMarkerUpdate($input:sceneMarkerUpdateInput!){sceneMarkerUpdate(input:$input){@input@}}';
-};
-
-/**
- * Return the correct response based on the given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} response Fetched data
- * @returns {object} Category response
- */
-skStash.prototype.updateGetResponse = function (category, response) {
-    if (category !== 'marker') return response[`${category}Update`];
-    return response[`markerUpdate`];
-};
-
-/**
- * Initialize the update query and send the request
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} input Stash or StashDB input data
- * @param {boolean} multiple If need to update multiple object
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateDo = async function (category, input, multiple) {
-    let query = this.updateSetQuery(category, multiple);
-    query = this.updateFormatQuery(query, category);
-    if (input._type === 'stashDB') input = await sk.stashDB.toStash(input);
-    const response = await this.GQL(query, input);
-    return this.updateGetResponse(category, response);
-};
-
-/**
- * Update multiple scenes
- * @param {object} input Scene object
- * @param {array.<number>} input.ids Scenes ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateScenes = async function (input) {
-    const response = await this.updateDo('scene', input, true);
-    this.setCache('scenes', null);
-    return response;
-};
-
-/**
- * Update scene
- * @param {object} input Scene object
- * @param {number} input.id Scene id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateScene = async function (input) {
-    const response = await this.updateDo('scene', input, false);
-    if (this.getCache('scenes')) this.setCache('scenes', input);
-    return true
-    return response;
-};
-
-/**
- * Update multiple images
- * @param {object} input Image object
- * @param {array.<number>} input.ids Images ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateImages = async function (input) {
-    const response = await this.updateDo('image', input, true);
-    this.setCache('images', null);
-    return response;
-};
-
-/**
- * Update image
- * @param {object} input Image object
- * @param {number} input.id Image id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateImage = async function (input) {
-    const response = await this.updateDo('image', input, false);
-    if (this.getCache('images')) this.setCache('images', input);
-    return response;
-};
-
-/**
- * Update multiple groups
- * @param {object} input Group object
- * @param {array.<number>} input.ids Groups ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateGroups = async function (input) {
-    const response = await this.updateDo('group', input, true);
-    this.setCache('groups', null);
-    return response;
-};
-
-/**
- * Update group
- * @param {object} input Group object
- * @param {number} input.id Group id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateGroup = async function (input) {
-    const response = await this.updateDo('group', input, false);
-    if (this.getCache('groups')) this.setCache('groups', input);
-    return response;
-};
-
-/**
- * Update multiple markers
- * @param {object} input Marker object
- * @param {array.<number>} input.ids Markers ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateMarkers = async function (input) {
-    const response = await this.updateDo('marker', input, true);
-    this.setCache('markers', null);
-    return response;
-};
-
-/**
- * Update marker
- * @param {object} input Marker object
- * @param {number} input.id Marker id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateMarker = async function (input) {
-    const response = await this.updateDo('marker', input, false);
-    if (this.getCache('markers')) this.setCache('markers', input);
-    return response;
-};
-
-/**
- * Update multiple galleries
- * @param {object} input Gallery object
- * @param {array.<number>} input.ids Galleries ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateGalleries = async function (input) {
-    const response = await this.updateDo('gallery', input, true);
-    this.setCache('galleries', null);
-    return response;
-};
-
-/**
- * Update gallery
- * @param {object} input Gallery object
- * @param {number} input.id Gallery id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateGallery = async function (input) {
-    const response = await this.updateDo('gallery', input, false);
-    if (this.getCache('galleries')) this.setCache('galleries', input);
-    return response;
-};
-
-/**
- * Update multiple performers
- * @param {object} input Performer object
- * @param {array.<number>} input.ids Performers ids to update
- * @returns {object} Performer data
- * @async
- */
-skStash.prototype.updatePerformers = async function (input) {
-    const response = await this.updateDo('performer', input, true);
-    this.setCache('performers', null);
-    return response;
-};
-
-/**
- * Update performer
- * @param {object} input Performer object
- * @param {number} input.id Performer id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updatePerformer = async function (input) {
-    const response = await this.updateDo('performer', input, false);
-    if (this.getCache('performers')) this.setCache('performers', input);
-    return response;
-};
-
-/**
- * Update multiple studios
- * @param {object} input Studio object
- * @param {array.<number>} input.ids Studios ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateStudios = async function (input) {
-    const response = await this.updateDo('studio', input, true);
-    this.setCache('studios', null);
-    return response;
-};
-
-/**
- * Update studio
- * @param {object} input Studio object
- * @param {number} input.id Studio id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateStudio = async function (input) {
-    const response = await this.updateDo('studio', input, false);
-    if (this.getCache('studios')) this.setCache('studios', input);
-    return response;
-};
-
-/**
- * Update multiple tags
- * @param {object} input Tag object
- * @param {array.<number>} input.ids Tags ids to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateTags = async function (input) {
-    const response = await this.updateDo('tag', input, true);
-    this.setCache('tags', null);
-    return response;
-};
-
-/**
- * Update tag
- * @param {object} input Tag object
- * @param {number} input.id Tag id to update
- * @returns {object} Updated data
- * @async
- */
-skStash.prototype.updateTag = async function (input) {
-    const response = await this.updateDo('tag', input, false);
-    if (this.getCache('tags')) this.setCache('tags', input);
-    return response;
-};
-
-//BOOKMARK skStash.Create
-
-/**
- * Format the creation query replacing field placeholder
- * @param {string} query
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} Full query
- */
-skStash.prototype.createFormatQuery = function (query, category) {
-    if (category !== 'gallery') category += 's';
-    if (category === 'gallery') category = 'galleries';
-    const value = this.formatField(this.getField('default', category));
-    query = query.replace('@input@', value);
-    return query;
-};
-
-/**
- * Set the creation query
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @returns {string} Query
- */
-skStash.prototype.createSetQuery = function (category) {
-    const upperCase = category[0].toUpperCase() + category.slice(1);
-    if (category !== 'marker') return `mutation ${category}Create($input:${upperCase}CreateInput!){${category}Create(input: $input){@input@}}`
-    return 'mutation sceneMarkerCreate($input:SceneMarkerCreateInput!){sceneMarkerCreate(input: $input){@input@}}';
-};
-
-
-/**
- * Return the correct response based on the given category
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} response Fetched data
- * @returns {object} Category response
- */
-skStash.prototype.createGetResponse = function (category, response) {
-    if (category !== 'marker') return response[`${category}Create`];
-    return response['sceneMarkerCreate'];
-};
-
-/**
- * Initialize the creation query and send the request
- * @param {string} category scenes|images|groups|markers|galleries|performers|studios|tags
- * @param {object} input Data of the new object
- * @returns {object} Created data
- * @async
- */
-skStash.prototype.createDo = async function (category, input) {
-    let query = this.createSetQuery(category);
-    query = this.createFormatQuery(query, category);
-    const response = await this.GQL(query, input);
-    return this.createGetResponse(category, response);
-};
-
-/**
- * Create a new scene
- * @param {object} input Scene data
- * @returns {object} Scene created data
- * @async
- */
-skStash.prototype.createScene = async function (input) {
-    const created = await this.createDo('scene', input);
-    this.updateCache('scenes', created);
-    return created;
-};
-
-/**
- * Create a new image
- * @param {object} input Image data
- * @returns {object} Image created data
- * @async
- */
-skStash.prototype.createImage = async function (input) {
-    const created = await this.createDo('image', input);
-    this.updateCache('images', created);
-    return created;
-};
-
-/**
- * Create a new group
- * @param {object} input Group data
- * @returns {object} Group created data
- * @async
- */
-skStash.prototype.createGroup = async function (input) {
-    const created = await this.createDo('group', input);
-    this.updateCache('groups', created);
-    return created;
-};
-
-/**
- * Create a new marker
- * @param {object} input Marker data
- * @returns {object} Marker created data
- * @async
- */
-skStash.prototype.createMarker = async function (input) {
-    const created = await this.createDo('marker', input);
-    this.updateCache('markers', created);
-    return created;
-};
-
-/**
- * Create a new gallery
- * @param {object} input Gallery data
- * @returns {object} Gallery created data
- * @async
- */
-skStash.prototype.createGallery = async function (input) {
-    const created = await this.createDo('gallery', input);
-    this.updateCache('galleries', created);
-    return created;
-};
-
-/**
- * Create a new performer
- * @param {object} input Performer data
- * @returns {object} Performer created data
- * @async
- */
-skStash.prototype.createPerformer = async function (input) {
-    const created = await this.createDo('performer', input);
-    this.updateCache('performers', created);
-    return created;
-};
-
-/**
- * Create a new studio
- * @param {object} input Studio data
- * @returns {object} Studio created data
- * @async
- */
-skStash.prototype.createStudio = async function (input) {
-    const created = await this.createDo('studio', input);
-    this.updateCache('studios', created);
-    return created;
-};
-
-/**
- * Create a new tag
- * @param {object} input Tag data
- * @returns {object} Tag created data
- * @async
- */
-skStash.prototype.createTags = async function (input) {
-    const created = await this.createDo('tag', input);
-    this.updateCache('tags', created);
-    return created;
-};
-
-//BOOKMARK skPlugins
-/**
- * The Plugins module
- * @constructor
- */
-function skPlugins() {
-    this.initialize.call(this);
-};
-
-/**
- * Check if the module skPlugins is already initializated
- * @returns {boolean}
- */
-skPlugins.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Set Stash plugins
- */
-skPlugins.prototype.setAll = function () {
-    this._plugins = sk.stash.getConfiguration().plugins;
-};
-
-/**
- * Get Stash plugins
- * @returns {object} Plugins
- */
-skPlugins.prototype.getAll = function () {
-    return this._plugins;
-};
-
-/**
- * Initialize the module
- * @returns If is already initialized
- * @async
- */
-skPlugins.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this.setAll();
-    this._initializated = true;
-};
-
-/**
- * Check if the given plugin exist
- * @param {string} name Plugin id
- * @returns {boolean}
- */
-skPlugins.prototype.exist = function (name) {
-    return this.getAll()[name] ? true : false;
-};
-
-/**
- * Get selected plugin configuration
- * @param {string} name Plugin id
- * @returns {object|boolean} Plugin data or false if the plugin does not exist
- */
-skPlugins.prototype.get = function (name) {
-    if (!this.exist(name)) return false;
-    return this.getAll()[name];
-};
-
-/**
- * Set plugin data
- * @param {string} name Plugin id
- * @param {object} option Plugin configuration
- * @param {any} [value] Plugin configuration value
- * @returns {boolean} False if the plugin does not exist
- */
-skPlugins.prototype.set = function (name, option, value) {
-    if (!this.exist(name)) return false;
-    if (!name || !option) throw Error('Name & option must be defined', name, option);
-    this._plugins[name] = option || false;
-    this.update(name, this.get(name));
-};
-
-/**
- * Replace plugin data
- * @param {string} name Plugin id
- * @param {object} option Plugin configuration
- * @returns {boolean} False if the plugin does not exist
- */
-skPlugins.prototype.replace = function (name, option) {
-    if (!this.exist(name)) return false;
-    if (!name || !option) throw Error('Name & option must be defined', name, option);
-    let plugin = this.get(name);
-    plugin = option;
-    this.set(name, plugin);
-};
-
-/**
- * Prepare the update query
- * @param {string} name Plugin id
- * @param {object} option Plugin configuration
- * @returns {string} Query
- */
-skPlugins.prototype.prepareQuery = function (name, plugin) {
-    return query = `mutation configurePlugin(plugin_id:${name}, input:${input})`;
-};
-
-/**
- * Update the plugin settings
- * @param {string} name Plugin id
- * @param {object} option Plugin configuration
- * @returns {any}
- */
-skPlugins.prototype.update = async function (name, plugin) {
-    if (!name || !option) throw Error('Name & option must be defined', name, option);
-    const result = sk.stash.GQL(this.prepareQuery(name, plugin));
-    return result;
-};
+    const _query = {
+        find: 'query {find@uppercase@(@filters@){@category@{@fields@}}}',
+        update: 'mutation @singular@Update($input:@sUppercase@UpdateInput!){@singular@Update(input:$input){id}}',
+        bulkUpdate: 'mutation bulk@uppercase@Update($input:Bulk@uppercase@UpdateInput!){bulk@uppercase@Update(input:$input){ids}}',
+        create: 'mutation @singular@Create($input:@sUppercase@CreateInput!){@singular@Create(input:$input){id}}'
+    };
+    const _fields = {
+        scenes: 'id title code details director urls date rating100 organized o_counter interactive interactive_speed captions {@caption@} created_at updated_at last_played_at resume_time play_duration play_count play_history o_history files {@videoFile@} paths {@videoPath@} scene_markers {@sceneMarkers@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@} stash_ids {@stashID@} sceneStreams {@sceneStream@}',
+        images: 'id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {@imagePath@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}',
+        groups: 'id name aliases duration date rating100 studio {@studios@} director synopsis urls tags {@tags@} created_at updated_at containing_groups { group {@groups@} description } sub_groups { group {@groups@} description } front_image_path back_image_path scene_count performer_count sub_group_count scenes {@scenes@} o_counter',
+        sceneMarkers: 'id scene {@scenes@} title seconds end_seconds primary_tag {@tags@} tags {@tags@} created_at updated_at stream preview screenshot',
+        galleries: 'id title code urls date details photographer rating100 organized created_at updated_at files {@baseFile@} folder {@folder@} chapters {@chapter@} scenes {@scenes@} studio {@studios@} image_count tags {@tags@} performers {@performers@} cover {@imageFile@} paths {@galleryPath@}',
+        performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count performer_count o_counter scenes {@scenes@} stash_ids {@stashID@} rating100 details death_date hair_color weight created_at updated_at groups {@groups@} custom_fields',
+        studios: 'id name urls parent_studio {@studios@} child_studios {@studios@} aliases tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count stash_ids {@stashID@} rating100 favorite details created_at updated_at groups {@groups@} o_counter',
+        tags: 'id name sort_name description aliases ignore_auto_tag created_at updated_at favorite stash_ids {@stashID@} image_path scene_count scene_marker_count image_count gallery_count performer_count studio_count group_count parent_count child_count parents {@tags@} children {@tags@}',
+        folder: 'id path parent_folder {@folder@} mod_time created_at updated_at',
+        baseFile: 'id path basename mod_time size created_at updated_at',
+        videoFile: 'id path basename mod_time size format width height duration video_codec audio_codec frame_rate bit_rate created_at updated_at',
+        imageFile: 'id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {@imagePath@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}',
+        caption: 'language_code caption_type',
+        videoPath: 'screenshot preview stream webp vtt sprite funscript interactive_heatmap caption',
+        imagePath: 'thumbnail preview image',
+        galleryPath: 'cover preview',
+        sceneStream: 'url mime_type label',
+        chapter: 'id  gallery {@galleries@} title image_index created_at updated_at',
+        stashID: 'endpoint stash_id updated_at',
+        _id: 'id',
+        _caption: 'language_code',
+        _videoPath: 'preview',
+        _imagePath: 'preview',
+        _galleryPath: 'preview',
+        _sceneStream: 'url',
+        _stashID: 'stashs_id'
+    };
+
+    /**
+     * Send a request to graphql
+     * @async
+     * @param {string} query Query or mutation
+     * @param {object} [input={}] Input to send
+     * @returns {object} Result data
+     */
+    const _gql = async (query, input = {}) => {
+        let configuration = _defaulHeaders;
+        if (input._type === 'stashDB') input = await sk.stashDB.toStash(input);
+        configuration.body = JSON.stringify({ query: query, variables: { input: input } });
+        const response = await fetch(`${_server}/graphql`, configuration);
+        let result = await response.json();
+        result._type = 'stash';
+        return result.data;
+    };
+
+    /**
+     * @typedef {object} skStashFilters Stash filter object
+     * @property {string} [fields] Fields to retrieve, default all. Ex. 'id title'
+     * @property {object} [filter] Request filter
+     * @property {string} [filter.q] Search
+     * @property {number} [filter.per_page] Max result
+     * @property {object} [fieldFilter] Specific category filter
+     * @property {array.<number>} [ids] IDs to get
+     */
+
+    /**
+     * Format the placeholder query
+     * @param {object} data Request data
+     * @param {string} data.action find/update/bulkUpdate/create
+     * @param {string} data.category scenes/images/groups/sceneMarkers/galleries/performers/studios/tags
+     * @param {string} data.singular Singular version of category
+     * @param {string} data.uppercase Capitalized category
+     * @param {string} data.sUppercase Capitalized singular
+     * @param {skStashFilters} [configuration={}] Request filters
+     * @returns {string} Full query
+     */
+    const _formatQuery = (data, configuration = {}) => {
+        let { action, category, singular, uppercase, sUppercase } = data;
+        if (!configuration.filter) configuration.filter = { q: '', per_page: -1 };
+        const search = configuration.filter.q;
+        let query = _query[action];
+
+        let filterName;
+        if (category === 'galleries') filterName = 'gallery_filter';
+        if (category === 'sceneMarkers') filterName = 'scene_marker_filter';
+        if (!filterName) filterName = `${singular}_filter`;
+
+        let filterList;
+        if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter)}`;
+        if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter)}`;
+        if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids)}`;
+        filterList = filterList.replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`);
+
+        let fields = configuration.fields;
+        if (!fields && action === 'find') {
+            fields = _fields[category];
+            for (fieldType in _fields) { if (fields.includes(`@${fieldType}@`)) fields = fields.replaceAll(`@${fieldType}@`, _fields[fieldType]); };
+            for (fieldType in _fields) {
+                if (fields.includes(`@${fieldType}@`)) {
+                    const stop = _fields[`_${fieldType}`];
+                    fields = stop ? fields.replaceAll(`@${fieldType}@`, stop) : fields.replaceAll(`@${fieldType}@`, _fields._id);
+                };
+            };
+        };
+        query = query.replaceAll('@uppercase@', uppercase);
+        query = query.replaceAll('@sUppercase@', sUppercase);
+        query = query.replaceAll('@category@', category);
+        query = query.replaceAll('@singular@', singular);
+        query = query.replace('@filters@', filterList);
+        query = query.replace('@fields@', fields);
+        return query;
+    };
+
+    /**
+     * Prepare the query and send the request to graphql
+     * @async
+     * @param {string} action find/update/bulkUpdate/create
+     * @param {string} category scenes/images/groups/sceneMarkers/galleries/performers/studios/tags
+     * @param {skStashFilters} [configuration={}] Request filters
+     * @param {object} input
+     * @returns {object} Result data
+     */
+    const _do = async (action, category, configuration = {}, input) => {
+        const data = {
+            action: action,
+            category: category,
+            singular: category.substring(0, category.length - 1),
+            uppercase: category[0].toUpperCase() + category.slice(1),
+            sUppercase: category[0].toUpperCase() + category.substring(0, category.length - 1).slice(1)
+        };
+        const query = _formatQuery(data, configuration);
+        const response = await _gql(query, input);
+        let result;
+        if (action === 'find') result = response[action + data.uppercase][category];
+        if (action === 'bulkUpdate') result = response[`bulk${data.sUppercase}Update`];
+        if (action === 'update') result = response[`${data.singular}Update`];
+        if (action === 'create') result = response[`${data.singular}Create`];
+        return result;
+    };
+    // Find query
+    const find = {
+        /**
+         * Find scenes
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        scenes: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'scenes', configuration);
+            response._category = 'scene';
+            return response;
+        },
+        /**
+         * Find scene
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        scene: async (configuration) => {
+            if (typeof configuration === 'string' && isNaN(configuration)) configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.scenes(configuration);
+            return response[0];
+        },
+        /**
+         * Find images
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        images: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'images', configuration);
+            return response;
+        },
+        /**
+         * Find image
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        image: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.images(configuration);
+            return response[0];
+        },
+        /**
+         * Find groups
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        groups: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'groups', configuration);
+            return response;
+        },
+        /**
+         * Find group
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        group: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.groups(configuration);
+            return response[0];
+        },
+        /**
+         * Find scene markers
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        markers: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'sceneMarkers', configuration);
+            return response;
+        },
+        /**
+         * Find scene marker
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        marker: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.markers(configuration);
+            return response[0];
+        },
+        /**
+         * Find galleries
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        galleries: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'galleries', configuration);
+            return response;
+        },
+        /**
+         * Find gallery
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        gallery: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.galleries(configuration);
+            return response[0];
+        },
+        /**
+         * Find performers
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        performers: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'performers', configuration);
+            return response;
+        },
+        /**
+         * Find performer
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        performer: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.performers(configuration);
+            return response[0];
+        },
+        /**
+         * Find studios
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        studios: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'studios', configuration);
+            return response;
+        },
+        /**
+         * Find studio
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        studio: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.studios(configuration);
+            return response[0];
+        },
+        /**
+         * Find tags
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        tags: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            const response = await _do('find', 'tags', configuration);
+            return response;
+        },
+        /**
+         * Find tag
+         * @async
+         * @param {string|skStashFilters} [configuration] Search or Request filters
+         * @returns {object} Response data
+         */
+        tag: async (configuration) => {
+            if (typeof configuration === 'string') configuration = { filter: { q: configuration } };
+            if (typeof configuration === 'string' && !isNaN(configuration)) configuration = { ids: [configuration] };
+            if (!configuration.filter) configuration.filter = {};
+            configuration.filter.per_page = 1;
+            const response = await find.tags(configuration);
+            return response[0];
+        }
+    };
+    // Update mutation
+    const update = {
+        /**
+         * Update scenes
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        scenes: async (input) => {
+            const response = await _do('bulkUpdate', 'scenes', undefined, input);
+            return response;
+        },
+        /**
+         * Update scene
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        scene: async (input) => {
+            const response = await _do('update', 'scenes', undefined, input);
+            return response;
+        },
+        /**
+         * Update images
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        images: async (input) => {
+            const response = await _do('bulkUpdate', 'images', undefined, input);
+            return response;
+        },
+        /**
+         * Update image
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        image: async (input) => {
+            const response = await _do('update', 'images', undefined, input);
+            return response;
+        },
+        /**
+         * Update groups
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        groups: async (input) => {
+            const response = await _do('bulkUpdate', 'groups', undefined, input);
+            return response;
+        },
+        /**
+         * Update group
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        group: async (input) => {
+            const response = await _do('update', 'groups', undefined, input);
+            return response;
+        },
+        /**
+         * Update scene markers
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        markers: async (input) => {
+            const response = await _do('bulkUpdate', 'sceneMarkers', undefined, input);
+            return response;
+        },
+        /**
+         * Update scene marker
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        marker: async (input) => {
+            const response = await _do('update', 'sceneMarkers', undefined, input);
+            return response;
+        },
+        /**
+         * Update galleries
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        galleries: async (input) => {
+            const response = await _do('bulkUpdate', 'galleries', undefined, input);
+            return response;
+        },
+        /**
+         * Update gallery
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        gallery: async (input) => {
+            const response = await _do('update', 'galleries', undefined, input);
+            return response;
+        },
+        /**
+         * Update performers
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        performers: async (input) => {
+            const response = await _do('bulkUpdate', 'performers', undefined, input);
+            return response;
+        },
+        /**
+         * Update performer
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        performer: async (input) => {
+            const response = await _do('update', 'performers', undefined, input);
+            return response;
+        },
+        /**
+         * Update studios
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        studios: async (input) => {
+            const response = await _do('bulkUpdate', 'studios', undefined, input);
+            return response;
+        },
+        /**
+         * Update studio
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        studio: async (input) => {
+            const response = await _do('update', 'studios', undefined, input);
+            return response;
+        },
+        /**
+         * Update tags
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        tags: async (input) => {
+            const response = await _do('bulkUpdate', 'tags', undefined, input);
+            return response;
+        },
+        /**
+         * Update tag
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        tag: async (input) => {
+            const response = await _do('update', 'tags', undefined, input);
+            return response;
+        }
+    };
+    // Create mutation
+    const create = {
+        /**
+         * Create scene
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        scene: async (input) => {
+            const response = await _do('create', 'scenes', undefined, input);
+            return response;
+        },
+        /**
+         * Update image
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        image: async (input) => {
+            const response = await _do('create', 'images', undefined, input);
+            return response;
+        },
+        /**
+         * Update group
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        group: async (input) => {
+            const response = await _do('create', 'groups', undefined, input);
+            return response;
+        },
+        /**
+         * Update scene marker
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        marker: async (input) => {
+            const response = await _do('create', 'sceneMarkers', undefined, input);
+            return response;
+        },
+        /**
+         * Update gallery
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        gallery: async (input) => {
+            const response = await _do('create', 'galleries', undefined, input);
+            return response;
+        },
+        /**
+         * Update performer
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        performer: async (input) => {
+            const response = await _do('create', 'performers', undefined, input);
+            return response;
+        },
+        /**
+         * Update studio
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        studio: async (input) => {
+            const response = await _do('create', 'studios', undefined, input);
+            return response;
+        },
+        /**
+         * Update tag
+         * @async
+         * @param {object} input New data
+         * @returns {object} Response data
+         */
+        tag: async (input) => {
+            const response = await _do('create', 'tag', undefined, input);
+            return response;
+        }
+    };
+
+    /**
+     * Return stashBox with the given name
+     * @param {string} name StashBox name
+     * @returns {object} StashBox
+     */
+    const getStashBox = (name) => {
+        let find = false;
+        const stashBoxes = configuration.general.stashBoxes;
+        for (stashBox of stashBoxes) { if (stashBox.name.toLowerCase() === name.toLowerCase()) find = stashBox; };
+        return find;
+    };
+
+    return { configuration, find, update, create, getStashBox };
+}();
 
 //BOOKMARK skStashDB
-/**
- * The StashDB module
- * @constructor
- */
-function skStashDB() {
-    this.initialize.call(this);
-};
 
 /**
- * Check if the module skStashDB is already initializated
- * @returns {boolean}
- */
-skStashDB.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Set StashDB configuration
- */
-skStashDB.prototype.setConfiguration = function () {
-    this._configuration = sk.stash.findStashBox('stashdb');
-};
-
-/**
- * Get StashDB configuration
- * @returns {object} StashDB configuration
- */
-skStashDB.prototype.getConfiguration = function () {
-    return this._configuration;
-};
-
-/**
- * Set GraphQL url
- */
-skStashDB.prototype.setGQL = function () {
-    this._gql = this.getConfiguration().endpoint;
-};
-
-/**
- * Get GraphQL url
- * @returns {string} GraphQL url
- */
-skStashDB.prototype.getGQL = function () {
-    return this._gql;
-};
-
-/**
- * Set StashDB api key
- */
-skStashDB.prototype.setApiKey = function () {
-    this._apiKey = this.getConfiguration().api_key;
-};
-
-/**
- * Get StashDB api key
- * @returns {string} Api key
- */
-skStashDB.prototype.getApiKey = function () {
-    return this._apiKey;
-};
-
-/**
- * Set the default headers for GraphQL
- */
-skStashDB.prototype.setHeaders = function () {
-    this._headers = {
+  * Create and return the StashDB module
+  * @returns {object} skStashDB module
+  */
+sk.stashDB = function skStashDB() {
+    const _configuration = sk.stash.getStashBox('stashdb');
+    const _server = _configuration.endpoint;
+    const _defaulHeaders = {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'ApiKey': this.getApiKey()
-        },
-        variables: {}
+            ApiKey: _configuration.api_key || ''
+        }
     };
-};
-
-/**
- * Get the default headers for GraphQL
- * @returns {object} Headers data
- */
-skStashDB.prototype.getHeaders = function () {
-    return this._headers;
-};
-
-/**
- * Set field placeholder
- */
-skStashDB.prototype.setField = function () {
-    this._field = {
-        scene: 'id code release_date production_date title details director urls { url } images { url } studio {@studio@} performers { performer {@performer@} } tags {@tag@}',
-        studio: 'id name aliases urls { url } parent { name } child_studios { name }',
-        performer: 'id name disambiguation aliases gender birth_date death_date age height hair_color eye_color ethnicity country career_end_year career_start_year breast_type waist_size hip_size band_size cup_size tattoos { location description } piercings { location description } urls { url } images { url }',
-        tag: 'id name description aliases'
-    };
-};
-
-/**
- * get given field placeholder
- * @param {string} field
- * @returns {string} Field placeholder
- */
-skStashDB.prototype.getField = function (field) {
-    return this._field[field];
-};
-
-/**
- * Initialize skStashDB module
- * @returns If is already initialized
- * @async
- */
-skStashDB.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this.setConfiguration();
-    this.setGQL();
-    this.setApiKey();
-    this.setHeaders();
-    this.setBaseQuery();
-    this.setCategoryQuery();
-    this.setField();
-    this._initializated = true;
-};
-
-/**
- * Send a request to GraphQL interface
- * @param {any} query
- * @param {any} search
- * @returns {object} Result data
- * @async
- */
-skStashDB.prototype.GQL = async function (query, search) {
-    if (!query) throw Error('Query must be defined', query);
-    let configuration = this.getHeaders();
-    configuration.body = JSON.stringify({ query: query, variables: { limit: 1, term: search } });
-    const response = await fetch(this.getGQL(), configuration);
-    let result = await response.json();
-    result._type = 'stashDB';
-    return result;
-};
-
-/**
- * Set the base query placeholder
- */
-skStashDB.prototype.setBaseQuery = function () {
-    this._baseQuery = 'query SearchAll($term:String!,$limit:Int=5){@category@}';
-};
-
-/**
- * Get the base query placeholder
- * @returns {string} Query placeholder
- */
-skStashDB.prototype.getBaseQuery = function () {
-    return this._baseQuery;
-};
-
-/**
- * Set the query placeholder based on category
- */
-skStashDB.prototype.setCategoryQuery = function () {
-    this._categoryQuery = {
+    const _query = {
+        base: 'query SearchAll($term:String!,$limit:Int=5){@categoryQuery@}',
         scene: 'searchScene(term:$term,limit:$limit){@scene@}',
         studio: 'searchStudio(term:$term,limit:$limit){@studio@}',
         performer: 'searchPerformer(term:$term,limit:$limit){@performer@}',
         tag: 'searchTag(term:$term,limit:$limit){@tag@}'
     };
-};
-
-/**
- * Get the query placeholder based on category
- * @param {string} category
- * @returns {string} Query placeholder
- */
-skStashDB.prototype.getCategoryQuery = function (category) {
-    return this._categoryQuery[category];
-}
-
-/**
- * Replace all the filed placeholder and return the complete query
- * @param {string} query
- * @returns {string} Complete query
- */
-skStashDB.prototype.formatField = function (query) {
-    if (query.includes('@scene@')) query = query.replace('@scene@', this.getField('scene'));
-    if (query.includes('@studio@')) query = query.replace('@studio@', this.getField('studio'));
-    if (query.includes('@performer@')) query = query.replace('@performer@', this.getField('performer'));
-    if (query.includes('@tag@')) query = query.replace('@tag@', this.getField('tag'));
-    return query;
-};
-
-/**
- * Return the full query replacing the category placeholder
- * @param {string} category Category of the query
- * @returns {string} Full query
- */
-skStashDB.prototype.formatQuery = function (category) {
-    let query = this.getBaseQuery();
-    query = query.replace('@category@', this.getCategoryQuery(category));
-    query = this.formatField(query);
-    return query;
-};
-
-/**
- * Search a StashDB scene
- * @param {string} search
- * @returns {object} StashDB scene data
- * @async
- */
-skStashDB.prototype.scene = async function (search) {
-    const query = this.formatQuery('scene');
-    let data = await this.GQL(query, search);
-    data = data.data.searchScene[0];
-    if (data) data._category = 'Scene';
-    return data;
-};
-
-/**
- * Search a StashDB performer
- * @param {string} search
- * @returns {object} StashDB performer data
- * @async
- */
-skStashDB.prototype.performer = async function (search) {
-    const query = this.formatQuery('performer');
-    let data = await this.GQL(query, search);
-    data = data.data.searchPerformer[0];
-    if (data) data._category = 'Performer';
-    return data;
-};
-
-/**
- * Search a StashDB studio
- * @param {string} search
- * @returns {object} StashDB studio data
- * @async
- */
-skStashDB.prototype.studio = async function (search) {
-    const query = this.formatQuery('studio');
-    let data = await this.GQL(query, search);
-    data = data.data.searchStudio[0];
-    if (data) data._category = 'Studio';
-    return data;
-};
-
-/**
- * Search a StashDB tag
- * @param {string} search
- * @returns {object} StashDB tag data
- * @async
- */
-skStashDB.prototype.tag = async function (search) {
-    const query = this.formatQuery('tag');
-    let data = await this.GQL(query, search);
-    data = data.data.searchTag[0];
-    if (data) data._category = 'Tag';
-    return data;
-};
-
-/**
- * Return a stashID instance
- * @param {string} idDB StashDB id
- * @returns {array.<object>} StashID instance
- */
-skStashDB.prototype.toStashIDs = function (idDB) {
-    const date = new Date();
-    return [{ stash_id: idDB, endpoint: this.getGQL(), updated_at: date.toISOString() }];
-};
-
-/**
- * Transform StashDB urls in Stash urls
- * @param {array.<object>} urlsDB StashDB urls
- * @returns {array.<string>} Stash urls
- */
-skStashDB.prototype.toStashURL = function (urlsDB) {
-    let urls = [];
-    urlsDB.forEach((url) => {
-        urls.push(url.url);
-    });
-    return urls;
-};
-
-/**
- * Check if the StashDB studio already exist inside Stash
- * @param {object} studio StashDB studio
- * @returns {number|boolean} Stash id or false
- * @async
-*/
-skStashDB.prototype.studioExist = async function (studio) {
-    if (!studio || !isNaN(studio)) return;
-    let find = false;
-    find = await sk.stash.findStudio(studio.name);
-    if (!find) for (alias of studio.aliases) {
-        if (!find) find = await sk.stash.findStudio(alias);
+    const _fields = {
+        scene: 'id code release_date production_date title details director urls { url } images { url } studio {@studio@} performers { performer {@performer@} } tags {@tag@}',
+        studio: 'id name aliases urls { url } parent { name } child_studios { name }',
+        performer: 'id name disambiguation aliases gender birth_date death_date age height hair_color eye_color ethnicity country career_end_year career_start_year breast_type waist_size hip_size band_size cup_size tattoos { location description } piercings { location description } urls { url } images { url }',
+        tag: 'id name description aliases'
     };
-    return find.id || studio;
-};
 
-/**
- * Check if the StashDB performers already exist inside Stash
- * @param {array.<object>} performers StashDB performers
- * @returns {object} Find and notFind array
- * @async
-*/
-skStashDB.prototype.performersExist = async function (performers) {
-    if (!performers || !isNaN(performers[0])) return { find: performers };
-    let find = false;
-    let ids = { find: [], notFind: [] };
-    for (let performer of performers) {
-        performer = performer.performer;
-        find = await sk.stash.findPerformer(performer.name);
-        if (!find) for (alias of performer.aliases) {
-            if (!find) find = await sk.stash.findPerformer(alias);
+    /**
+     * Check if the StashDB endpoint is setted
+     * @returns {boolean}
+     */
+    const canUse = () => {
+        if (!_configuration) return false;
+        return true;
+    };
+
+    /**
+     * @typedef {object} stashDBFilter StashDB filter object
+     * @property {string} term Search
+     * @property {number} [limit] Max result
+     */
+
+    /**
+     * Send a request to stashDB
+     * @async
+     * @param {string} query Query
+     * @param {stashDBFilter} options Results filter
+     * @returns {object} Result data
+     */
+    const _gql = async (query, options) => {
+        let configuration = _defaulHeaders;
+        configuration.body = JSON.stringify({ query: query, variables: options });
+        const response = await fetch(_server, configuration);
+        let result = await response.json();
+        result._type = 'stashDB';
+        return result.data;
+    };
+
+    /**
+     * Format the placeholder query
+     * @param {string} category scene/studio/performer/tag
+     * @returns {string} Full query
+     */
+    const _formatQuery = (category) => {
+        let query = _query.base;
+        let categoryQuery = _query[category];
+        query = query.replace('@categoryQuery@', categoryQuery);
+        for (field in _fields) { if (query.includes(`@${field}@`)) query = query.replaceAll(`@${field}@`, _fields[field]) };
+        for (field in _fields) { if (query.includes(`@${field}@`)) query = query.replaceAll(`@${field}@`, _fields[field]) };
+        return query;
+    };
+
+    /**
+     * Prepare the query and send a request to stashDB
+     * @async
+     * @param {string} category scene/studio/performer/tag
+     * @param {stashDBFilter} options Results filter
+     * @returns {boolean|object} Response data or return void if the endpoint is not setted
+     */
+    const _do = async (category, options) => {
+        if (!canUse) {
+            sk.tool.notify('StashDB endpoint is not setted');
+            return;
         };
-        find ? ids.find.push(find.id) : ids.notFind.push(performer);
-        find = false;
+        const uppercase = category[0].toUpperCase() + category.slice(1);
+        const query = _formatQuery(category);
+        const response = await _gql(query, options);
+        return response[`search${uppercase}`];
     };
-    return ids;
-};
 
-/**
- * Check if the StashDB tags already exist inside Stash
- * @param {array.<object>} tags StashDB tags
- * @returns {object} Find and notFind array
- * @async
-*/
-skStashDB.prototype.tagsExist = async function (tags) {
-    if (!tags || !isNaN(tags[0])) return { find: tags };
-    let find = false;
-    let ids = { find: [], notFind: [] };
-
-    for (tag of tags) {
-        find = await sk.stash.findTag(tag.name);
-        if (!find) for (alias of tag.aliases) {
-            if (!find) find = await sk.stash.findTag(alias);
-        };
-        find ? ids.find.push(find.id) : ids.notFind.push(find.id);
-        find = false;
+    //Find query
+    const find = {
+        /**
+         * Find scenes
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBScene} Result data, default 10
+         */
+        scenes: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            if (!options.limit) options.limit = 10;
+            let response = await _do('scene', options);
+            respose._category = 'scene';
+            return response;
+        },
+        /**
+         * Find scene
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBScene} Result data
+         */
+        scene: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            options.limit = 1;
+            let response = await _do('scene', options);
+            response[0]._category = 'scene';
+            return response[0];
+        },
+        /**
+         * Find performers
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBPerformer} Result data, default 10
+         */
+        performers: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            if (!options.limit) options.limit = 10;
+            let response = await _do('performer', options);
+            respose._category = 'performer';
+            return response;
+        },
+        /**
+         * Find performer
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBPerformer} Result data
+         */
+        performer: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            options.limit = 1;
+            let response = await _do('performer', options);
+            response[0]._category = 'performer';
+            return response[0];
+        },
+        /**
+         * Find studios
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBStudio} Result data, default 10
+         */
+        studios: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            if (!options.limit) options.limit = 10;
+            let response = await _do('studio', options);
+            respose._category = 'studio';
+            return response;
+        },
+        /**
+         * Find studio
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBStudio} Result data
+         */
+        studio: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            options.limit = 1;
+            let response = await _do('studio', options);
+            response[0]._category = 'studio';
+            return response[0];
+        },
+        /**
+         * Find tags
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBTags} Result data, default 10
+         */
+        tags: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            if (!options.limit) options.limit = 10;
+            let response = await _do('tag', options);
+            respose._category = 'tag';
+            return response;
+        },
+        /**
+         * Find tag
+         * @async
+         * @param {stashDBFilter|string} options Results filter or search
+         * @returns {stashDBTags} Result data
+         */
+        tag: async (options = {}) => {
+            if (typeof options === 'string') options = { term: options };
+            options.limit = 1;
+            let response = await _do('tag', options);
+            response[0]._category = 'tag';
+            return response[0];
+        }
     };
-    return ids;
-};
 
-/**
- * Transform StashDB scene data in Stash scene data
- * @param {object} sceneDB StashDB scene data
- * @param {string} sceneDB.id Scene StashDB id
- * @param {string} sceneDB.title Scene title
- * @param {array.<object>} sceneDB.images Scene images
- * @param {string|number} sceneDB.code Scene code
- * @param {string} sceneDB.details Scene details
- * @param {string} sceneDB.director Scene director
- * @param {array.<object>} sceneDB.urls Scene urls data
- * @param {string} sceneDB.release_date Scene release date (yyyy-mm-dd)
- * @param {object} sceneDB.studio Scene studio
- * @param {array.<object>} sceneDB.performers Scene performers
- * @param {array.<object>} sceneDB.tags Scene tags
- * @param {number|string} [sceneId] Stash scene id to update
- * @param {boolean} find If return not found data
- * @returns {object} Stash scene data
- * @async
- */
-skStashDB.prototype.toStashScene = async function (sceneDB, sceneId, find) {
-    let scene = {};
-    const studio = await this.studioExist(sceneDB.studio);
-    const performers = await this.performersExist(sceneDB.performers);
-    const tags = await this.tagsExist(sceneDB.tags);
+    /**
+     * @typedef {object} stashDBScene StashDB scene data
+     * @property {string} [id] Scene StashDB id
+     * @property {string} [title] Scene title
+     * @property {object[]} [images] Scene images
+     * @property {string|number} [code] Scene code
+     * @property {string} [details] Scene details
+     * @property {string} [director] Scene director
+     * @property {object[]} [urls] Scene urls data
+     * @property {string} [release_date] Scene release date (yyyy-mm-dd)
+     * @property {object} [studio] Scene studio
+     * @property {object[]} [performers] Scene performers
+     * @property {object[]} [tags] Scene tags
+     */
 
-    if (sceneId !== undefined) scene.id = sceneId;
-    if (sceneDB.images) scene.cover_image = sceneDB.images[0].url;
-    if (sceneDB.title) scene.title = sceneDB.title;
-    if (sceneDB.code) scene.code = sceneDB.code;
-    if (sceneDB.details) scene.details = sceneDB.details;
-    if (sceneDB.director) scene.director = sceneDB.director;
-    if (sceneDB.urls) scene.urls = this.toStashURL(sceneDB.urls);
-    if (sceneDB.release_date) scene.date = scene.release_date;
-    if (sceneDB.id) scene.stash_ids = this.toStashIDs(sceneDB.id);
-    if (!isNaN(studio)) scene.studio_id = studio;
-    scene.performer_ids = performers.find;
-    scene.tag_ids = tags.find;
+    /**
+     * @typedef {object} stashDBPerformer StashDB performer data
+     * @property {string} [id] StashDB performer id
+     * @property {string} [name] Performer name
+     * @property {string} [disambiguation] Performer disambiguation
+     * @property {object[]} [urls] Performer urls data
+     * @property {string} [gender] Performer gender
+     * @property {string} [birth_date] Performer birth date (yyyy-mm-dd)
+     * @property {string} [ethnicity] Performer ethnicity
+     * @property {string} [country] Performer country code
+     * @property {string} [eye_color] Performer eyes color
+     * @property {number} [height] Performer height in cm
+     * @property {number} [band_size] Performer band size
+     * @property {string} [cup_size] Performer cup size
+     * @property {number} [waist_size] Performer waist size
+     * @property {number} [hip_size] Performer hip size
+     * @property {string} [breast_type] Performer breast type natural|augmented
+     * @property {number} [penis_length] Performer penis length in cm
+     * @property {string} [circumcised] Performer circumcised cut|uncut
+     * @property {string} [career_start_year] Performer career starting year
+     * @property {string} [career_end_year] Performer career ending year
+     * @property {object[]} [tattoos] Performer tattoos list
+     * @property {object[]} [piercings] Performer piercings list
+     * @property {array.<string>} [aliases] Performer aliases list
+     * @property {string} [death_date] Performer death date (yyyy-mm-dd)
+     * @property {string} [hair_color] Performer hair color
+     * @property {number} [weight] Performer weight in kg
+     */
 
-    if (find) {
-        if (isNaN(studio)) find.studio = studio;
-        if (performers.notFind) find.performers = performers.notFind;
-        if (tags.notFind) find.tags = tags.notFind;
+    /**
+     * @typedef {object} stashDBStudio StashDB studio data
+     * @property {string} [id] StashDB studio id
+     * @property {string} [name] Studio name
+     * @property {array.<string>} [aliases] Studio aliases list
+     * @property {object[]} [url] Studio urls data
+     * @property {object} [parent] Studio parent object
+     */
+
+    /**
+     * @typedef {object} stashDBTags StashDB tag data
+     * @property {string} [id] StashDB tag id
+     * @property {string} [name] Tag name
+     * @property {string} [description] Tag description
+     * @property {array.<string>} [aliases] Tag aliases list
+     */
+
+    // Getter & creator for existing data on Stash
+    const _get = {
+        /**
+         * Find existing performers
+         * @async
+         * @param {stashDBPerformer[]} performers Performers data
+         * @param {boolean} [create] If true create missing data
+         */
+        performers: async (performers, create) => {
+            if (!performers) return;
+            let ids = { find: [], missing: [] };
+            for (performer of performers) {
+                performer = performer.performer;
+                let find = false;
+                find = await sk.stash.find.performer(performer.name);
+                if (!find) for (alias of performer.aliases) { if (!find) find = await sk.stash.find.performer(alias); };
+                if (!find && create) {
+                    const newPerformer = await _toStash.performer(performer);
+                    find = await sk.stash.create.performer({ name: newPerformer });
+                };
+                find ? ids.find.push(find.id) : ids.missing.push(performer);
+            };
+            return ids;
+        },
+        /**
+         * Find existing studio
+         * @async
+         * @param {stashDBStudio} studio Studio data
+         * @param {boolean} [create] If true create missing data
+         */
+        studio: async (studio, create) => {
+            if (!studio) return studio;
+            let find = false;
+            find = await sk.stash.find.studio(studio.name);
+            if (!find) for (alias of studio.aliases) { if (!find) find = await sk.stash.find.studio(alias); };
+            if (!find && create) {
+                const newStudio = await _toStash.studio(newStudio, { create: true });
+                find = await sk.stash.create.studio({ name: newStudio });
+            };
+            return find;
+        },
+        /**
+         * Find existing tags
+         * @async
+         * @param {stashDBTags[]} tags Tags data
+         * @param {boolean} [create] If true create missing data
+         */
+        tags: async (tags, create) => {
+            if (!tags) return;
+            let ids = { find: [], missing: [] };
+            for (tag of tags) {
+                let find = false;
+                find = await sk.stash.find.tag(tag.name);
+                if (!find) for (alias of tag.aliases) { if (!find) find = await sk.stash.find.tag(alias); };
+                if (!find && create) {
+                    const newTag = await _toStash.tag(tag);
+                    find = await sk.stash.create.tag({ name: newTag });
+                };
+                find ? ids.find.push(find.id) : ids.missing.push(tag);
+            };
+            return ids;
+        },
+        /**
+         * Return a stash urls
+         * @param {object[]} urls StashDB urls
+         * @returns {array.<string>} Stash urls
+         */
+        urls: (urls) => {
+            let stashUrls = [];
+            urls.forEach((url) => { urls.push(url.url) });
+            return stashUrls;
+        },
+        /**
+         * Return a stash tattoos/piercings description
+         * @param {object[]} list StashDB tattoos/piercings
+         * @return {string} Stash tattoos/piercings description
+         */
+        tattosPiercings: (list) => {
+            if (!list) return;
+            let data = [];
+            list.forEach((entry) => {
+                let value;
+                const description = entry.description;
+                const location = entry.location;
+                if (description && location) value = `${description} (${location})`;
+                if(description || location && !value) value = description || location;
+                data.push(value);
+            });
+            return data.join(', ');
+        },
+        /**
+         * Return a stash_id
+         * @param {string} id StashDB id
+         * @return {object[]} List of stash_id
+         */
+        stashId: (id) => {
+            const date = new Date();
+            return [{ stash_id: id, endpoint: _server, updated_at: date.toISOString() }];
+        }
     };
-    return find ? { scene: scene, find: find } : scene;
-};
-
-/**
- * Return a string of Tattoos or Piercings
- * @param {array.<object>} listDB Tattoos or Piercings list of StashDB
- * @returns {string} Stash compatible tattoos or piercings
- */
-skStashDB.prototype.toStashTattoosPiercings = function (listDB) {
-    let list = [];
-    if (listDB) listDB.forEach((item) => {
-        const description = item.description;
-        const location = item.location;
-        let toStash = description;
-        if (location) toStash = `${toStash} (${location})`;
-        list.push(toStash);
-    });
-    return list.join(', ');
-};
-
-/**
- * Transform StashDB scene data in Stash scene data
- * @param {object} performerDB StashDB performer data
- * @param {string} performerDB.id StashDB performer id
- * @param {string} performerDB.name Performer name
- * @param {string} performerDB.disambiguation Performer disambiguation
- * @param {array.<object>} performerDB.urls Performer urls data
- * @param {string} performerDB.gender Performer gender
- * @param {string} performerDB.birth_date Performer birth date (yyyy-mm-dd)
- * @param {string} performerDB.ethnicity Performer ethnicity
- * @param {string} performerDB.country Performer country code
- * @param {string} performerDB.eye_color Performer eyes color
- * @param {number} performerDB.height Performer height in cm
- * @param {number} performerDB.band_size Performer band size
- * @param {string} performerDB.cup_size Performer cup size
- * @param {number} performerDB.waist_size Performer waist size
- * @param {number} performerDB.hip_size Performer hip size
- * @param {string} performerDB.breast_type Performer breast type natural|augmented
- * @param {number} performerDB.penis_length Performer penis length in cm
- * @param {string} performerDB.circumcised Performer circumcised cut|uncut
- * @param {string} performerDB.career_start_year Performer career starting year
- * @param {string} performerDB.career_end_year Performer career ending year
- * @param {array.<object>} performerDB.tattoos Performer tattoos list
- * @param {array.<object>} performerDB.piercings Performer piercings list
- * @param {array.<string>} performerDB.aliases Performer aliases list
- * @param {string} performerDB.death_date Performer death date (yyyy-mm-dd)
- * @param {string} performerDB.hair_color Performer hair color
- * @param {number} performerDB.weight Performer weight in kg
- * @param {number|string} [performerId] Stash performer id to update
- * @returns {object} Stash performer data
- * @async
- */
-skStashDB.prototype.toStashPerformer = async function (performerDB, performerId) {
-    let performer = {};
-    if (performerId !== undefined) performer.id = performerId;
-    if (performerDB.images) performer.image = performerDB.images[0].url;
-    if (performerDB.name) performer.name = performerDB.name;
-    if (performerDB.disambiguation) performer.disambiguation = performerDB.disambiguation;
-    if (performerDB.urls) performer.urls = this.toStashURL(performerDB.urls);
-    if (performerDB.gender) performer.gender = performerDB.gender;
-    if (performerDB.birthdate) performer.birthdate = performerDB.birth_date
-    if (performerDB.ethnicity) performer.ethnicity = performerDB.ethnicity[0] + performerDB.ethnicity.slice(1).toLowerCase();
-    if (performerDB.country) performer.country = performerDB.country;
-    if (performerDB.eye_color) performer.eye_color = performerDB.eye_color;
-    if (performerDB.height) performer.height_cm = performerDB.height;
-    if (performerDB.band_size && performerDB.cup_size && performerDB.waist_size && performerDB.hip_size) performer.measurements = `${performerDB.band_size}${performerDB.cup_size}-${performerDB.waist_size}-${performerDB.hip_size}`;
-    if (performerDB.breast_type) performer.fake_tits = performerDB.breast_type[0] + performerDB.breast_type.slice(1).toLowerCase();
-    if (performerDB.penis_length) performer.penis_length = performerDB.penis_length;
-    if (performerDB.circumcised) performer.circumcised = performerDB.circumcised;
-    if (performerDB.career_start_year) performer.career_length = performerDB.career_end_year ? `${performerDB.career_start_year} -` : `${performerDB.career_start_year} - ${performerDB.career_end_year}`;
-    if (performerDB.tattoos) performer.tattoos = this.toStashTattoosPiercings(performerDB.tattoos);
-    if (performerDB.piercings) performer.piercings = this.toStashTattoosPiercings(performerDB.piercings);
-    if (performerDB.aliases) performer.alias_list = performerDB.aliases;
-    if (performerDB.id) performer.stash_ids = this.toStashIDs(performerDB.id);
-    if (performerDB.death_date) performer.death_date = performerDB.death_date;
-    if (performerDB.hair_color) performer.hair_color = performerDB.hair_color[0] + performerDB.hair_color.slice(1).toLowerCase();
-    if (performerDB.weight) performer.weight = performerDB.weight;
-    return performer;
-};
-
-/**
- * Transform StashDB studio data in Stash studio data
- * @param {object} studioDB StashDB studio data
- * @param {string} studioDB.id StashDB studio id
- * @param {string} studioDB.name Studio name
- * @param {array.<string>} studioDB.aliases Studio aliases list
- * @param {array.<object>} studioDB.url Studio urls data
- * @param {object} studioDB.parent Studio parent object
- * @param {string|number} studioId Stash studio id to update
- * @param {boolean} find If return not found data
- * @returns {object} Stash studio data
- * @async
- */
-skStashDB.prototype.toStashStudio = async function (studioDB, studioId, find) {
-    let studio = {};
-    const parent = await this.studioExist(studioDB.parent);
-
-    if (studioId !== undefined) studio.id = studioId;
-    if (studioDB.name) studio.name = studioDB.name;
-    if (studioDB.aliases) studio.aliases = studioDB.aliases;
-    if (studioDB.urls) studio.urls = this.toStashURL(studioDB.urls);
-    if (studioDB.id) studio.stash_ids = this.toStashIDs(studioDB.id);
-    if (!isNaN(parent)) studio.parent_id = parent.id;
-
-    if (find) {
-        if (isNaN(parent)) find.parent = parent;
-    };
-    return find ? { scene: scene, find: find } : studio;
-};
-
-/**
- * Transform StashDB tag data in Stash tag data
- * @param {object} tagDB StashDB tag data
- * @param {string} tagDB.id StashDB tag id
- * @param {string} tagDB.name Tag name
- * @param {string} tagDB.description Tag description
- * @param {array.<string>} tagDB.aliases Tag aliases list
- * @param {number|id} tagId Stash tag id to update
- * @returns {object} Stash tag data
- * @async
- */
-skStashDB.prototype.toStashTag = async function (tagDB, tagId) {
-    let tag = {};
-    if (tagId !== undefined) tag.id = tagId;
-    if (tagDB.name) tag.name = tagDB.name;
-    if (tagDB.description) tag.description = tagDB.description;
-    if (tagDB.aliases) tag.aliases = tagDB.aliases;
-    if (tagDB.id) tag.stash_ids = this.toStashIDs(tagDB.id);
-    return tag;
-};
-
-/**
- * Transform a StashDB data to Stash data and update it
- * @param {object} stashDB StashDB data
- * @param {number|string} id Stash id. If defined auto update the stash database
- * @returns
- */
-skStashDB.prototype.toStash = async function (stashDB, id) {
-    const stashData = await sk.stashDB[`toStash${stashDB._category}`](stashDB, id);
-    if (id !== undefined) await sk.stash[`update${stashDB._category}`](stashData);
-    return stashData;
-};
-
-//BOOKMARK skHook
-/**
- * The Hook module
- * @constructor
- */
-function skHook() {
-    this.initialize.call(this);
-};
-
-/**
- * Check if the module skHook is already initializated
- * @returns {boolean}
- */
-skHook.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Clone the default fetch
- */
-skHook.prototype.setFetch = function () {
-    this._fetch = window.fetch.bind(window);
-};
-
-/**
- * Return the cloned default fetch
- * @returns {function} Fetch
- */
-skHook.prototype.getFetch = function () {
-    return this._fetch;
-};
-
-/**
- * Set hook category
- */
-skHook.prototype.setCategory = function () {
-    this._category = ['scene', 'marker', 'image', 'gallery', 'group', 'performer', 'studio', 'tag'];
-};
-
-/**
- * Get hook category
- * @returns {array} Hook category
- */
-skHook.prototype.getCategory = function () {
-    return this._category;
-};
-
-/**
- * Set hook operation
- */
-skHook.prototype.setOperation = function () {
-    this._operation = ['create', 'update', 'destroy', 'merge'];
-};
-
-/**
- * Get hook operation 
- * @returns {array} Hook operation
- */
-skHook.prototype.getOperation = function () {
-    return this._operation;
-};
-
-/**
- * Prepare the watcher query and array
- */
-skHook.prototype.setWatcher = function () {
-    this._watch = {};
-    const category = this.getCategory();
-    const operation = this.getOperation();
-    category.forEach((name) => {
-        this._watch[name] = {};
-    });
-    operation.forEach((name) => {
-        for (var cat in this._watch) {
-            var upperCase = name[0].toUpperCase() + name.slice(1);
-            if (name !== 'merge') {
-                this._watch[cat][name] = { query: cat + upperCase, functions: [] };
-            } else if (cat === 'tag') {
-                this._watch[cat][name] = { query: cat + upperCase, functions: [] };
+    // Transform StashDB data to Stash data
+    const _toStash = {
+        /**
+         * StashDB scene to Stash
+         * @async
+         * @param {stashDBScene} data StashDB scene
+         * @param {object} [options={}] Special action
+         * @param {boolean} [options.create] Create missing data
+         * @param {string|number} [options.update] Element to update with converted data
+         * @param {boolean} [options.find] Return missing data
+         * @returns {object} Stash scene if options.find is true return {scene,missing} instead
+         */
+        scene: async (data, options = {}) => {
+            const studio = await _get.studio(data.studio, options.create);
+            const performers = await _get.performers(data.performers, options.create);
+            const tags = await _get.tags(data.tags, options.create);
+            let scene = {};
+            if (data.images) scene.cover_image = data.images[0].url;
+            if (data.title) scene.title = data.title;
+            if (data.code) scene.code = data.code;
+            if (data.details) scene.details = data.details;
+            if (data.director) scene.director = data.director;
+            if (data.urls) scene.urls = _get.urls(data.urls);
+            if (data.release_date) scene.date = scene.release_date;
+            if (data.id) scene.stash_ids = _get.stashId(data.id);
+            if (studio && !isNaN(studio.id)) scene.studio_id = studio.id;
+            if (performers.find) scene.performer_ids = performers.find;
+            if (tags.find) scene.tag_ids = tags.find;
+            if (options.update !== undefined) {
+                scene.id = options.update;
+                const updated = await sk.stash.update.scene(scene);
+            };
+            let missing = {};
+            if (options.find) {
+                if (!studio || isNaN(studio.id)) missing.studio = data.studio;
+                if (performers.missing) missing.performers = performers.missing;
+                if (tags.missing) missing.tags = tags.missing;
+                scene = {
+                    scene: scene,
+                    missing: missing
+                };
             }
+            return scene;
+        },
+        /**
+         * StashDB performer to Stash
+         * @async
+         * @param {stashDBPerformer} data StashDB performer
+         * @param {object} [options={}] Special action
+         * @param {string|number} [options.update] Element id to update with converted data
+         * @param {boolean} [options.images] If true return {performer, images} with all profile picture instead of performer{}
+         * @returns {object} Stash performer
+         */
+        performer: async (data, options = {}) => {
+            let performer = {};
+            if (data.images) performer.image = data.images[0].url;
+            if (data.name) performer.name = data.name;
+            if (data.disambiguation) performer.disambiguation = data.disambiguation;
+            if (data.urls) performer.urls = _get.urls(data.urls);
+            if (data.gender) performer.gender = data.gender;
+            if (data.birthdate) performer.birthdate = data.birth_date
+            if (data.ethnicity) performer.ethnicity = data.ethnicity[0] + data.ethnicity.slice(1).toLowerCase();
+            if (data.country) performer.country = data.country;
+            if (data.eye_color) performer.eye_color = data.eye_color;
+            if (data.height) performer.height_cm = data.height;
+            if (data.band_size && data.cup_size && data.waist_size && data.hip_size) performer.measurements = `${data.band_size}${data.cup_size}-${data.waist_size}-${data.hip_size}`;
+            if (data.breast_type) performer.fake_tits = data.breast_type[0] + data.breast_type.slice(1).toLowerCase();
+            if (data.penis_length) performer.penis_length = data.penis_length;
+            if (data.circumcised) performer.circumcised = data.circumcised;
+            if (data.career_start_year) performer.career_length = !data.career_end_year ? `${data.career_start_year} -` : `${data.career_start_year} - ${data.career_end_year}`;
+            if (data.tattoos) performer.tattoos = _get.tattosPiercings(data.tattoos);
+            if (data.piercings) performer.piercings = _get.tattosPiercings(data.piercings);
+            if (data.aliases) performer.alias_list = data.aliases;
+            if (data.id) performer.stash_ids = _get.stashId(data.id);
+            if (data.death_date) performer.death_date = data.death_date;
+            if (data.hair_color) performer.hair_color = data.hair_color[0] + data.hair_color.slice(1).toLowerCase();
+            if (data.weight) performer.weight = data.weight;
+            if (options.update !== undefined) {
+                performer.id = options.update;
+                const updated = await sk.stash.update.performer(performer);
+                debugger
+            };
+            if (options.images) performer = { performer: performer, images: _get.urls(data.images) };
+            return performer;
+        },
+        /**
+         * StashDB studio to Stash
+         * @async
+         * @param {stashDBStudio} data StashDB studio
+         * @param {object} [options={}] Special action
+         * @param {boolean} [options.create] Create missing data
+         * @param {string|number} [options.update] Element to update with converted data
+         * @param {boolean} [options.find] Return missing data
+         * @returns {object} Stash studio if options.find is true return {studio,missing} instead
+         */
+        studio: async (data, options = {}) => {
+            const parent = await _get.studio(data.parent, options.create);
+            let studio = {};
+            if (data.name) studio.name = data.name;
+            if (data.aliases) studio.aliases = data.aliases;
+            if (data.urls) studio.urls = _get.urls(data.urls);
+            if (data.id) studio.stash_ids = _get.stashId(data.id);
+            if (parent || !isNaN(parent.id)) studio.parent_id = parent.id;
+            if (options.update !== undefined) {
+                studio.id = options.update;
+                const updated = await sk.stash.create.studio(studio);
+            };
+            if (options.find) {
+                studio = { studio: studio, missing: data.parent };
+            };
+            return studio;
+        },
+        /**
+         * StashDB tag to Stash
+         * @async
+         * @param {stashDBTags} data StashDB tag
+         * @param {object} [options] Special action
+         * @param {string|number} [options.update] Element to update with converted data
+         * @returns {object} Stash tag
+         */
+        tag: async (data, options) => {
+            let tag = {};
+            if (data.name) tag.name = data.name;
+            if (data.description) tag.description = data.description;
+            if (data.aliases) tag.aliases = data.aliases;
+            if (data.id) tag.stash_ids = _get.stashId(data.id);
+            if (options.update !== undefined) {
+                tag.id = options.update;
+                const updated = sk.stash.update.tag(tag);
+            };
+            return tag;
+        }
+    };
+
+    /**
+     * Transform given data to Stash data
+     * @async
+     * @param {stashDBScene|stashDBPerformer|stashDBStudio|stashDBTags} stashdbData StashDB data
+     * @param {object} [options] Special action
+     * @param {boolean} [options.create] Create missing data
+     * @param {string|number} [options.update] Element to update with converted data
+     * @param {boolean} [options.find] Return missing data
+     * @returns {object|object[]} Stash data
+     */
+    const toStash = async (stashdbData, options) => {
+        let stashData = [];
+        const category = stashdbData._category;
+        if (!stashdbData[0]) stashdbData = [stashdbData];
+        for (data of stashdbData) {
+            const transform = await _toStash[category](data, options);
+            stashData.push(transform);
         };
-    });
-};
+        return stashData[1] ? stashData : stashData[0];
+    };
+
+    return { canUse, find, toStash };
+}();
+
+//BOOKMARK skPlugin
 
 /**
- * Return the selected watcher
- * @param {string} [category] scene|marker|image|gallery|group|performer|studio|tag
- * @param {string} [operation] create|update|destroy|merge
- * @returns {object} entire watch|watch[category]|watch[category][operation]
- */
-skHook.prototype.getWatcher = function (category, operation) {
-    if (!category && !operation) return this._watch;
-    if (category && !operation) return this._watch[category];
-    return this._watch[category][operation];
-};
+  * Create and return the Plugin module
+  * @returns {object} skPlugin module
+  */
+sk.plugin = function skPlugin() {
+    const _plugins = sk.stash.configuration.plugins;
 
-/**
- * Check if the current fetch is observed
- * @param {string} query Fetch query
- * @returns {object|boolean} watcher or false
- */
-skHook.prototype.needWatch = function (query) {
-    let needWatch = false;
-    this.getOperation().forEach((name) => {
-        for (var cat in this.getWatcher()) {
-            var hook = this.getWatcher(cat, name);
-            if (hook && query.includes(hook.query)) needWatch = hook;
+    /**
+     * Return the selected plugins
+     * @param {string|array.<string>} names Plugin names
+     * @returns {object|object[]} Plugins
+     */
+    const get = (names) => {
+        if (!names) return _plugins;
+        if (!Array.isArray(names)) return _plugins[names];
+        let find = [];
+        names.forEach((names) => { if (_plugins[name]) find.push(_plugins.name); });
+        return find;
+    };
+
+    /**
+     * Update the plugin
+     * @param {object} plugin Plugin to update
+     * @param {string} plugin.name Plugin name
+     * @param {object} plugin.options Plugin options
+     * @returns {promise} Update result
+     */
+    const _gql = async (plugin) => {
+        const query = 'mutation configurePlugin($plugin_id: ID!, $input: Map!) {configurePlugin(plugin_id: $plugin_id, input: $input)}';
+        try {
+            const response = await fetch('/graphql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'ApiKey': sk.stash.configuration.general.ApiKey || ''
+                },
+                body: JSON.stringify({ query: query, variables: { plugin_id: plugin.name, input: plugin.options } })
+            });
+            const result = await response.json();
+            return result.data.configurePlugin;
+        } catch (e) {
+            return e;
+        }
+    };
+
+    /**
+     * Update plugins with the given data
+     * @async
+     * @param {object[]} plugins Plugins object list
+     * @param {string} plugins[].name Plugin name
+     * @param {object} plugins[].options Plugin new data {name:value}
+     * @param {boolean} notReplace If true does not replace existing value
+     * @returns {promise|array.<promise>} Updated response
+     */
+    const update = async (plugins, notReplace) => {
+        let results = [];
+        if (!plugins[0]) plugins = [plugins];
+        for (plugin of plugins) {
+            var newData = {};
+            var currentData = _plugins[plugin.name] || {};
+            for (option in currentData) { newData[option] = currentData[option]; };
+            for (option in plugin.options) {
+                if (!notReplace || notReplace && newData[option] === undefined) newData[option] = plugin.options[option];
+            };
+            const response = await _gql({ name: plugin.name, options: newData });
+            response._name = plugin.name;
+            results.push(response);
         };
-    });
-    return needWatch;
-};
-
-/**
- * Parse the response and return the data
- * @param {function} callback Function to pass data
- * @param {promise} response Data fetched
- * @param {string} query Data type
- */
-skHook.prototype.prepareResponse = async function (callback, response, query) {
-    const data = await response.json();
-    callback(data.data[query]);
-};
-
-/**
- * Set the custom fetch with the integrated observer
- * @returns {promise} Data fetched
- */
-skHook.prototype.setFakeFetch = function () {
-    window.fetch = function (...args) {
-        let query
-        if (args[1]) {
-            args[1].signal = null;
-            query = args[1].body;
-        };
-        const gql = args[0];
-        let watch = false;
-        if (gql === 'http://localhost:9999/graphql' || gql === '/graphql') watch = sk.hook.needWatch(query);
-        return Promise.resolve(sk.hook.getFetch().apply(window, args))
-            .then((resp) => {
-                if (watch.functions) watch.functions.forEach((watcher) => {
-                    const resp2 = resp.clone();
-                    sk.hook.prepareResponse(watcher, resp2, watch.query);
-                });
-                return resp;
-            })
+        return results.length === 1 ? results[0] : results;
     };
-};
 
-/**
- * Initialize the module
- * @returns If is already initialized
- * @async
- */
-skHook.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this.setFetch();
-    this.setCategory();
-    this.setOperation();
-    this.setWatcher();
-    this.setFakeFetch();
-    this._initializated = true;
-};
+    /**
+     * Check and set default data without replacing already setted options
+     * @async
+     * @param {object[]} plugins Plugins object list
+     * @param {string} plugins[].name Plugin name
+     * @param {object} plugins[].options Plugin new data {name:value}
+     * @returns{promise|array.<promise>} Updated response
+     */
+    const check = async (plugins) => { return update(plugins, true) };
 
-/**
- * Check if the given category exist as hook category
- * @param {string} name Hook category
- * @returns {boolean}
- */
-skHook.prototype.isCategory = function (name) {
-    let exist = false;
-    this.getCategory().forEach((cat) => { if (name === cat) exist = true });
-    return exist;
-};
-
-/**
- * Check if the given operation exist as hook operation
- * @param {string} name Hook operation
- * @returns {boolean}
- */
-skHook.prototype.isOperation = function (name) {
-    let exist = false;
-    this.getOperation().forEach((op) => { if (name === op) exist = true });
-    return exist;
-};
-
-/**
- * Set a new watcher
- * @param {string} category scene|marker|image|gallery|group|performer|studio|tag
- * @param {string} operation create|update|destroy|merge
- * @param {function} callback Callback function
- */
-skHook.prototype.newWatch = function (category, operation, callback) {
-    this.getWatcher(category, operation).functions.push(callback);
-};
-
-/**
- * Set a custom watcher
- * @param {string} name category.operation|category operation
- * @param {function} callback Callback function
- */
-skHook.prototype.watch = function (name, callback) {
-    name = name.toLowerCase();
-    if (name.includes('.')) name = name.split('.');
-    if (name.includes(' ')) name = name.split(' ');
-    const category = name[0];
-    const operation = name[1];
-    if (!this.isCategory(category)) throw Error('Category not found', category);
-    if (!this.isOperation(operation)) throw Error('Operation not found', operation);
-    this.newWatch(category, operation, callback);
-};
-
-//BOOKMARK skTask
-/**
- * The Task module
- * @constructor
- */
-function skTask() {
-    this.initialize.call(this);
-};
-
-/**
- * Check if the module skTask is already initializated
- * @returns {boolean}
- */
-skTask.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Set empty tasks list
- */
-skTask.prototype.setTasksList = function () {
-    this._tasks = [];
-};
-
-/**
- * Get tasks list
- * @returns {array.<object>} Task list
- */
-skTask.prototype.getTasksList = function () {
-    return this._tasks;
-};
-
-/**
- * Set id for tasks setting container
- */
-skTask.prototype.setTasksSetting = function () {
-    this._settings = '#configuration-tabs-tabpane-tasks';
-};
-
-/**
- * Get tasks setting container
- * @returns {HTMLElement} Tasks setting container
- */
-skTask.prototype.getTasksSetting = function () {
-    return this._settings;
-};
-
-/**
- * Wait for the task settings page to load
- */
-skTask.prototype.isTaskSettings = function () {
-    sk.wait(this.getTasksSetting(), this.setTasks.bind(this));
-};
-
-/**
- * Initialize the module
- * @returns If is already initialized
- * @async
- */
-skTask.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this.setTasksList();
-    this.setTasksSetting();
-    this.isTaskSettings();
-    this._initializated = true;
-};
-
-/**
- * Check if the given task is a valid task object
- * @param {object} task Task object
- * @param {string} task.id Task id
- * @param {string} task.name Task name
- * @param {string} task.description Task description
- * @param {function} task.callback Function to run on task
- * @param {string} [task.arg] Argument to pass on function run
- * @returns {boolean}
- */
-skTask.prototype.isValidTask = function (task) {
-    if (!task.id || typeof task.id !== 'string') return false;
-    if (!task.name || typeof task.name !== 'string') return false;
-    if (!task.description || typeof task.description !== 'string') return false;
-    if (!task.callback || typeof task.callback !== 'function') return false;
-    return true;
-};
-
-/**
- * Create a new task
- * @param {string} id Task id
- * @param {string} name Task name
- * @param {string} description Task description
- * @param {function} callback Function to run on task
- * @param {string} [arg] Argument to pass on function run
- */
-skTask.prototype.new = function (id, name, description, callback, arg) {
-    const newTask = {
-        id: id,
-        name: name,
-        description: description,
-        callback: callback,
-        arg: arg || ''
-    };
-    if (!this.isValidTask(newTask)) throw Error('Not a valid task', task);
-    this.getTasksList().push(newTask);
-};
-
-/**
- * Check if custom tasks are already setted
- * @returns {boolean}
- */
-skTask.prototype.isSetted = function () {
-    if (document.querySelector('.skTask')) return true;
-    return false;
-};
-
-/**
- * Create the plugin tasks group
- * @returns {skGraphic.contaier} Card element
- */
-skTask.prototype.makeContainer = function () {
-    const panelTasks = sk.ui.get('.tasks-panel-tasks');
-    const hr = sk.ui.make.divider();
-    const formGroup = sk.ui.make.container();
-    formGroup.class('form-group', true);
-    const settingSection = sk.ui.make.container();
-    settingSection.class('setting-section', true);
-    const title = sk.ui.make.title('Plugin Tasks');
-    const card = sk.ui.make.container();
-    card.class('card', true);
-
-    panelTasks.child(hr);
-    panelTasks.child(formGroup);
-    formGroup.child(settingSection);
-    settingSection.child(title);
-    settingSection.child(card);
-    return card;
-};
-
-/**
- * Get tasks container container
- * @returns {HTMLElement} Task container
- */
-skTask.prototype.getContainer = function () {
-    let pluginCard;
-    const pluginSection = sk.ui.getAll('.form-group');
-    if (pluginSection.length === 3) pluginCard = sk.ui.transform(pluginSection[2].get().firstChild.lastChild);
-    if (pluginSection.length !== 3) pluginCard = this.makeContainer();
-    return pluginCard;
-};
-
-/**
- * Group task by id
- * @returns {object.<array>} Grouped tasks
- */
-skTask.prototype.groupTasks = function () {
-    const tasksList = this.getTasksList();
-    let tasksGroup = {};
-    tasksList.forEach((task) => {
-        if (!tasksGroup[task.id]) tasksGroup[task.id] = [];
-        tasksGroup[task.id].push(task);
-    });
-    return tasksGroup;
-};
-
-/**
- * Create the settings group container
- * @returns {HTMLElement} Settings group container
- */
-skTask.prototype.makeSettingsGroup = function () {
-    const settingsGroup = sk.ui.make.container();
-    settingsGroup.class('skTask setting-group collapsible', true);
-    return settingsGroup;
-};
-
-/**
- * Create the settings header
- * @returns {HTMLElement} Settings header
- */
-skTask.prototype.makeSettingsHeader = function (group) {
-    const settingsHeader = sk.ui.make.container();
-    settingsHeader.class('setting');
-    const titleContainer = sk.ui.make.container();
-    const title = sk.ui.make.subTitle(group);
-    const buttonContainer = sk.ui.make.container();
-    const button = sk.ui.make.button();
-    button.class('setting-group-collapse-button btn btn-minimal');
-    const arrow = sk.ui.make.svg('currentColor', 'M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z');
-    arrow.class('svg-inline--fa fa-chevron-up fa-icon fa-fw');
-    arrow.attribute('aria-hidden', true);
-    arrow.attribute('focusable', false);
-    arrow.attribute('data-prefix', 'fas');
-    arrow.attribute('data-icon', 'chevron-up');
-    arrow.attribute('role', 'img');
-    arrow.attribute('xmlns', 'http://www.w3.org/2000/svg');
-    arrow.attribute('viewBox', '0 0 512 512');
-
-    settingsHeader.child(titleContainer);
-    titleContainer.child(title);
-    settingsHeader.child(buttonContainer);
-    buttonContainer.child(button);
-    button.child(arrow);
-
-    button.event('click', function () { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); });
-    return settingsHeader;
-};
-
-/**
- * Create the settings section
- * @returns {HTMLElement} Settings section
- */
-skTask.prototype.makeSettingsSection = function () {
-    const settingsSection = document.createElement('div');
-    settingsSection.className = 'collapsible-section collapse show';
-    return settingsSection;
-};
-
-/**
- * Create the setting task option
- * @returns {HTMLElement} Setting task option
- */
-skTask.prototype.makeSettingsTask = function (task) {
-    const settingContainer = document.createElement('div');
-    settingContainer.className = 'setting';
-    const settingInfo = document.createElement('div');
-    const settingTitle = document.createElement('h3');
-    settingTitle.innerText = task.name;
-    const settingDescription = document.createElement('div');
-    settingDescription.className = 'sub-heading';
-    settingDescription.innerText = task.description;
-    const buttonContainer = document.createElement('div');
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'btn btn-secondary btn-sm';
-    button.innerText = task.name;
-
-    settingContainer.appendChild(settingInfo);
-    settingInfo.appendChild(settingTitle);
-    settingInfo.appendChild(settingDescription);
-    settingContainer.appendChild(buttonContainer);
-    buttonContainer.appendChild(button);
-
-    button.onclick = () => { task.callback(task.arg) };
-    return settingContainer;
-};
-
-/**
- * Populate task settings with custom created
- * @returns If is already setted
- */
-skTask.prototype.setTasks = function () {
-    if (this.isSetted()) return;
-    const container = this.getContainer();
-    const tasksGroup = this.groupTasks();
-    for (var group in tasksGroup) {
-        const settingsGroup = this.makeSettingsGroup();
-        const settingsHeader = this.makeSettingsHeader(group);
-        const settingsSection = this.makeSettingsSection();
-        tasksGroup[group].forEach((task) => {
-            const settingsTask = this.makeSettingsTask(task);
-            settingsSection.appendChild(settingsTask);
-        });
-        container.child(settingsGroup);
-        settingsGroup.child(settingsHeader);
-        settingsGroup.child(settingsSection);
-    };
-};
-
-//BOOKMARK skScraper
-/**
- * The Scraper module
- * @constructor
- */
-function skScraper() {
-    this.initialize.call(this);
-};
-
-/**
- * Check if the module skScraper is already initializated
- * @returns {boolean}
- */
-skScraper.prototype.isInitializated = function () {
-    return this._initializated;
-};
-
-/**
- * Initialize the module
- * @returns If is already initialized
- * @async
- */
-skScraper.prototype.initialize = async function () {
-    if (this.isInitializated()) return;
-    this._initializated = true;
-};
-
-/**
- * Scrape a given url
- * @param {string} url Url to scrape
- * @param {object} [option] Parsing option if not defined parse as text
- * @param {boolean} [option.json] If true return json data
- * @param {boolean} [option.blob] if true return blob data
- * @param {boolean} [option.html] if true return scraper object
- * @returns {object|string} JSON data, text or scraper object
- */
-skScraper.prototype.scrape = async function (url, option) {
-    const response = await sk.hook._fetch(url);
-    let data;
-    if (!option) return await response.text();
-    if (option.json) return await response.json();
-    if (option.blob) return await response.blob();
-    if (option.html) {
-        data = await response.text();
-        return new skScraperBase(data, url);
-    };
-};
-
-/**
- * Constructor of scraper object
- * @param {string} data HTML document (not parsed)
- * @param {string} url Website scraped url
- */
-function skScraperBase(data, url) {
-    this.initialize(data, url);
-};
-
-/**
- * Parse and set the scraped document
- * @param {string} data HTML document (not parsed)
- */
-skScraperBase.prototype.setData = function (data) {
-    const parser = new DOMParser();
-    this._data = parser.parseFromString(data, 'text/html');
-};
-
-/**
- * Get the scraped document
- * @returns {HTMLDocument} Scraped HTML document
- */
-skScraperBase.prototype.getData = function () {
-    return this._data;
-};
-
-/**
- * Set the url of the scraped website
- * @param {string} url Scraped url
- */
-skScraperBase.prototype.setUrl = function (url) {
-    this._url = url;
-};
-
-/**
- * Get the scraped website url
- * @returns {string} Scraped url
- */
-skScraperBase.prototype.getUrl = function () {
-    return this._url;
-};
-
-/**
- * Initialize the scraper object
- * @param {string} data HTML document (not parsed)
- * @param {string} url Website scraped url
- */
-skScraperBase.prototype.initialize = function (data, url) {
-    this.setData(data);
-    this.setUrl(url);
-};
-
-/**
- * Get an element inside the scraped document
- * @param {string} query Query selector
- * @returns {HTMLElement} Selected element
- */
-skScraperBase.prototype.get = function (query) {
-    return this.getData().querySelector(query);
-};
-
-/**
- * Get elements inside the scraped document
- * @param {string} query Query selector
- * @returns {array.<HTMLElement>} Selected elements
- */
-skScraperBase.prototype.getAll = function (query) {
-    return this.getData().querySelectorAll(query);
-};
-
-const sk = new ShinobiApi();
+    return { get, update, check };
+}();

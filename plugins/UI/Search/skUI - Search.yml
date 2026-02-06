@@ -1,0 +1,9 @@
+name: skUI - Search
+description: Apply custom search
+# requires: Shinobi-Api
+version: 1.0
+ui:
+  javascript:
+    - skUI - Search.js
+  requires:
+    - Shinobi-Api

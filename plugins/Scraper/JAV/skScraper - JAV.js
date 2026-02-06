@@ -1,223 +1,179 @@
-(async function () {
-    let totalScene, searchedScene, scrapedScene;
-    let settings = sk.plugins.get('skScraper - JAV');
-    const jav = 'https://njavtv.com'
-    function defaultSettings() {
-        return {
-            autoCreate: settings.autoCreate === undefined ? false : settings.autoCreate,
-            create: settings.create === undefined ? 'all' : settings.create,
-            autoUpdate: settings.autoUpdate === undefined ? true : settings.autoCreate,
-            updateFilter: settings.updateFilter === undefined ? 'all' : settings.updateFilter,
-            language: settings.language === undefined ? 'en' : settings.language,
-            fallback: settings.fallback === undefined ? false : settings.fallback
-        };
-    };
-    //JAV SEARCH
-    function fallback() {
-        return settings.language === 'en' ? 'ja' : 'en';
-    };
+(function () {
+    const pluginName = 'skScraper - JAV';
+    let settings, total, searched, scraped, alreadyscraped;
 
-    function haveStashId(data) {
-        if (!data.stash_ids[0]) return false;
+    function enabled(action, category) {
+        const type = action.split('auto')[1].toLowerCase();
+        const active = settings[action];
+        const filter = settings[`${type}Filter`].includes(category);
+        const all = settings[`${type}Filter`] === 'all';
+        if (!active) return false;
+        if (!filter && !all) return false;
         return true;
     };
 
-    function getJavCode(data) {
-        let code, id;
-        let jav = data.code || data.title;
-        if (!jav.includes('-')) return false;
-        code = jav.split('-')[0];
-        id = jav.split('-')[1];
-        id = id.includes(' ') ? id.split(' ')[0] : id;
-        if (!code || !id) return false;
-        return `${code}-${id}`;
-    };
-
-    async function searchJav(query, language) {
-        language = language || settings.language;
-        query = `${jav}/${language}/search/${query}`;
-        const search = await sk.scraper.scrape(query, { html: true });
-        const result = search.getAll('.thumbnail.group');
-        if (!result[0]) return false;
-        return result;
-    };
-
-    function javSceneUrl(sceneData) {
-        return sceneData.firstElementChild.firstElementChild.href;
-    };
-
-    function formatInfo(info) {
-        info = info.replace('\n                ', '');
-        info = info.replace('\n            ', '');
-        info = info.replace('\n            ', '');
-        info = info.replace('\n        ', '');
-        info = info.replace('        ', '');
-        info = info.replace('    ', '');
-        info = info.replace('    ', '');
-        return info;
-    };
-
-    async function javScene(sceneData) {
-        const scraped = await sk.scraper.scrape(javSceneUrl(sceneData), { html: true });
-        const details = scraped.getAll('div.text-secondary');
-        let scene = {};
-        scene.title = scraped.get('h1').innerText;
-        scene.details = scraped.get('.mb-1.text-secondary.break-all.line-clamp-2').innerText;
-        details.forEach((info) => {
-            info = formatInfo(info.innerText);
-            if (info.includes('Release date')) scene.date = info.replace('Release date:', '');
-            if (info.includes('Actress')) scene.performer_ids = info.replace('Actress:', '');
-            if (info.includes('Series')) scene.groups = info.replace('Series:', '');
-            if (info.includes('Genre')) scene.tag_ids = info.replace('Genre:', '');
-            if (info.includes('Maker')) scene.studio_id = info.replace('Maker:', '');
-            if (info.includes('Director')) scene.director = info.replace('Director:', '');
-            if (info.includes('Code')) scene.code = info.replace('Code:', '');
-        });
-        return scene;
-    };
-
-    //CREATE
-
-    async function createPerformers(performers) {
+    //Creator
+    async function setPerformers(performers) {
+        if (!enabled('autoUpdate', 'performer')) return [];
         let ids = [];
-        performers = performers.includes(',') ? performers.split(', ') : [performers];
-        performers.forEach(async (performer) => {
+        for (performer of performers) {
             let id;
-            const exist = await sk.stash.findPerformer(performer);
-            if (!exist && settings.autoCreate && settings.create.includes('performers')) {
-                await sk.stash.createPerformer({ name: performer });
-                id = await sk.stash.findPerformer(performer).id;
-            } else if (exist) {
-                id = exist.id;
-            }
-            if (id != undefined && settings.updateFilter.includes('performer')) ids.push(id);
-        });
+            const options = { filter: { q: performer }, fields: 'id' };
+            const exist = await sk.stash.find.performer(options);
+            if (!exist && enabled('autoCreate', 'performer')) {
+                const created = await sk.stash.create.performer({ name: performer });
+                id = created.id;
+            };
+            if (exist) id = exist.id;
+            if (id !== undefined) ids.push(id);
+        };
         return ids;
     };
 
-    async function createStudios(studio) {
-        const exist = await sk.stash.findStudio(studio);
-        let id;
-        if (!exist && settings.autoCreate && settings.create.includes('studios')) {
-            await sk.stash.createStudio({ name: studio });
-            id = await sk.stash.findStudio(studio).id;
-        } else if (exist && settings.updateFilter.includes('studios')) {
-            id = exist.id;
-        };
-        return id != undefined ? id : undefined;
-    };
-
-    async function createGroups(group) {
-        const exist = await sk.stash.findGroup(group);
-        let id;
-        let result = [];
-        if (!exist && settings.autoCreate && settings.create.includes('groups')) {
-            await sk.stash.createGroup({ name: group });
-            id = await sk.stash.findGroup(group).id;
-        } else if (exist) {
-            id = exist.id;
-        };
-        if (id != undefined && settings.updateFilter.includes('groups')) result.push({ group_id: id });
-        return result;
-    };
-
-    async function createTags(tags) {
+    async function setTags(tags) {
+        if (!enabled('autoUpdate', 'tags')) return [];
         let ids = [];
-        tags = tags.includes(',') ? tags.split(', ') : [tags];
-        tags.forEach(async (tag) => {
+        for (tag of tags) {
             let id;
-            const exist = await sk.stash.findTag(tag);
-            if (!exist && settings.autoCreate && settings.create.includes('tags')) {
-                await sk.stash.createTag({ name: tag });
-                id = await sk.stash.findTag(tag).id;
-            } else if (exist) {
-                id = exist.id;
-            }
-            if (id != undefined && settings.updateFilter.includes('tags')) ids.push(id);
-        });
+            const options = { filter: { q: tag }, fields: 'id' };
+            const exist = await sk.stash.find.tag(options);
+            if (!exist && enabled('autoCreate', 'tags')) {
+                const created = await sk.stash.create.tag({ name: tag });
+                id = created.id;
+            };
+            if (exist) id = exist.id;
+            if (id !== undefined) ids.push(id);
+        };
         return ids;
     };
 
-    async function sceneUpdate(data) {
-        if (haveStashId(data)) return;
-        const javCode = getJavCode(data);
-        const index = javCode[0] === '0' ? javCode.substring(1) : javCode;
-        if (!javCode) return;
-        let javData = await searchJav(javCode);
-        if (!javData && settings.fallback) javData = await searchJav(javCode, fallback())
-        const isRecommend = javData[0].getAttribute('x-show');
-        if (!javData[0] || isRecommend || isRecommend.includes('recommendItems')) {
-            sk.notify('skScraper - JAV', `${javCode} not found`);
+    async function setGroup(group) {
+        if (!enabled('autoUpdate', 'groups')) return [];
+        let ids = [];
+        let id;
+        const options = { filter: { q: group }, fields: 'id' };
+        const exist = await sk.stash.find.group(options);
+        if (!exist && enabled('autoCreate', 'groups')) {
+            const created = await sk.stash.create.group({ name: group });
+            id = created.id;
+        };
+        if (exist) id = exist.id;
+        if (id !== undefined) ids.push({ group_id: id });
+        return ids;
+    };
+
+    async function setStudio(studio) {
+        if (!enabled('autoUpdate', 'studios')) return;
+        let id;
+        const options = { filter: { q: studio }, fields: 'id' };
+        const exist = await sk.stash.find.studio(options);
+        if (!exist && enabled('autoCreate', 'studios')) {
+            const created = await sk.stash.create.studio({ name: studio });
+            id = created.id;
+        };
+        if (exist) id = exist.id;
+        if (id !== undefined) return id;
+    };
+
+    //Scraper
+    async function scrape(scene) {
+        //If have already a stashDB or skScraperJav id return
+        let dontScrape = false;
+        scene.stash_ids.forEach((stashId) => {
+            if (!settings.forceScrape && stashId) dontScrape = true;
+            if (settings.forceScrape && stashId.endpoint === 'skScraperJav') dontScrape = true; 
+        });
+        if (dontScrape) {
+            alreadyscraped++;
             return;
-        }
-        let scene = await javScene(javData[0]);
-        scene.cover_image = `https://fourhoi.com/${javCode.toLowerCase()}/cover-n.jpg`;
-        scene.id = data.id;
-
-        let performers, studios, groups, tags;
-
-        if (scene.performer_ids) scene.performer_ids = await createPerformers(scene.performer_ids);
-        if (scene.studio_id) scene.studio_id = await createStudios(scene.studio_id);
-        if (scene.studio_id === undefined) delete scene.studio_id;
-        if (scene.tag_ids) scene.tag_ids = await createTags(scene.tag_ids);
-        if (scene.groups) scene.groups = await createGroups(scene.groups);
-        if (scene.groups[0]) scene.groups[0].scene_index = index;
-        const updated = await sk.stash.updateScene(scene);
+        };
+        const title = scene.code || scene.title;
+        //If the scene is not a JAV code return xxx-123
+        if (!title.includes('-')) return;
+        const [code, id] = title.split('-');
+        if (!isNaN(code) && isNaN(id)) return;
+        const javCode = `${code}-${id}`.toUpperCase();
+        //Scrape for results
+        const javData = await sk.tool.scrape(`https://www.javmost.ws/search/${javCode}/`, { html: true });
+        const results = javData.get('.card');
+        if (!results) return;
+        //Set scraped metadata
+        const data = {};
+        const date = new Date();
+        const skID = { stash_id: javCode, endpoint: 'skScraperJav', updated_at: date.toISOString() };
+        data.stash_ids = scene.stash_ids;
+        data.stash_ids.push(skID);
+        data.id = scene.id;
+        data.cover_image = `https://img3.javmost.ws/images/${javCode}.webp`;
+        data.title = results.get('h2').read();
+        data.code = results.get('h1').read();
+        data.groups = code.toUpperCase();
+        data.date = results.get('p').read().replaceAll(' ', '').split('Release')[1].split('Time')[0];
+        results.getAll('p a').forEach((info) => {
+            if (info.url().includes('/star/')) data.performer_ids ? data.performer_ids.push(info.read()) : data.performer_ids = [info.read()];
+            if (info.url().includes('/category/')) data.tag_ids ? data.tag_ids.push(info.read()) : data.tag_ids =[info.read()];
+            if (info.url().includes('/director/')) data.director = info.read();
+            if (info.url().includes('/maker/')) data.studio_id = info.read();
+        });
+        //Bind stash id and if not exist create
+        if (data.performer_ids) data.performer_ids = await setPerformers(data.performer_ids);
+        if (data.tag_ids) data.tag_ids = await setTags(data.tag_ids)
+        if (data.groups) data.groups = await setGroup(data.groups);
+        if (data.studio_id) data.studio_id = await setStudio(data.studio_id);
+        if (data.studio_id === undefined) delete data.studio_id;
+        if (data.groups[0]) data.groups[0].scene_index = id[0] === '0' ? id.substring(1) : id;
+        const updated = await sk.stash.update.scene(data);
         return updated;
     };
 
-    async function scrapeScene(scenes) {
-        totalScene = scenes.length;
-        searchedScene = 0;
-        scrapedScene = 0
-        scenes.forEach(async (scene) => {
-            const updated = await sceneUpdate(scene);
-            searchedScene++
-            if (updated) scrapedScene++
-        });
-        return searchedScene;
-    };
-
-    function getDate() {
-        const date = new Date();
-        return `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-    };
-
-    //HOOK
-    async function scrapeOne(data) {
-        await scrapeScene([data]);
-        checkFinish();
-    };
-
-    //TASK
-
-    async function scrapeAll() {
-        const scenes = await sk.stash.findScenes();
-        sk.notify('skScraper - JAV', `Searching for JAV in ${scenes.length} scenes...`);
-        await scrapeScene(scenes);
-        checkFinish();
-    };
-
-    function checkFinish() {
-        if (totalScene === searchedScene) {
-            sk.notify('skScraper - JAV', `Finished scraping, found a total of ${scrapedScene} JAV scene`);
-        } else {
-            setTimeout(checkFinish, 1000);
+    async function start(scenes) {
+        total = scenes.length;
+        searched = 0;
+        scraped = 0;
+        alreadyscraped = 0;
+        for (scene of scenes) {
+            const find = await scrape(scene);
+            searched++;
+            if (find) scraped++;
         };
     };
 
-    //MAIN
-
-    async function main() {
-        settings = defaultSettings();
-        settings.create === 'all' ? settings.create = 'performers, studios, groups, tags' : null;
-        settings.updateFilter === 'all' ? settings.updateFilter = 'performers, studios, groups, tags' : null;
-        await sk.useNotification();
-        //HOOK
-        if (settings.autoUpdate) sk.hook.watch('scene update', scrapeOne);
-        //TASK
-        sk.task.new('skScraper - JAV', 'Scrape all', 'Scrape all scene', scrapeAll);
+    function finish() {
+        if (total === searched) sk.tool.notify(pluginName, `Finished scraping, scraped a total of ${scraped} and ${alreadyscraped} already scraped JAV scenes`);
+        if (total !== searched) setTimeout(finish, 1000);
     };
 
-    main();
+    //Hook
+    async function scrapeOne(data) {
+        const scene = await sk.stash.find.scene(data.id);
+        await start([scene]);
+        finish();
+    };
+
+    //Task
+    async function scrapeAll() {
+        const scenes = await sk.stash.find.scenes();
+        sk.tool.notify(pluginName, `Searching for JAV in ${scenes.length} scenes...`);
+        await start(scenes);
+        finish();
+    };
+
+    async function main() {
+        const defaultSettings = {
+            name: pluginName,
+            options: {
+                forceScrape: false,
+                autoCreate: false,
+                createFilter: 'all',
+                autoUpdate: true,
+                updateFilter: 'all'
+            }
+        };
+        await sk.plugin.check(defaultSettings);
+        settings = sk.plugin.get(pluginName);
+        if (settings.autoUpdate) sk.hook.add([{ category: 'scene', operation: 'update', callback: scrapeOne }]);
+        sk.task.add([{ id: pluginName, name: 'Scrape All', description: 'Scrape all scene', callback: scrapeAll }]);
+    };
+
+    main()
 })();

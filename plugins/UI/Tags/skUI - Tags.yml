@@ -1,7 +1,7 @@
 name: skUI - Tags
 description: Colorize tags based on their parent tag/s
 # requires: Shinobi-Api
-version: 1.1
+version: 2.0
 ui:
   javascript:
     - skUI - Tags.js
@@ -10,5 +10,5 @@ ui:
 settings:
   colors:
     displayName: Category colors
-    description: TagName:Color((name/rgb/rgba/hex)) separated by comma. Ex - Category:red
+    description: TagName:Color(any) separated by comma. Ex - Category:red
     type: STRING

@@ -1,34 +1,25 @@
 (async function () {
-    const rating = sk.stash.getConfiguration().ui.ratingSystemOptions;
-    let settings = sk.plugins.get('skUI - Rating');
-
-    function defaultSettings() {
-        return {
-            banner: settings.banner === undefined ? false : settings.banner,
-            rating1: settings.rating1 === undefined ? 'rgb(0 0 0)' : settings.rating1,
-            rating2: settings.rating2 === undefined ? 'rgb(0 100 0)' : settings.rating2,
-            rating3: settings.rating3 === undefined ? 'rgb(70 130 180)' : settings.rating3,
-            rating4: settings.rating4 === undefined ? 'rgb(102 51 153)' : settings.rating4,
-            rating5: settings.rating5 === undefined ? 'rgb(255 140 0)' : settings.rating5
-        };
-    };
+    const pluginName = 'skUI - Rating'
+    let settings, rating;
 
     function fullRating() {
-        const rating1 = sk.ui.getAll('.card:has(.rating-1)');
-        const rating2 = sk.ui.getAll('.card:has(.rating-2)');
-        const rating3 = sk.ui.getAll('.card:has(.rating-3)');
-        const rating4 = sk.ui.getAll('.card:has(.rating-4)');
-        const rating5 = sk.ui.getAll('.card:has(.rating-5)');
-        if (rating1[0]) rating1.forEach((card) => { card.css('background-color', settings.rating1, 'important') });
-        if (rating2[0]) rating2.forEach((card) => { card.css('background-color', settings.rating2, 'important') });
-        if (rating3[0]) rating3.forEach((card) => { card.css('background-color', settings.rating3, 'important') });
-        if (rating4[0]) rating4.forEach((card) => { card.css('background-color', settings.rating4, 'important') });
-        if (rating5[0]) rating5.forEach((card) => { card.css('background-color', settings.rating5, 'important') });
+        const rating1 = sk.tool.getAll('.card:has(.rating-1)');
+        const rating2 = sk.tool.getAll('.card:has(.rating-2)');
+        const rating3 = sk.tool.getAll('.card:has(.rating-3)');
+        const rating4 = sk.tool.getAll('.card:has(.rating-4)');
+        const rating5 = sk.tool.getAll('.card:has(.rating-5)');
+        if (rating1[0]) rating1.forEach((card) => { card.style({ 'background-color': settings.rating1 }, true); })
+        if (rating2[0]) rating2.forEach((card) => { card.style({ 'background-color': settings.rating2 }, true); });
+        if (rating3[0]) rating3.forEach((card) => { card.style({ 'background-color': settings.rating3 }, true); });
+        if (rating4[0]) rating4.forEach((card) => { card.style({ 'background-color': settings.rating4 }, true); });
+        if (rating5[0]) rating5.forEach((card) => { card.style({ 'background-color': settings.rating5 }, true); });
     };
 
-    function isRGB(min, max) {
-        if (min.includes('rgb') && max.includes('rgb')) return true;
-        return false;
+    function toRGB(color) {
+        if (color.includes('rgb')) return color;
+        if (!color.includes('#')) return color;
+        const [r, g, b] = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+        return `rgb(${parseInt(r, 16)}, ${parseInt(g, 16)}, ${parseInt(b), 16})`;
     };
 
     function getGradient(modifier, min, max) {
@@ -46,33 +37,44 @@
     function getHalfCard(rating, min, max) {
         const perc = [0.25, 0.50, 0.75, 1];
         rating.forEach((value, i) => {
-            const cards = sk.ui.getAll(`.card:has(.rating-100-${value})`);
+            const cards = sk.tool.getAll(`.card:has(.rating-100-${value})`);
             if (cards[0]) cards.forEach((card) => {
-                const color = isRGB(min, max) ? getGradient(perc[i], min, max) : max;
-                card.css('background-color', color, 'important');
+                min = toRGB(min);
+                max = toRGB(max);
+                const color = options.transition && min.includes('rgb') || max.includes('rgb') ? getGradient(perc[i], min, max) : max;
+                card.style({'background-color':color}, true);
             });
         });
     };
 
     function halfRating() {
-        const rating1 = [1, 2, 3, 4];
-        const rating2 = [5, 6, 7, 8];
-        const rating3 = [9, 10, 11, 12];
-        const rating4 = [13, 14, 15, 16];
-        const rating5 = [17, 18, 19, 20];
-        getHalfCard(rating1, settings.rating1, settings.rating1);
-        getHalfCard(rating2, settings.rating1, settings.rating2);
-        getHalfCard(rating3, settings.rating2, settings.rating3);
-        getHalfCard(rating4, settings.rating3, settings.rating4);
-        getHalfCard(rating5, settings.rating4, settings.rating5);
+        getHalfCard([1, 2, 3, 4], settings.rating1, settings.rating1);
+        getHalfCard([5, 6, 7, 8], settings.rating1, settings.rating2);
+        getHalfCard([9, 10, 11, 12], settings.rating2, settings.rating3);
+        getHalfCard([13, 14, 15, 16], settings.rating3, settings.rating4);
+        getHalfCard([17, 18, 19, 20], settings.rating4, settings.rating5);
     };
 
-    function main() {
-        settings = defaultSettings();
-        if (!settings.banner) sk.ui.getAll('.rating-banner').forEach((banner) => { banner.css('display', 'none') });
-        if (rating.type === 'star' && rating.starPrecision === 'full') fullRating();
+    async function main() {
+        const defaultSettings = {
+            name: pluginName,
+            options: {
+                banner: false,
+                transition: true,
+                rating1: 'rgb(0, 0, 0)',
+                rating2: 'rgb(0, 100, 0)',
+                rating3: 'rgb(70, 130, 180)',
+                rating4: 'rgb(102, 51, 153)',
+                rating5: 'rgb(255, 140, 0)'
+            }
+        };
+        await sk.plugin.check(defaultSettings);
+        settings = sk.plugin.get(pluginName);
+        rating = sk.stash.configuration.ui.ratingSystemOptions;
+        if (!settings.banner) sk.tool.getAll('.rating-banner').forEach((banner) => { banner.style({ display: 'none' }) });
+        if (rating.type === 'stars' && rating.starPrecision === 'full') fullRating();
         if (rating.type === 'decimal' || rating.starPrecision !== 'full') halfRating();
     };
 
-    sk.wait('.rating-banner', main);
+    sk.tool.wait('.rating-banner', main);
 })();
