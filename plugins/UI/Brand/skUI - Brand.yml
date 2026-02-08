@@ -1,14 +1,11 @@
 name: skUI - Brand
-description: UI customization for Stash name, logo and icon.
-# requires: Shinobi-Api
-# requires: skUI - Assets
-version: 1.0
+description: UI customization for Stash name, logo and favicon.
+version: 1.0.1
 ui:
   javascript:
     - skUI - Brand.js
   requires:
     - Shinobi-Api
-    - skUI - Assets
 settings:
     showName:
       displayName: Show title name

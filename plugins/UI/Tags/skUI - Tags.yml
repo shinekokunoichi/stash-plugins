@@ -1,6 +1,5 @@
 name: skUI - Tags
 description: Colorize tags based on their parent tag/s
-# requires: Shinobi-Api
 version: 2.0
 ui:
   javascript:

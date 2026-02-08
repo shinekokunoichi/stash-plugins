@@ -1,13 +1,11 @@
 name: skScraper - JAV
 description: Custom metadata scraper for JAV. Need CORS
-# requires: Shinobi-Api
-version: 2.0.1
+version: 2
 ui:
   javascript:
     - skScraper - JAV.js
   requires:
     - Shinobi-Api
-  # content-security policy overrides
   csp:
     connect-src:
       - https://www.javmost.ws

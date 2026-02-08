@@ -124,7 +124,6 @@ sk.hook = function skHook() {
         if (watcher) for (watch of watcher.functions) {
             const clone = response.clone();
             const cloneResponse = await response.json();
-            console.log(cloneResponse, cloneResponse.data, cloneResponse.data[watcher.query]);
             watch(cloneResponse.data[watcher.query])
         };
         return response.bodyUsed ? backup : response;
@@ -277,6 +276,7 @@ sk.task = function skTask() {
  * @property {function} attribute Return or change the element attributes
  * @property {function} flex Set a preset to make the element a flex
  * @property {function} size Set width and height of the element
+ * @property {function} remove Remove the element
  */
 
 /**
@@ -337,12 +337,12 @@ function skGraphicBase(tag, options = {}) {
 
     /**
      * Return the classname, enable/disable class or replace it
-     * @param {string|array} classList String or array of classes. Ex for string 'a b c'
+     * @param {string|array} [classList] String or array of classes. Ex for string 'a b c'
      * @param {boolean} [replace] If should replace all classList with the new one
      * @returns {string} Classname
      */
-    base.class = (classList = [], replace) => {
-        if (!classList && !replace) return base.element.className;
+    base.class = (classList, replace) => {
+        if (!classList && !replace) return base.element.className || '';
         if (replace) base.element.className = classList.join(' ');
         if (typeof classList === 'string') classList = classList.split(' ');
         if (!replace) for (className of classList) { base.element.classList.toggle(className); };
@@ -372,7 +372,7 @@ function skGraphicBase(tag, options = {}) {
      */
     base.url = (url) => {
         const tag = base.element.tagName.toLowerCase();
-        if (tag === 'a') {
+        if (tag === 'link' || tag === 'a') {
             if (!url) return base.attribute('href');
             base.element.href = url;
         };
@@ -446,6 +446,11 @@ function skGraphicBase(tag, options = {}) {
         if (height) size.height = height;
         base.style({ size });
     };
+
+    /**
+     * Remove the element
+     */
+    base.remove = () => { base.element.remove() };
 
     for (init in options) {
         if (init !== 'text' && init !== 'html') base[init](options[init]);
@@ -664,6 +669,13 @@ sk.ui = function skGraphic() {
         link: (options = {}) => { return skGraphicBase('a', options) },
 
         /**
+         * Create a image
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Image
+         */
+        image: (options = {}) => { return skGraphicBase('img', options) },
+
+        /**
          * Create a video
          * @param {skUIOptions} [options={}] skUI options
          * @returns {skUI} Video
@@ -675,7 +687,25 @@ sk.ui = function skGraphic() {
          * @param {skUIOptions} [options={}] skUI options
          * @returns {skUI} Button
          */
-        button: (options = {}) => { return skGraphicBase('button', options) }
+        button: (options = {}) => { return skGraphicBase('button', options) },
+
+        /**
+         * Create a checkbox
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Checkbox
+         */
+        checkBox: (options = {}) => {
+            if (!options.attribute) options.attribute = {};
+            options.attribute.type = 'checkbox';
+            return skGraphicBase('input', options);
+        },
+
+        /**
+         * Create a input
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} Input
+         */
+        input: (options = {}) => { return skGraphicBase('input', options) }
     };
 
     return { get, make };

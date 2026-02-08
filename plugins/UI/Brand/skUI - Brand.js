@@ -14,7 +14,7 @@
         await sk.plugin.check(defaultSettings);
         settings = sk.plugin.get(pluginName);
         //Icon
-        sk.tool.getAll('link').forEach((link) => { if (link.attribute('rel').includes('icon')) link.url('/plugin/skUI - Assets/assets/Core/Icon.png') });
+        sk.tool.getAll('link').forEach((link) => { if (link.attribute('rel').includes('icon')) link.url('/plugin/skUI - Assets/assets/Core/Favicon.png') });
         //Tabs
         const title = sk.tool.get('title');
         new MutationObserver(() => {

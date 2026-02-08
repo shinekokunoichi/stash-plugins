@@ -1,6 +1,5 @@
 name: skUI - Rating
 description: Style card based on rating
-# requires: Shinobi-Api
 version: 2.0
 ui:
   javascript:
