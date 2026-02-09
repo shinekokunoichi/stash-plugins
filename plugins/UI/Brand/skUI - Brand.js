@@ -20,6 +20,7 @@
         new MutationObserver(() => {
             if (title.read().includes('Stash')) title.write(title.read().replace('Stash', settings.name));
         }).observe(title.element, { childList: true, characterData: true });
+        title.write(title.read());
         //Brand
         const brand = sk.ui.get.navbar().brand;
         if (!settings.showBrand) brand.remove();

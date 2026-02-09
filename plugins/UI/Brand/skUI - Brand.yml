@@ -1,6 +1,6 @@
 name: skUI - Brand
 description: UI customization for Stash name, logo and favicon.
-version: 1.0.1
+version: 1.0.2
 ui:
   javascript:
     - skUI - Brand.js
