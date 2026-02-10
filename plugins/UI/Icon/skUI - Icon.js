@@ -3,6 +3,7 @@
     let settings;
 
     function create() {
+	const iconStyle = settings.iconStyle.toLowerCase();
         const scene = sk.tool.getAll('svg.fa-circle-play').map((svg) => { svg._type = 'Scene'; return svg; });
         const image = sk.tool.getAll('svg.fa-image').map((svg) => { svg._type = 'Image'; return svg; });
         const group = sk.tool.getAll('svg.fa-film').map((svg) => { svg._type = 'Group'; return svg; });
@@ -13,7 +14,7 @@
         const tag = sk.tool.getAll('svg.fa-tag').map((svg) => { svg._type = 'Tag'; return svg; });
 
         [].concat(scene, image, group, marker, gallery, performer, studio, tag).forEach((svg) => {
-            const icon = settings.iconStyle === 'emoji' ? sk.ui.make.span({ text: settings[`e${svg._type}`], style: { 'font-size': '25px', 'text-shadow': '0, 0 black' } }) : sk.ui.make.image({ url: `/plugin/skUI - Assets/assets/Icon/${svg._type}.png`, style: { width: '35px', height: '35px' } });
+            const icon = iconStyle === 'emoji' ? sk.ui.make.span({ text: settings[`e${svg._type}`], style: { 'font-size': '25px', 'text-shadow': '0, 0 black' } }) : sk.ui.make.image({ url: `/plugin/skUI - Assets/assets/Icon/${svg._type}.png`, style: { width: '35px', height: '35px' } });
             icon.class('skUIIcon');
             svg.element.parentNode.appendChild(icon.element);
             svg.remove();
@@ -21,10 +22,11 @@
     };
 
     function replace() {
-        if (settings.navStyle === 'both' && settings.iconStyle === 'default') return;
-        if (settings.navStyle === 'text') sk.ui.get.navbar().nav.getAll('svg').forEach((svg) => { svg.remove(); });
-        if (settings.navStyle === 'icon') sk.ui.get.navbar().nav.getAll('span').forEach((text) => { if (!text.class().includes('skUIIcon')) text.remove(); });
-        if (settings.navStyle !== 'text' && settings.iconStyle !== 'default') create();
+	const navStyle = settings.navStyle.toLowerCase();
+        if (navStyle === 'both' && settings.iconStyle === 'default') return;
+        if (navStyle === 'text') sk.ui.get.navbar().nav.getAll('svg').forEach((svg) => { svg.remove(); });
+        if (navStyle === 'icon') sk.ui.get.navbar().nav.getAll('span').forEach((text) => { if (!text.class().includes('skUIIcon')) text.remove(); });
+        if (navStyle !== 'text' && settings.iconStyle !== 'default') create();
     };
 
     async function main() {

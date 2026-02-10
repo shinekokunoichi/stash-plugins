@@ -4,8 +4,8 @@
 
     function canCreate() {
         const active = settings.autoCreate;
-        const filter = settings.createFilter.includes(category);
-        const all = settings.createFilter === 'all';
+        const filter = settings.createFilter.toLowerCase().includes(category);
+        const all = settings.createFilter.toLowerCase() === 'all';
         if (!active) return false;
         if (!filter && !all) return false;
         return true;
@@ -93,7 +93,7 @@
         };
         //Hook
         if (settings.autoUpdate) {
-            const hookFilter = settings.updateFilter;
+            const hookFilter = settings.updateFilter.toLowerCase();
             let hooks = [];
             if (hookFilter.includes('scenes') || hookFilter === 'all') hooks.push({ category: 'scene', operation: 'update', callback: scrapeOne });
             if (hookFilter.includes('performers') || hookFilter === 'all') hooks.push({ category: 'performer', operation: 'update', callback: scrapeOne });

@@ -2,34 +2,36 @@
     const pluginName = 'skScraper - JAV';
     let settings, total, searched, scraped, alreadyscraped;
 
-    function enabled(action, category) {
-        const type = action.split('auto')[1].toLowerCase();
-        const active = settings[action];
-        const filter = settings[`${type}Filter`].includes(`${category}s`);
-        const all = settings[`${type}Filter`] === 'all';
+    function enabled(category) {
+        const active = settings.createFilter;
+        const filter = settings.createFilter.toLowerCase().includes(category);
+        const all = settings.createFilter.toLowerCase() === 'all';
         if (!active) return false;
         if (!filter && !all) return false;
         return true;
     };
 
-    async function find(category, nameList) {
-        if (!enabled('autoUpdate', category));
+    //Creator
+    async function create(category, data) {
         let ids = [];
-        for (name of nameList) {
+        for (name of data) {
             let id;
-            const exist = await sk.stash.find[category]({ filter: { q: name }, fields: 'id' });
-            if (!exist && enabled('autoCreate', category)) {
+            const options = { filter: { q: name }, fields: 'id' };
+            const exist = await sk.stash.find[category](options);
+            if (!exist && enabled(category)) {
                 const created = await sk.stash.create[category]({ name: name });
                 id = created.id;
             };
             if (exist) id = exist.id;
             if (id !== undefined) ids.push(id);
         };
-        return category !== 'studio' ? ids : ids[0];
+        if (category === 'studio' && ids[0] === undefined) return;
+        return category === 'studio' ? ids[0] : ids;
     };
 
     //Scraper
     async function scrape(scene) {
+        //If have already a stashDB or skScraperJav id return
         let dontScrape = false;
         scene.stash_ids.forEach((stashId) => {
             if (!settings.forceScrape && stashId) dontScrape = true;
@@ -40,17 +42,19 @@
             return;
         };
         const title = scene.code || scene.title;
+        //If the scene is not a JAV code return xxx-123
         if (!title.includes('-')) return;
         const [code, id] = title.split('-');
         if (!isNaN(code) && isNaN(id)) return;
         const javCode = `${code}-${id}`.toUpperCase();
+        //Scrape for results
         const javData = await sk.tool.scrape(`https://www.javmost.ws/search/${javCode}/`, { html: true });
         const results = javData.get('.card');
         if (!results) return;
+        //Set scraped metadata
         const data = {};
         const date = new Date();
         const skID = { stash_id: javCode, endpoint: 'skScraperJav', updated_at: date.toISOString() };
-
         data.stash_ids = scene.stash_ids;
         data.stash_ids.push(skID);
         data.id = scene.id;
@@ -65,11 +69,11 @@
             if (info.url().includes('/director/')) data.director = info.read();
             if (info.url().includes('/maker/')) data.studio_id = info.read();
         });
-
-        if (data.performer_ids) data.performer_ids = await find('performer', data.performer_ids);
-        if (data.tag_ids) data.tag_ids = await find('tag', data.tag_ids)
-        if (data.groups) data.groups = await find('group', data.groups);
-        if (data.studio_id) data.studio_id = await find('studio', data.studio_id);
+        //Bind stash id and if not exist create
+        if (data.performer_ids) data.performer_ids = await create('performer', data.performer_ids);
+        if (data.tag_ids) data.tag_ids = await create('tag', data.tag_ids)
+        if (data.groups) data.groups = await create('group', data.groups);
+        if (data.studio_id) data.studio_id = await create('studio', [data.studio_id]);
         if (data.studio_id === undefined) delete data.studio_id;
         if (data.groups[0]) data.groups[0].scene_index = id[0] === '0' ? id.substring(1) : id;
         const updated = await sk.stash.update.scene(data);
@@ -115,8 +119,7 @@
                 forceScrape: false,
                 autoCreate: false,
                 createFilter: 'all',
-                autoUpdate: true,
-                updateFilter: 'all'
+                autoUpdate: true
             }
         };
         await sk.plugin.check(defaultSettings);

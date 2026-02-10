@@ -1,6 +1,6 @@
 name: skScraper - StashDB
 description: Auto metadata scraper from StashDB (based on title and name)
-version: 2.0
+version: 2.0.1
 ui:
   javascript:
     - skScraper - StashDB.js

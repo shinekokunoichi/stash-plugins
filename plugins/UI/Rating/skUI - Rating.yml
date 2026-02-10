@@ -1,6 +1,6 @@
 name: skUI - Rating
 description: Style card based on rating
-version: 2.0
+version: 2.0.1
 ui:
   javascript:
     - skUI - Rating.js

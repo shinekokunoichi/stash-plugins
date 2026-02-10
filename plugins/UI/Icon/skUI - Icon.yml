@@ -1,6 +1,6 @@
 name: skUI - Icon
 description: Customization for icon and navbar.
-version: 1.0
+version: 1.0.1
 ui:
   javascript:
     - skUI - Icon.js

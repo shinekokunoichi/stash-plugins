@@ -55,6 +55,13 @@
         getHalfCard([17, 18, 19, 20], settings.rating4, settings.rating5);
     };
 
+    function start() {
+        rating = sk.stash.configuration.ui.ratingSystemOptions;
+        if (!settings.banner) sk.tool.getAll('.rating-banner').forEach((banner) => { banner.style({ display: 'none' }) });
+        if (rating.type === 'stars' && rating.starPrecision === 'full') fullRating();
+        if (rating.type === 'decimal' || rating.starPrecision !== 'full') halfRating();
+    };
+
     async function main() {
         const defaultSettings = {
             name: pluginName,
@@ -70,11 +77,8 @@
         };
         await sk.plugin.check(defaultSettings);
         settings = sk.plugin.get(pluginName);
-        rating = sk.stash.configuration.ui.ratingSystemOptions;
-        if (!settings.banner) sk.tool.getAll('.rating-banner').forEach((banner) => { banner.style({ display: 'none' }) });
-        if (rating.type === 'stars' && rating.starPrecision === 'full') fullRating();
-        if (rating.type === 'decimal' || rating.starPrecision !== 'full') halfRating();
+        sk.tool.wait('.rating-banner', start);
     };
 
-    sk.tool.wait('.rating-banner', main);
+    main();
 })();

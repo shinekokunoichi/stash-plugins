@@ -122,15 +122,18 @@ sk.hook = function skHook() {
         const response = await _fetch.apply(window, args);
         const backup = response.clone();
         if (watcher) for (watch of watcher.functions) {
-            const clone = response.clone();
-            const cloneResponse = await response.json();
-            watch(cloneResponse.data[watcher.query])
+            const clone = backup.clone();
+            const cloneResponse = await clone.json();
+            let data = cloneResponse.data;
+            if (!data[watcher.query]) data = data[`${watcher.query}s`] ? data[`${watcher.query}s`] : data['findGalleries'];
+            if (data[watcher.query]) data = data[watcher.query];
+            watch(data)
         };
         return response.bodyUsed ? backup : response;
     };
 
-    const _category = ['scene', 'marker', 'image', 'gallery', 'group', 'performer', 'studio', 'tag'];
-    const _operation = ['create', 'update', 'destroy', 'merge'];
+    const _category = ['scene', 'sceneMarker', 'image', 'gallery', 'group', 'performer', 'studio', 'tag'];
+    const _operation = ['find', 'create', 'update', 'destroy', 'merge'];
     let _watch = {};
 
     //Populate watcher placeholders
@@ -138,7 +141,9 @@ sk.hook = function skHook() {
         _watch[cat] = {};
         _operation.forEach((ope) => {
             const uppercase = ope[0].toUpperCase() + ope.slice(1);
-            _watch[cat][ope] = { query: cat + uppercase, functions: [] };
+            const catUppercase = cat[0].toUpperCase() + cat.slice(1);
+            const query = ope === 'find' ? ope + catUppercase : cat + uppercase;
+            _watch[cat][ope] = { query: query, functions: [] };
         });
     });
 
@@ -776,7 +781,6 @@ sk.stash = function skStash() {
         configuration.body = JSON.stringify({ query: query, variables: { input: input } });
         const response = await fetch(`${_server}/graphql`, configuration);
         let result = await response.json();
-        result._type = 'stash';
         return result.data;
     };
 
@@ -1448,7 +1452,7 @@ sk.stashDB = function skStashDB() {
             if (typeof options === 'string') options = { term: options };
             options.limit = 1;
             let response = await _do('scene', options);
-            response[0]._category = 'scene';
+            if (response[0]) response[0]._category = 'scene';
             return response[0];
         },
         /**
@@ -1474,7 +1478,7 @@ sk.stashDB = function skStashDB() {
             if (typeof options === 'string') options = { term: options };
             options.limit = 1;
             let response = await _do('performer', options);
-            response[0]._category = 'performer';
+            if (response[0]) response[0]._category = 'performer';
             return response[0];
         },
         /**
@@ -1500,7 +1504,7 @@ sk.stashDB = function skStashDB() {
             if (typeof options === 'string') options = { term: options };
             options.limit = 1;
             let response = await _do('studio', options);
-            response[0]._category = 'studio';
+            if (response[0]) response[0]._category = 'studio';
             return response[0];
         },
         /**
@@ -1526,7 +1530,7 @@ sk.stashDB = function skStashDB() {
             if (typeof options === 'string') options = { term: options };
             options.limit = 1;
             let response = await _do('tag', options);
-            response[0]._category = 'tag';
+            if (response[0]) response[0]._category = 'tag';
             return response[0];
         }
     };

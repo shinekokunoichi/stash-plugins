@@ -1,0 +1,21 @@
+name: skUI - Scenes
+description: Change the aspect of scene cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Scenes.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - all, studio, resolution, duration, title, date, description. Default - studio resolution duration date description.
+      type: STRING
+    cardWatched:
+      displayName: Card watched
+      description: Darkens the preview image if you have watched the scenes. Default - on.
+      type: BOOLEAN
+    cardOrganized:
+      displayName: Card organized
+      description: Apply a border to the card if the scene is organized. Default - on.
+      type: BOOLEAN
