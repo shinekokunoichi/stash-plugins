@@ -22,7 +22,7 @@
         const content = details.navbar.add('Related');
         content.flex();
         content.style({ 'flex-direction': 'column' });
-        performers = await sk.stash.find.performers({ fields: 'id name image_path tags { name }' });
+        performers = await sk.stash.find.performers({ fields: 'id name image_path tags { name } custom_fields' });
         if (settings.showAutomatic) {
             const auto = sk.ui.make.subTitle({ text: 'Automatic' });
             const autoResult = sk.ui.make.container({ flex: true });
@@ -104,6 +104,7 @@
             };
         });
         await sk.stash.update.performer({ id: id, custom_fields: { partial: { skExtra_Similar_Performers: related.join(' ') } } });
+        if (settings.autoLink) await sk.stash.update.performer({ id: toAdd.id, custom_fields: { partial: { skExtra_Similar_Performers: `${toAdd.custom_fields.skExtra_Similar_Performers} ${id}` } } });
         sk.tool.get('#skERPManual').append(makeCard(toAdd));
     };
 
@@ -113,7 +114,8 @@
             options: {
                 showAutomatic: true,
                 showManual: true,
-                automaticReq: 5
+                automaticReq: 5,
+                autoLink: true
             }
         };
         await sk.plugin.check(defaultSettings);

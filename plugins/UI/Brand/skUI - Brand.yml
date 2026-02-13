@@ -1,6 +1,6 @@
 name: skUI - Brand
 description: UI customization for Stash name, logo and favicon.
-version: 1.0.2
+version: 1.0.4
 ui:
   javascript:
     - skUI - Brand.js
@@ -9,7 +9,7 @@ ui:
 settings:
     showName:
       displayName: Show title name
-      description: If enabled show the name in the tabs title. Default - True
+      description: If enabled show the name in the tabs title. Default - on
       type: BOOLEAN
     name:
       displayName: Stash name
@@ -17,9 +17,9 @@ settings:
       type: STRING
     showBrand:
       displayName: Show brand name
-      description: If enabled display the brand logo inside the navigation. Default - true
+      description: If enabled display the brand logo inside the navigation. Default - on
       type: BOOLEAN
     brandLogo:
       displayName: Brand logo
-      description: If enabled use an image as brand (inside skUI - Customization). Default - true
+      description: If enabled use an image as brand (inside skUI - Customization). Default - on
       type: BOOLEAN
