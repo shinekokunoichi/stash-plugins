@@ -1,0 +1,21 @@
+name: skExtra - Multiple-Performer-Images
+description: Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Multiple-Performer-Images.js
+  requires:
+    - Shinobi-Api
+settings:
+    default:
+      displayName: Default image type
+      description: Value - portrait, clothed, skimpy, nude, custom. Default - skimpy
+      type: STRING
+    replaceAll:
+      displayName: Replace all
+      description: If enabled replace all performers preview, otherwise only inside performer page. Default - true
+      type: BOOLEAN
+    useSFW:
+      displayName: Force SFW
+      description: Auto use clothed if Stash is in SFW mode. Default - true
+      type: BOOLEAN

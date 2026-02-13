@@ -371,6 +371,12 @@ function skGraphicBase(tag, options = {}) {
     base.write = (text, html) => html ? base.element.innerHTML = text : base.element.innerText = text;
 
     /**
+     * Change the value
+     * @param {any} value
+     */
+    base.value = (value) => base.element.value = value;
+
+    /**
      * Set or return src or href of the element
      * @param {string} [url] If given apply it else return the src or href
      * @returns {string} Src or href of the element
@@ -438,7 +444,7 @@ function skGraphicBase(tag, options = {}) {
     /**
      * Set a preset to make the element a flex
      */
-    base.flex = () => { base.style({ 'display': 'flex', 'justify-content': 'center', 'aling-items': 'center' }); };
+    base.flex = () => { base.style({ 'display': 'flex', 'justify-content': 'center', 'align-items': 'center' }); };
 
     /**
      * Set width and height of the element
@@ -456,6 +462,11 @@ function skGraphicBase(tag, options = {}) {
      * Remove the element
      */
     base.remove = () => { base.element.remove() };
+
+    /**
+     * Click the element
+     */
+    base.click = () => { base.element.click(); };
 
     for (init in options) {
         if (init !== 'text' && init !== 'html') base[init](options[init]);
@@ -546,14 +557,19 @@ sk.ui = function skGraphic() {
             /**
             * Create, append and return a new navbar button
             * @param {string} name Button name
-            * @param {function} callback Function to execute when clicked
+            * @param {function} [callback] Function to execute when clicked
             * @param {string} [where=nav] Where append the button. brand/nav/buttons
             * @returns {skUI} Button element
             */
             navbar.add = (name, callback, where) => {
                 const div = make.container({ class: 'col-4 col-sm-3 col-md-2 col-1 g-auto nav-link' });
                 const a = make.link({ class: 'minimal p-4 p-xl-2 d-flex d-xl-inline-block flex-column justify-content-between align-items-center btn btn-primary' });
-                a.event({ type: 'click', callback: () => { navbar.nav.get('.active').class('active'); callback(); } });
+                a.event({
+                    type: 'click', callback: () => {
+                        navbar.nav.get('.active').class('active');
+                        if (callback) callback();
+                    }
+                });
                 const text = make.span({ text: name });
                 navbar[where].append(div)
                 div.append(a);
@@ -660,30 +676,43 @@ sk.ui = function skGraphic() {
             const notFavorite = sk.tool.get('.not-favorite');
             const ratingStar = sk.tool.get('.star-rating-number');
             const ratingDecimal = sk.tool.get('.rating-number span');
+            data.id = window.location.pathname.split('/')[2];
             data.container = sk.tool.get('.detail-container');
             data.headers = sk.tool.get('.detail-header-image');
             data.image = sk.tool.get('img.performer');
             data.name = sk.tool.get('.performer-name');
             data.disambiguation = sk.tool.get('.performer-disambiguation');
             data.details = sk.tool.get('.detail.group');
+            data.buttons = sk.tool.get('.details-edit');
             data.customFields = sk.tool.get('.custom-fields');
             data.navbar = sk.tool.get('.nav.nav-tabs');
             data.tabContent = sk.tool.get('.tab-content');
             data.favorite = isFavorite.element ? isFavorite : notFavorite;
             data.rating = ratingStar.element ? ratingStar : ratingDecimal;
             /**
-             * Get a details
+             * Get a detail
              * @param {string} name Detail name
-             * @returns {skUI} Detail element
+             * @returns {string} Detail value
              */
             data.getDetails = (name) => {
                 name = name.toLowerCase();
-                return sk.tool.get(`.detail-item.${name}`);
+                return data.container.get(`.detail-item-value.${name}`).read();
+            };
+            /**
+             * Get a custom field
+             * @param {string} name Custom field name
+             * @returns {string} Custom field value
+             */
+            data.getCustomField = (name) => {
+                if (!data.customFields) return;
+                name = name.toLowerCase();
+                const field = data.customFields.get(`.detail-item-value.${name}`);
+                return field ? field.read() : '';
             };
             /**
              * Create a custom tab and return it
              * @param {string} name Tab name
-             * @param {function} callback Function to run on tab click
+             * @param {function} [callback] Function to run on tab click
              * @returns {skUI} Custom tab content
              */
             data.navbar.add = (name, callback) => {
@@ -696,11 +725,20 @@ sk.ui = function skGraphic() {
                         sk.tool.get('.fade.tab-pane.active.show').class('active show');
                         a.class('active');
                         div.class('active show');
-                        callback();
+                        if (callback) callback(div);
                     }
                 });
-                a.append(div);
                 data.navbar.append(a);
+                sk.tool.get('.tab-content').append(div);
+                sk.tool.getAll('.nav-item.nav-link').forEach((tab) => {
+                    if (tab.id() === a.id()) return;
+                    tab.event({
+                        type: 'click', callback: () => {
+                            if (a.class().includes('active')) a.class('active');
+                            if (div.class().includes('active')) div.class('active show');
+                        }
+                    });
+                });
                 return div;
             };
             return data;
@@ -773,6 +811,29 @@ sk.ui = function skGraphic() {
          * @returns {skUI} Description
          */
         description: (options = {}) => { return skGraphicBase('p', options) },
+
+        /**
+         * Create a list item
+         * @param {skUIOptions} [options={}] skUI options
+         * @returns {skUI} List item
+         */
+        li: (options = {}) => { return skGraphicBase('li', options) },
+
+        /**
+         * Create a unordered list
+         * @param {skUIOptions} [options={}] skUI options
+         * @param {array.<string>} [li=[]] List item text
+         * @param {skUIOptions} [liOptions={}] skUI options for every list item
+         * @returns {skUI} Unordered list
+         */
+        ulist: (options = {}, li = [], liOptions = {}) => {
+            const ul = skGraphicBase('ul', options);
+            li.forEach((item) => {
+                liOptions.text = item;
+                ul.append(skGraphicBase('li', liOptions));
+            });
+            return ul;
+        },
 
         /**
          * Create a anchor
@@ -916,6 +977,10 @@ sk.stash = function skStash() {
     const _formatQuery = (data, configuration = {}) => {
         let { action, category, singular, uppercase, sUppercase } = data;
         if (!configuration.filter) configuration.filter = { q: '', per_page: -1 };
+        if (!isNaN(configuration.filter.q) && configuration.filter.q !== '') {
+            configuration.ids = [configuration.filter.q];
+            configuration.filter.q = '';
+        };
         const search = configuration.filter.q;
         let query = _query[action];
 
@@ -929,8 +994,10 @@ sk.stash = function skStash() {
         if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter)}`;
         if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids)}`;
         filterList = filterList.replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`);
+        if (filterList.includes("'")) filterList = filterList.replaceAll("'", '"');
 
         let fields = configuration.fields;
+        if (fields && !fields.includes('id')) fields = `${fields} id`;
         if (!fields && action === 'find') {
             fields = _fields[category];
             for (fieldType in _fields) { if (fields.includes(`@${fieldType}@`)) fields = fields.replaceAll(`@${fieldType}@`, _fields[fieldType]); };
@@ -974,6 +1041,7 @@ sk.stash = function skStash() {
         if (action === 'bulkUpdate') result = response[`bulk${data.sUppercase}Update`];
         if (action === 'update') result = response[`${data.singular}Update`];
         if (action === 'create') result = response[`${data.singular}Create`];
+        if (configuration.ids && configuration.ids.length === 1) result = result.filter((entry) => { if (entry.id === configuration.ids[0]) return entry });
         return result;
     };
     // Find query
