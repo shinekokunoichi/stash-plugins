@@ -20,6 +20,16 @@ Custom Stash API powers all my plugins. It's free to use for others under the CC
   - StashDB: StashDB interaction
   - Hook: Custom hook and watcher
   - Task: Custom task
+### skAwesomplete
+Awesomplete with custom style and compatibility with Shinobi-Api
+## Extra
+### Similar-Performers
+<img width="479" height="603" alt="image" src="https://github.com/user-attachments/assets/57dc2212-79f2-4c7e-80e6-2b0594740574" />
+
+Add a section inside the performer page to show similar one, automatic and manual.
+- Automatic suggestion based on tags
+- Manual link creation with dropdown
+- Can auto-link performers
 ## Scraper
 ### JAV
 Custom JAV scraper. Require CORS.
