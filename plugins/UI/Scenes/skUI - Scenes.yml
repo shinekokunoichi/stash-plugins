@@ -1,6 +1,6 @@
 name: skUI - Scenes
 description: Change the aspect of scene cards
-version: 1.0
+version: 1.1
 ui:
   javascript:
     - skUI - Scenes.js
@@ -18,4 +18,12 @@ settings:
     cardOrganized:
       displayName: Card organized
       description: Apply a border to the card if the scene is organized. Default - on.
+      type: BOOLEAN
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - tags, performers, groups, markers, galleries, copies, organized. Default - copies organized
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
       type: BOOLEAN

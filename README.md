@@ -61,6 +61,13 @@ Customization for icon and navbar.
 Style card based on rating.
 - Color cards based on given color code for each rating
 - Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 4 with low intensity.
+### Scenes
+UI customization for scene cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+- Apply a style for watched scenes
+- Apply a style for organized scenes
 ### Search
 <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/b8c24736-f2ae-4428-9953-a0313e8322bd" />
 

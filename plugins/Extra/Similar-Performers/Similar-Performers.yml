@@ -1,0 +1,22 @@
+name: skExtra - Similar-Performers
+description: Add a section inside the performer page to show similar one, automatic and manual.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Similar-Performers.js
+  requires:
+    - Shinobi-Api
+    - skAwesomplete
+settings:
+    showAutomatic:
+      displayName: Show automatic
+      description: If enabled show automatic section. Default - true
+      type: BOOLEAN
+    automaticReq:
+      displayName: Automatic tags valutation
+      description: How many tags must performers have in common at least. Default - 5
+      type: STRING
+    showManual:
+      displayName: Brand logo
+      description: If enabled show manual section. Default - true
+      type: BOOLEAN

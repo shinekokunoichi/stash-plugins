@@ -472,6 +472,63 @@ function skGraphicBase(tag, options = {}) {
  * @returns {object} skGraphic module
  */
 sk.ui = function skGraphic() {
+    /**
+     * Get and return general card info
+     * @param {skUI} card Card element
+     * @returns {object} Card info
+     */
+    const _cardInfo = (card) => {
+        const data = {};
+        const isFavorite = card.get('.favorite');
+        const notFavorite = card.get('.not-favorite');
+        data.favorite = isFavorite ? isFavorite : notFavorite;
+        data.ratingBanner = card.get('.rating-banner');
+        data.rating = data.ratingBanner.read().split(' ')[1];
+        data.popovers = data.get('.card-popovers');
+        data.scenes = data.get('.scene-count');
+        if (data.scenes) {
+            data.scenesIcon = data.scenes.get('svg');
+            data.scenesCount = data.scenes.get('span');
+        };
+        data.tags = data.get('.tag-count');
+        if (data.tags) {
+            data.tagsIcon = data.tags.get('svg');
+            data.tagsCount = data.tags.get('span');
+        };
+        data.performers = data.get('.performer-count');
+        if (data.performers) {
+            data.performerIcon = data.performers.get('svg');
+            data.performerCount = data.performers.get('span');
+        };
+        data.groups = data.get('.group-count');
+        if (data.groups) {
+            data.groupsIcon = data.groups.get('svg');
+            data.groupsCount = data.groups.get('span');
+        };
+        data.images = data.get('.image-count');
+        if (data.images) {
+            data.imagesIcon = data.images.get('svg');
+            data.imagesCount = data.images.get('span');
+        };
+        data.markers = data.get('.marker-count');
+        if (data.markers) {
+            data.markersIcon = data.markers.get('svg');
+            data.markersCount = data.markers.get('span');
+        };
+        data.galleries = data.get('.gallery-count');
+        if (data.galleries) {
+            data.galleriesIcon = data.galleries.get('svg');
+            data.galleriesCount = data.galleries.get('span');
+        };
+        data.copies = data.get('.other-copies');
+        if (data.copies) {
+            data.copiesIcon = data.copies.get('svg');
+            data.copiesCount = data.copies.get('span');
+        };
+        data.organized = data.get('.organized');
+        return data;
+    };
+
     // UI Selector
     const get = {
         //GENERAL
@@ -496,7 +553,7 @@ sk.ui = function skGraphic() {
             navbar.add = (name, callback, where) => {
                 const div = make.container({ class: 'col-4 col-sm-3 col-md-2 col-1 g-auto nav-link' });
                 const a = make.link({ class: 'minimal p-4 p-xl-2 d-flex d-xl-inline-block flex-column justify-content-between align-items-center btn btn-primary' });
-                a.event({ type: 'click', callback: callback });
+                a.event({ type: 'click', callback: () => { navbar.nav.get('.active').class('active'); callback(); } });
                 const text = make.span({ text: name });
                 navbar[where].append(div)
                 div.append(a);
@@ -533,21 +590,54 @@ sk.ui = function skGraphic() {
             container.active = () => { return sk.tool.get('.item-list-container') || sk.tool.get('.recommendations-container'); };
             return container;
         },
+        //SCENES
+
+        /**
+         * Return all scene cards
+         * @returns {skUI[]} Scene cards
+         */
+        sceneCards: () => {
+            const cards = sk.tool.getAll('.scene-card');
+            for (card of cards) {
+                const data = {};
+                data.videoSection = card.get('.video-section');
+                data.page = card.get('.scene-card-link').url();
+                data.id = data.page.split('scenes/')[1].split('?')[0];
+                data.thumbnail = card.get('.scene-card-preview-image');
+                data.preview = card.get('.scene-card-preview-video');
+                data.specs = card.get('.scene-specs-overlay');
+                data.fileSize = card.get('.overlay-filesize');
+                data.resolution = card.get('.overlay-resolution');
+                data.duration = card.get('.overlay-duration');
+                data.studio = card.get('.studio-overlay');
+                if (data.studio) {
+                    data.studioThumbnail = data.studio.get('img');
+                    data.studioPage = data.studio.get('a').url();
+                    data.studioId = data.studioPage.split('studios/')[1];
+                };
+                data.middleSection = data.get('.card-section');
+                data.details = data.get('.scene-card__details');
+                data.title = data.get('h5');
+                data.date = card.get('.scene-card__date');
+                data.description = card.get('.scene-card__description');
+                data.path = card.get('file-path').read();
+                const popovers = _cardInfo(card);
+                card._data = { ...data, ...popovers };
+            };
+            return cards;
+        },
+
         //PERFORMERS
 
         /**
-         * Return all performers cards
-         * @returns {skUI[]} Performers cards
+         * Return all performer cards
+         * @returns {skUI[]} Performer cards
          */
-        performersCard: () => {
+        performerCards: () => {
             const cards = sk.tool.getAll('.performer-card');
             for (card of cards) {
                 const data = {};
-                const isFavorite = card.get('.favorite');
-                const notFavorite = card.get('.not-favorite');
                 data.topSection = card.get('.thumbnail-section');
-                data.ratingBanner = card.get('.rating-banner');
-                data.rating = data.ratingBanner.read(true);
                 data.page = data.topSection.get('a').url();
                 data.id = data.page.split('performers/')[1];
                 data.image = data.topSection('img');
@@ -555,13 +645,8 @@ sk.ui = function skGraphic() {
                 card.name = card.get('.performer-name');
                 card.disambiguation = card.get('.performer-disambiguation');
                 card.gender = card.get('.gender-icon');
-                card.popOver = card.get('.card-popovers');
-                card.scenesCount = card.get('.scene-count span');
-                card.imagesCount = card.get('.image-count span');
-                card.galleriesCount = card.get('.gallery-count span');
-                card.tagsCount = card.get('.tag-count span');
-                data.favorite = isFavorite.element ? isFavorite : notFavorite;
-                card._data = data;
+                const popovers = _cardInfo(card);
+                card._data = {...data, ...popovers};
             };
             return cards;
         },
@@ -569,7 +654,7 @@ sk.ui = function skGraphic() {
          * Get details element of the performer page
          * @returns {skUI} Performer details
          */
-        performerDetail: () => {
+        performerDetails: () => {
             const data = {};
             const isFavorite = sk.tool.get('.favorite');
             const notFavorite = sk.tool.get('.not-favorite');
@@ -594,6 +679,29 @@ sk.ui = function skGraphic() {
             data.getDetails = (name) => {
                 name = name.toLowerCase();
                 return sk.tool.get(`.detail-item.${name}`);
+            };
+            /**
+             * Create a custom tab and return it
+             * @param {string} name Tab name
+             * @param {function} callback Function to run on tab click
+             * @returns {skUI} Custom tab content
+             */
+            data.navbar.add = (name, callback) => {
+                const a = make.link({
+                    text: name, id: `skPPT_${name}`, class: 'nav-item nav-link', attribute: { role: 'tab' }, style: { cursor: 'pointer' } });
+                const div = make.container({ id: `skPPTC_${name}`, class: 'fade tab-pane', attribute: { role: 'tabpanel' } });
+                a.event({
+                    type: 'click', callback: () => {
+                        sk.tool.get('.nav-item.nav-link.active').class('active');
+                        sk.tool.get('.fade.tab-pane.active.show').class('active show');
+                        a.class('active');
+                        div.class('active show');
+                        callback();
+                    }
+                });
+                a.append(div);
+                data.navbar.append(a);
+                return div;
             };
             return data;
         },

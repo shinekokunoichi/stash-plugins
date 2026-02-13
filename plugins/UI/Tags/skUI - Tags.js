@@ -31,7 +31,7 @@
         colors.forEach((color) => {
             if (find) return;
             if (name === color.category.toLowerCase()) {
-                tag.css({ 'background-color': color.color });
+                tag.style({ 'background-color': color.color });
                 find = true;
             };
             color.group.forEach((subTag) => {
