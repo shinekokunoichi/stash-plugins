@@ -23,6 +23,17 @@ Custom Stash API powers all my plugins. It's free to use for others under the CC
 ### skAwesomplete
 Awesomplete with custom style and compatibility with Shinobi-Api
 ## Extra
+### Multiple-Performer-Images
+<img width="1008" height="244" alt="Screenshot 2026-02-13 230744" src="https://github.com/user-attachments/assets/fbde9a82-2e39-412b-b02d-6e33dbc7b853" />
+<img width="1297" height="332" alt="Screenshot 2026-02-13 230752" src="https://github.com/user-attachments/assets/87ed9422-9225-40e4-8d35-1151b3ea3d46" />
+
+Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+- Simple GUI to choose and change custom images from the performer page
+- Have a set of preset name - portrait, clothed, skimpy and nude
+- Can create and use an unlimited amounts of custom name
+- Change the performer image with dots system
+- Can replace all performer preview with the selected default image
+- If Stash is in SFW mode will auto-change image to clothed if avaiable
 ### Similar-Performers
 <img width="479" height="603" alt="image" src="https://github.com/user-attachments/assets/57dc2212-79f2-4c7e-80e6-2b0594740574" />
 
