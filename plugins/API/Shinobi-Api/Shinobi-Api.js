@@ -902,7 +902,7 @@ sk.stash = function skStash() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            ApiKey: configuration.general.ApiKey || ''
+            ApiKey: configuration().general.ApiKey || ''
         }
     };
     const _query = {
@@ -1505,7 +1505,7 @@ sk.stash = function skStash() {
      */
     const getStashBox = (name) => {
         let find = false;
-        const stashBoxes = configuration.general.stashBoxes;
+        const stashBoxes = configuration().general.stashBoxes;
         for (stashBox of stashBoxes) { if (stashBox.name.toLowerCase() === name.toLowerCase()) find = stashBox; };
         return find;
     };
@@ -2093,7 +2093,7 @@ sk.plugin = function skPlugin() {
         if (!plugins[0]) plugins = [plugins];
         for (plugin of plugins) {
             var newData = {};
-            var currentData = _plugins[plugin.name] || {};
+            var currentData = get(plugin.name) || {};
             for (option in currentData) { newData[option] = currentData[option]; };
             for (option in plugin.options) {
                 if (!notReplace || notReplace && newData[option] === undefined) newData[option] = plugin.options[option];
