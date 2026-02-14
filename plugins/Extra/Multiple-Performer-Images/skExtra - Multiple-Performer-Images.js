@@ -73,7 +73,7 @@
                     const popUp = sk.ui.make.popUp({ style: { background: 'rgba(0,0,0,.9)', top: 0, width: '100%', height: '100%', overflow: 'scroll' } });
                     const info = sk.ui.make.title({ text: 'Click first a type and then the image to set' });
                     const current = sk.ui.make.subTitle();
-                    const buttons = sk.ui.make.container({ flex: true });
+                    const buttons = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
                     const names = settings.preset.includes(',') ? settings.preset.split(',') : settings.preset.split(' ');
                     names.concat(['remove', 'close']).forEach((type) => {
                         type = type.trim();
@@ -83,7 +83,7 @@
                         if (type === 'Close') buttonType = 'primary';
                         if (!buttonType) buttonType = 'secondary'
                         const button = sk.ui.make.button({
-                            text: type, class: `btn btn-${buttonType}`, style: { margin: '0 .5%' }, event: {
+                            text: type, class: `btn btn-${buttonType}`, style: { margin: '.5%' }, event: {
                                 type: 'click', callback: () => {
                                     if (type === 'Close') popUp.remove();
                                     if (type !== 'Close') {
