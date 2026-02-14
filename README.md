@@ -33,7 +33,8 @@ Enable the possibility to have multiple performer images by a custom GUI inside 
 - Can create and use an unlimited amounts of custom name
 - Change the performer image with dots system
 - Can replace all performer preview with the selected default image
-- If Stash is in SFW mode will auto-change image to clothed if avaiable
+- If Stash is in SFW mode will auto-change image to clothed if available
+- Can select a random image to display
 ### Similar-Performers
 <img width="479" height="603" alt="image" src="https://github.com/user-attachments/assets/57dc2212-79f2-4c7e-80e6-2b0594740574" />
 
@@ -93,7 +94,7 @@ UI customization for scene cards
 <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/b8c24736-f2ae-4428-9953-a0313e8322bd" />
 
 Set a custom search filter by alphabetical order. Note: after selecting a filter you need to double-click the next one! 
-- Avaiable for every category.
+- available for every category.
 ### Tags
 <img width="496" height="298" alt="Screenshot 2026-02-08 022257" src="https://github.com/user-attachments/assets/c8a02bbe-18c9-42bd-b07f-c43bf83b11cf" />
 

@@ -56,7 +56,7 @@
     };
 
     function start() {
-        rating = sk.stash.configuration.ui.ratingSystemOptions;
+        rating = sk.stash.configuration().ui.ratingSystemOptions;
         if (!settings.banner) sk.tool.getAll('.rating-banner').forEach((banner) => { banner.style({ display: 'none' }) });
         if (rating.type === 'stars' && rating.starPrecision === 'full') fullRating();
         if (rating.type === 'decimal' || rating.starPrecision !== 'full') halfRating();

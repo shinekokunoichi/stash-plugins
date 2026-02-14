@@ -892,8 +892,11 @@ sk.ui = function skGraphic() {
   * @returns {object} skStash module
   */
 sk.stash = function skStash() {
-    /** @const {object} configuration Stash configuration */
-    const configuration = window.__APOLLO_CLIENT__.cache.data.data.ROOT_QUERY.configuration;
+    /**
+     * Return Stash configuration
+     * @returns {object} Stash configuration
+     */
+    const configuration = () => { return window.__APOLLO_CLIENT__.cache.data.data.ROOT_QUERY.configuration; };
     const _server = `${window.location.protocol}//${window.location.host}`;
     const _defaulHeaders = {
         method: 'POST',
@@ -2037,14 +2040,13 @@ sk.stashDB = function skStashDB() {
   * @returns {object} skPlugin module
   */
 sk.plugin = function skPlugin() {
-    const _plugins = sk.stash.configuration.plugins;
-
     /**
      * Return the selected plugins
      * @param {string|array.<string>} names Plugin names
      * @returns {object|object[]} Plugins
      */
     const get = (names) => {
+        const _plugins = sk.stash.configuration().plugins;
         if (!names) return _plugins;
         if (!Array.isArray(names)) return _plugins[names];
         let find = [];
@@ -2066,7 +2068,7 @@ sk.plugin = function skPlugin() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'ApiKey': sk.stash.configuration.general.ApiKey || ''
+                    'ApiKey': sk.stash.configuration().general.ApiKey || ''
                 },
                 body: JSON.stringify({ query: query, variables: { plugin_id: plugin.name, input: plugin.options } })
             });

@@ -1,6 +1,6 @@
 name: skExtra - Multiple-Performer-Images
 description: Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
-version: 1.0.1
+version: 1.1
 ui:
   javascript:
     - skExtra - Multiple-Performer-Images.js
@@ -9,16 +9,28 @@ ui:
 settings:
     preset:
       displayName: Preset category
-      description: Default - portrait, clothed, skimpy, nude, custom.
+      description: Default - portrait, clothed, skimpy, nude.
+    useDefault:
+      displayName: Use default
+      description: If enabled use the default category, otherwise select a random one. Default - off
+      type: BOOLEAN
     default:
-      displayName: Default image type
+      displayName: Default image category
       description: Value - portrait, clothed, skimpy, nude, custom. Default - skimpy
       type: STRING
+    randomCategory:
+      displayName: Use random category
+      description: If enabled when random is active select a random category for each performer, otherwise try to use the same category of image for each performer if available. Default - on
+      type: BOOLEAN
     replaceAll:
       displayName: Replace all
-      description: If enabled replace all performers preview, otherwise only inside performer page. Default - true
+      description: If enabled replace all performers preview, otherwise only inside performer page. Default - on
       type: BOOLEAN
     useSFW:
       displayName: Force SFW
-      description: Auto use clothed if Stash is in SFW mode. Default - true
+      description: Auto use clothed if Stash is in SFW mode. Default - on
+      type: BOOLEAN
+    sfwCategory:
+      displayName: SFW category
+      description: Category to use if force SFW is active. Default - clothed
       type: BOOLEAN
