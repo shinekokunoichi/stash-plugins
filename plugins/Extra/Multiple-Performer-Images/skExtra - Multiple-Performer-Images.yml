@@ -1,12 +1,15 @@
 name: skExtra - Multiple-Performer-Images
 description: Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
-version: 1.0
+version: 1.0.1
 ui:
   javascript:
     - skExtra - Multiple-Performer-Images.js
   requires:
     - Shinobi-Api
 settings:
+    preset:
+      displayName: Preset category
+      description: Default - portrait, clothed, skimpy, nude, custom.
     default:
       displayName: Default image type
       description: Value - portrait, clothed, skimpy, nude, custom. Default - skimpy

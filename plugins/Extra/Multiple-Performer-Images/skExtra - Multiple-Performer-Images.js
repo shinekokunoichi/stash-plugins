@@ -55,7 +55,10 @@
                     const info = sk.ui.make.title({ text: 'Click first a type and then the image to set' });
                     const current = sk.ui.make.subTitle();
                     const buttons = sk.ui.make.container({ flex: true });
-                    ['Portrait', 'Clothed', 'Skimpy', 'Nude', 'Custom'].forEach((type) => {
+                    const names = settings.preset.includes(',') ? settings.preset.split(',') : settings.preset.split(' ');
+                    names.forEach((type) => {
+                        type = type.trim();
+                        type = type[0].toUpperCase() + type.slice(1).toLowerCase();
                         const button = sk.ui.make.button({
                             text: type, class: 'btn btn-primary', style: { margin: '0 .5%' }, event: {
                                 type: 'click', callback: () => {
@@ -141,6 +144,7 @@
         const defaultSettings = {
             name: pluginName,
             options: {
+                preset: 'portrait clothed skimpy nude custom',
                 default: 'skimpy',
                 replaceAll: true,
                 useSFW: true
