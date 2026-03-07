@@ -1,0 +1,12 @@
+id: skAwesomplete
+name: skAwesomplete
+metadata:
+  description: Awesomplete with custom style and compatibility with Shinobi-Api
+version: 1.0-5cf581a
+date: "2026-02-13 00:20:27"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- skAwesomplete.yml
+- skAwesomplete.css
+- skAwesomplete.js

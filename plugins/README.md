@@ -1,0 +1,174 @@
+# Stash Plugins
+Do you have any plugin ideas? DM to discord or open a issue with your ideas!
+
+## Installation
+https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+
+<img width="446" height="354" alt="image" src="https://github.com/user-attachments/assets/96151086-5ae3-410c-b9ec-8d234418693e" />
+
+## Version Legend
+1.2.3.4
+- 1: Rework or major update like speed, big new function, etc
+- 2: Minor update small function
+- 3: Bug fixes
+- 4: Minor fixes typo, micro change in function, description, etc
+
+## Note
+- Change plugins settings after installing them otherwise will use the default settings!
+- Issues/Suggestion: If you have some issues with my plugins, open a new issue with title "{Plugin Name} - Shortened Problem". I will fix it as fast as I can.
+- CORS: When a plugin have the CORS requirement you need a special CORS addon to bypass bad request from website server. I suggest <a href="https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc">this addons</a> as it can be enabled only for stash host. Any request that are not from stash and my plugins to external server will be blocked anyway.
+
+## API
+
+### Shinobi-Api
+Custom Stash API powers all my plugins. It's free to use for others under the CC-BY-NC-ND-4.0 copyright. The API is fully commented in JSDoc. If I get multiple requests for the API, I'll create a page with instructions for the basic functions.
+- Current Modules:
+  - Tool: Scraper, watcher and custom getter
+  - UI: Graphic manipulator
+  - Stash: Stash interaction
+  - Plugin: Plugins manager
+  - StashDB: StashDB interaction
+  - Hook: Custom hook and watcher
+  - Task: Custom task
+
+### skAwesomplete
+Awesomplete with custom style and compatibility with Shinobi-Api
+
+## Extra
+
+### Multiple-Performer-Images
+<img width="1008" height="244" alt="Screenshot 2026-02-13 230744" src="https://github.com/user-attachments/assets/fbde9a82-2e39-412b-b02d-6e33dbc7b853" />
+<img width="1297" height="332" alt="Screenshot 2026-02-13 230752" src="https://github.com/user-attachments/assets/87ed9422-9225-40e4-8d35-1151b3ea3d46" />
+
+Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+- Simple GUI to choose and change custom images from the performer page
+- Have a set of preset name - portrait, clothed, skimpy and nude
+- Can create and use an unlimited amounts of custom name
+- Change the performer image with dots system
+- Can replace all performer preview with the selected default image
+- If Stash is in SFW mode will auto-change image to clothed if available
+- Can select a random image to display
+
+### Related-Content
+<img width="479" height="603" alt="image" src="https://github.com/user-attachments/assets/57dc2212-79f2-4c7e-80e6-2b0594740574" />
+
+Add a section inside page category to show related one, automatic and manual (currently only for performers).
+- Automatic suggestion based on tags
+- Manual link creation with dropdown
+- Can auto-link performers
+
+### Tags-Color
+<img width="496" height="298" alt="Screenshot 2026-02-08 022257" src="https://github.com/user-attachments/assets/c8a02bbe-18c9-42bd-b07f-c43bf83b11cf" />
+
+Colorize tags based on their parent tag/s.
+- Colorize every tags with colors based on their parents tag
+
+## Scraper
+
+### JAV
+Custom JAV scraper. Require CORS.
+- Can force replace already scraped data
+- Auto updater on scene updating
+- Filter for field during scraping
+- Auto creation missing metadata
+- Filter for auto creation
+
+### StashDB
+Auto update scenes, performers, groups and tags using StashDB (based on name and title)
+- Can force replace already scraped data
+- Auto update and task update
+- Auto creation missing data
+- Filter for auto creation
+- Filter for performers gender creation
+
+## UI
+
+### All
+Install all UI customization at once. (currently not working until yml parse fix)
+
+### Assets
+Assets images used by others skPlugins
+
+### Brand
+<img width="229" height="36" alt="Screenshot 2026-02-08 022037" src="https://github.com/user-attachments/assets/f965c5b4-9c0b-4981-97e7-7efb52c390e1" />
+<img width="1839" height="59" alt="Screenshot 2026-02-08 022119" src="https://github.com/user-attachments/assets/ac46d974-b1a4-412d-80d1-ef6f13dd4011" />
+
+UI customization for Stash name, logo and icon.
+- Change Brand name with text or a custom logo
+- Remove brand or brand in tabs name
+- Can set a custom icon
+
+### Galleries
+UI customization for gallery cards and page
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+- Apply a style when organized
+
+### Groups
+UI customization for group cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+
+### Icon
+<img width="1836" height="52" alt="Screenshot 2026-02-08 020622" src="https://github.com/user-attachments/assets/21b8586c-d427-42c4-be0d-6159ce31c55f" />
+<img width="1846" height="59" alt="Screenshot 2026-02-08 020537" src="https://github.com/user-attachments/assets/68feddfd-534b-42fe-8241-65169cf2d9a8" />
+
+Customization for icon and navbar.
+- Can set the navbar menu to be: both (default), only text or only icon
+- Can change the default icon with emoji or image
+
+### Images
+UI customization for image cards and page
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+- Apply a style when organized
+
+### Markers
+UI customization for marker cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+
+### Performers
+UI customization for performer cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+
+### Rating
+<img width="611" height="592" alt="Screenshot 2026-02-08 022222" src="https://github.com/user-attachments/assets/e021d887-f9cc-4a36-ab58-86dabb82cc74" />
+
+Style card and page based on rating.
+- Color cards and page based on given color code for each rating
+- Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 4 with low intensity.
+
+### Scenes
+UI customization for scene cards and page
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+- Apply a style when watched
+- Apply a style when organized
+- Auto hide details in page
+- Different theatre mode for page
+
+### Search
+<img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/b8c24736-f2ae-4428-9953-a0313e8322bd" />
+
+Set a custom search filter by alphabetical order. Note: after selecting a filter you need to double-click the next one! 
+- available for every category.
+
+### Studios
+UI customization for studio cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count
+
+### Tags
+UI customization for tag cards
+- Can remove infos
+- Can remove popovers
+- Can remove popovers count

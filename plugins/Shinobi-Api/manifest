@@ -1,0 +1,11 @@
+id: Shinobi-Api
+name: Shinobi-Api
+metadata:
+  description: Master api for easy plugin and ui develop.
+version: 2.2-ead62ac
+date: "2026-03-01 05:17:13"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- Shinobi-Api.js
+- Shinobi-Api.yml

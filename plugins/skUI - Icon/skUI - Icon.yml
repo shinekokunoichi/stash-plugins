@@ -1,0 +1,54 @@
+name: skUI - Icon
+# requires: Shinobi-Api
+description: Customization for icon and navbar.
+version: 1.0.2
+ui:
+  javascript:
+    - skUI - Icon.js
+  requires:
+    - Shinobi-Api
+settings:
+    removeDonate:
+      displayName: Remove donate button
+      description: Default - true
+      type: BOOLEAN
+    navStyle:
+      displayName: Navbar style
+      description: Value - both, icon, text. Default - icon.
+      type: STRING
+    iconStyle:
+      displayName: Icon style
+      description: Value - default, emoji, image. Default - emoji.
+      type: STRING
+    eScene:
+      displayName: Emoji for scene
+      description: Default - 🎬
+      type: STRING
+    eImage:
+      displayName: Emoji for image
+      description: Default - 📷
+      type: STRING
+    eGroup:
+      displayName: Emoji for group
+      description: Default - 🎞️
+      type: STRING
+    eMarker:
+      displayName: Emoji for marker
+      description: Default - 📍
+      type: STRING
+    eGallery:
+      displayName: Emoji for gallery
+      description: Default - 🖼️
+      type: STRING
+    ePerformer:
+      displayName: Emoji for performer
+      description: Default - 👤
+      type: STRING
+    eStudio:
+      displayName: Emoji for studio
+      description: Default - 🎥
+      type: STRING
+    eTag:
+      displayName: Emoji for tag
+      description: Default - 🪧
+      type: STRING

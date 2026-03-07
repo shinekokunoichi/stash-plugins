@@ -1,0 +1,13 @@
+1.3:
+ - Added scene page info remover
+
+1.2:
+ - Added Auto hide function for scene page
+ - Added theatre mode for scene page
+
+1.1:
+ - Added the ability to remove popovers
+ - Minimized code with more stable and less intense controls
+
+1.0:
+ - Created

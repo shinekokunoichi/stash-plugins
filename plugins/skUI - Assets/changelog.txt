@@ -1,0 +1,5 @@
+1.0.1:
+ - Added Icon folder for skUI - Icon
+
+1.0:
+ - Created

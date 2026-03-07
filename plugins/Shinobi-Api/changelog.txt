@@ -1,0 +1,65 @@
+2.3:
+ - Improved sk.tool.wait to works dynamically for all pages without duplication and timer
+ - Fixed skUI.class not working correctly with string type
+ - Added sk.ui.is to check if an ui element is displayed
+ - Fixed some typo
+ - Moved all sk.ui.get.xCard to sk.ui.get.card.x
+ - Moved all sk.ui.get.xDetails to sk.ui.get.page.x
+ - Added all sk.ui.get.card category
+ - Added all sk.ui.get.page category
+ - Added type definition for each card/page and stash object for easy use of sk.stash.find/create/update without consulting GQL
+
+2.2:
+ - Fixed a temp bug for sk.stash GQL call not working
+ - Fixed sk.plugin.get not working
+
+2.1.2:
+ - Changed sk.stash.configuration to get Stash configuration real-time
+ - Changed sk.plugin.get to get Stash pluginss real-time
+
+2.1.1:
+
+ - Added skUI.value to get input value
+ - Added skUI.click to click the element
+ - Fixed skUI.flex not setting align-items proprety
+ - Changed sk.ui.get.navbar.add to execute a callback on click
+ - Added sk.ui.get.performerDetails.getCustomField
+ - added sk.ui.make.li & sk.ui.make.ulist
+
+2.1:
+ - Added sk.ui.get._cardInfo for get same data dynamically for each card type
+ - Improved sk.ui.navbar now custom navlink onclick will change other style to be unselected
+ - Added sk.ui.get.sceneCards
+ - Added sk.ui.get.performerDetails.navbar.add to create a custom section inside performer page
+
+2.0.1:
+ - Improved sk.hook to reduce possible conflict
+ - Added the ability to pass directly a stashDB object to stash sk.stash.update & sk.stash.create
+
+2.0.0.1:
+ - Added skUI.remove
+ - Added sk.ui.make.image, sk.ui.make.button, sk.ui.make.checkbox, sk.ui.make.input
+
+2.0:
+ - Completely reworked the API with improved speed and usability
+
+1.2:
+ - Added the ability to return blob with sk.tool.scrape
+
+1.1.4:
+ - Fixed some typo in sk.ui.make.popup
+
+1.1.3:
+ - Replaced sk.tool.setNotification & sk.tool.getNotificationName with sk.tool.useNotification
+
+1.1.2:
+ - Fixes of sk.stashdb.performersExist & sk.stashdb.toStashStudio
+
+1.1.1:
+ - Changed from public to private scope
+
+1.1:
+ - General fixes of Stash and StashDB module
+
+1.0:
+ - Created

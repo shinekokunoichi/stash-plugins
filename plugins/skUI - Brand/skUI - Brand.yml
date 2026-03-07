@@ -1,0 +1,26 @@
+name: skUI - Brand
+# requires: Shinobi-Api
+description: UI customization for Stash name, logo and favicon.
+version: 1.0.4
+ui:
+  javascript:
+    - skUI - Brand.js
+  requires:
+    - Shinobi-Api
+settings:
+    showName:
+      displayName: Show title name
+      description: If enabled show the name in the tabs title. Default - on
+      type: BOOLEAN
+    name:
+      displayName: Stash name
+      description: Change title and brand name. Default - Stash
+      type: STRING
+    showBrand:
+      displayName: Show brand name
+      description: If enabled display the brand logo inside the navigation. Default - on
+      type: BOOLEAN
+    brandLogo:
+      displayName: Brand logo
+      description: If enabled use an image as brand (inside skUI - Assets). Default - on
+      type: BOOLEAN

@@ -1,0 +1,22 @@
+name: skUI - Studios
+# requires: Shinobi-Api  
+description: Change the aspect of studio cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Studios.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - name, child. Default - name.
+      type: STRING
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - scenes, galleries, images, performers, groups. Default - 
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

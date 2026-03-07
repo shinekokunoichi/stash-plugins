@@ -1,0 +1,22 @@
+name: skUI - Markers
+# requires: Shinobi-Api  
+description: Change the aspect of marker cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Markers.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - title, time, scene. Default - time scene.
+      type: STRING
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - performers, tags. Default - 
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

@@ -1,0 +1,11 @@
+id: skUI - Rating
+name: skUI - Rating
+metadata:
+  description: Style card based on rating
+version: 2.0.4-ead62ac
+date: "2026-03-01 05:17:13"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- skUI - Rating.yml
+- skUI - Rating.js

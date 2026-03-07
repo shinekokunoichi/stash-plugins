@@ -1,0 +1,11 @@
+id: skUI - Scenes
+name: skUI - Scenes
+metadata:
+  description: Change the aspect of scene cards
+version: 1.1.1-ead62ac
+date: "2026-03-01 05:17:13"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- skUI - Scenes.js
+- skUI - Scenes.yml

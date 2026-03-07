@@ -1,0 +1,23 @@
+2.1:
+ - Added the ability to chang card an page rating style
+
+2.0.4:
+ - Fixed yml file
+
+2.0.3:
+ - Fixed a bug related to getting user rating system
+
+2.0.2:
+ - Changed default plugin values
+
+2.0.1:
+ - Updated with the new function of Shinobi-Api sk.tool.wait
+
+2.0:
+ - Adapted the plugin for the newer version of Shinobi-Api (2.0)
+
+1.1:
+ - Stricted settings values check
+
+1.0:
+ - Created

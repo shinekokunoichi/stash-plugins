@@ -1,0 +1,9 @@
+1.0.2:
+ - fixed yml file
+
+1.0.1:
+ - Fixed icon styles problems
+ - Added the possibility to remove donate button
+
+1.0:
+ - Created

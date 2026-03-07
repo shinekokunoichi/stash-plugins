@@ -1,0 +1,29 @@
+name: skUI - Images
+# requires: Shinobi-Api  
+description: Change the aspect of image cards and page
+version: 1.0
+ui:
+  javascript:
+    - skUI - Images.js
+  requires:
+    - Shinobi-Api
+settings:
+    pageInfo:
+      displayName: Remove page info
+      description: Value - studio, resolution, createdAt, updatedAt. Default - resolution createdAt updatedAt
+    cardRemove:
+      displayName: Card info remover
+      description: Value - studio, resolution, title, date, description. Default - studio resolution date description.
+      type: STRING
+    cardOrganized:
+      displayName: Card organized
+      description: Apply a border to the card if the scene is organized. Default - on.
+      type: BOOLEAN
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - tags, performers, galleries, copies, organized. Default - copies organized
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

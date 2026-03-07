@@ -1,0 +1,22 @@
+name: skUI - Tags
+# requires: Shinobi-Api  
+description: Change the aspect of tag cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Tags.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - name, description, parent, child. Default - description child parent.
+      type: STRING
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - scenes, galleries, images, performers, groups, markers, studios. Default - 
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

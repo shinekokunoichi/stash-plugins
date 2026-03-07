@@ -1,0 +1,22 @@
+name: skUI - Groups
+# requires: Shinobi-Api  
+description: Change the aspect of group cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Groups.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - name, date, description. Default - date description.
+      type: STRING
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - scenes, tags, groups. Default - 
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

@@ -1,0 +1,16 @@
+2.0.3
+ - Reduced delay to control tasks end
+
+2.0.2
+ - Fixed yml file
+
+2.0.1
+ - Reduced static code and added dynamic functions
+ - Added custom stash-id
+ - Added comments
+ 
+2.0:
+ - Reworked the plugin to be faster and reliable
+
+1.0:
+ - Created

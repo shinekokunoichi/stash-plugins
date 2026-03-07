@@ -1,0 +1,46 @@
+name: skUI - Rating
+# requires: Shinobi-Api  
+description: Style card based on rating
+version: 2.1
+ui:
+  javascript:
+    - skUI - Rating.js
+  requires:
+    - Shinobi-Api
+settings:
+    card:
+      displayName: Card rating
+      description: Apply styles to cards. Default - on
+      type: BOOLEAN
+    page:
+      displayName: Page rating
+      description: Apply styles to pages. Default - on
+      type: BOOLEAN
+    banner:
+      displayName: Enable default banner
+      description: Enable the default rating banner. Default - off
+      type: BOOLEAN
+    transition:
+      displayName: Enable transition
+      description: Enable transition between rating color for decimal ratings. NOTE - if enabled color value must be rgb/rgba/hex. Default - true
+      type: BOOLEAN
+    rating1:
+      displayName: Rating 1
+      description: Background color (any) for card with 1 star rating. Default - black
+      type: STRING
+    rating2:
+      displayName: Rating 2
+      description: Background color (any) for card with 1 star rating. Default - darkgreen
+      type: STRING
+    rating3:
+      displayName: Rating 3
+      description: Background color (any) for card with 1 star rating. Default - steelblue
+      type: STRING
+    rating4:
+      displayName: Rating 4
+      description: Background color (any) for card with 1 star rating. Default - rebeccapurple
+      type: STRING
+    rating5:
+      displayName: Rating 5
+      description: Background color (any) for card with 1 star rating. Default - darkorange
+      type: STRING

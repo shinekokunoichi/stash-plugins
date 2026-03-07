@@ -1,0 +1,22 @@
+name: skUI - Performers
+# requires: Shinobi-Api  
+description: Change the aspect of performer cards
+version: 1.0
+ui:
+  javascript:
+    - skUI - Performers.js
+  requires:
+    - Shinobi-Api
+settings:
+    cardRemove:
+      displayName: Card info remover
+      description: Value - name, disambiguation, flag, gender, age. Default - disambiguation flag gender age.
+      type: STRING
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - scenes, groups, images, galleries, tags. Default - 
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

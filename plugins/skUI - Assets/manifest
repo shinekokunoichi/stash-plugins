@@ -1,0 +1,20 @@
+id: skUI - Assets
+name: skUI - Assets
+metadata:
+  description: Assets images used by others skPlugins
+version: 1.0.0.1-a69bece
+date: "2026-02-08 01:26:11"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- skUI - Assets.yml
+- Core\Favicon.png
+- Core\Brand.png
+- Icon\Image.png
+- Icon\Performer.png
+- Icon\Marker.png
+- Icon\Tag.png
+- Icon\Scene.png
+- Icon\Group.png
+- Icon\Studio.png
+- Icon\Gallery.png

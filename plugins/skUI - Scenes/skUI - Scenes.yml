@@ -1,0 +1,41 @@
+name: skUI - Scenes
+# requires: Shinobi-Api  
+description: Change the aspect of scene cards and page
+version: 1.1.3
+ui:
+  javascript:
+    - skUI - Scenes.js
+  requires:
+    - Shinobi-Api
+settings:
+    pageHide:
+      displayName: Auto hide details
+      description: Auto hide details inside the scene page. Default - on.
+      type: BOOLEAN
+    pageInfo:
+      displayName: Remove page info
+      description: Value - studio, frameRate, resolution, createdAt, updatedAt. Default - frameRate resolution createdAt updatedAt
+    pageTheatre:
+      displayName: Theatre mode
+      description: Value - default, darken (darken the UI to make the video "pop-out"), fake fullscreen (video cover all the screen without setting fullscreen), fullscreen. Default - darken.
+      type: STRING
+    cardRemove:
+      displayName: Card info remover
+      description: Value - studio, resolution, duration, title, date, description. Default - studio resolution duration date description.
+      type: STRING
+    cardWatched:
+      displayName: Card watched
+      description: Darkens the preview image if you have watched the scenes. Default - on.
+      type: BOOLEAN
+    cardOrganized:
+      displayName: Card organized
+      description: Apply a border to the card if the scene is organized. Default - on.
+      type: BOOLEAN
+    popoversRemove:
+      displayName: Card popovers remover
+      description: Value - tags, performers, groups, markers, galleries, copies, organized. Default - copies organized
+      type: STRING
+    popoversCount:
+      displayName: Card popovers count
+      description: If off remove the popovers count. Default - on.
+      type: BOOLEAN

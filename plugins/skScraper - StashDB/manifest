@@ -1,0 +1,11 @@
+id: skScraper - StashDB
+name: skScraper - StashDB
+metadata:
+  description: Auto metadata scraper from StashDB (based on title and name)
+version: 2.0.2-ead62ac
+date: "2026-03-01 05:17:13"
+requires: []
+source_repository: https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+files:
+- skScraper - StashDB.js
+- skScraper - StashDB.yml

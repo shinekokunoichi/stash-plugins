@@ -1,0 +1,36 @@
+name: skExtra - Related-Content
+# requires: Shinobi-Api  
+# requires: skAwesomplete
+description: Add a section inside page category to show related one, automatic and manual (currently only for performers).
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Related-Content.js
+  requires:
+    - Shinobi-Api
+    - skAwesomplete
+settings:
+    showAutomatic:
+      displayName: Show automatic
+      description: If enabled show automatic section. Default - on
+      type: BOOLEAN
+    showAutomaticFilter:
+      displayName: Where to show automatic
+      description: Value - scene image group gallery performer studio (currently tag is not supported). Default - scene image group gallery performer studio
+      type: STRING
+    showManual:
+      displayName: Show manual
+      description: If enabled show manual section. Default - off
+      type: BOOLEAN
+    showManualFilter:
+      displayName: Where to show manual
+      description: Value - performer. Default - performer
+      type: STRING
+    automaticReq:
+      displayName: Automatic tags valutation
+      description: How many tags must performers have in common at least. Default - 5
+      type: STRING
+    autoLink:
+      displayName: Auto link performers
+      description: If you link performer "a" to "b" auotomatically link performer "b" to "a". Default - on
+      type: BOOLEAN
