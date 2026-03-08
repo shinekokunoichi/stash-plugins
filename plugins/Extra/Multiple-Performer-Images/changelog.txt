@@ -1,0 +1,14 @@
+1.1.2.1:
+ - Changed sk.ui.get.performerDetails to sk.ui.get.page.performer
+
+1.1.2:
+ - Added a change of style of already setted presets
+
+1.1.1:
+ - Fixed buttons going over-screen
+
+1.1:
+ - Reworked to match new Shinobi-Api version (2.0)
+
+1.0:
+ - Created
