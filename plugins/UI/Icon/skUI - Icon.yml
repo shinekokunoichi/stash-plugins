@@ -1,7 +1,7 @@
 name: skUI - Icon
 # requires: Shinobi-Api
 description: Customization for icon and navbar.
-version: 1.0.2
+version: 1.0.3
 ui:
   javascript:
     - skUI - Icon.js

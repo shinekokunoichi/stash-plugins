@@ -1,3 +1,6 @@
+1.0.3:
+ - Fixed donate button removing not working
+
 1.0.2:
  - fixed yml file
 
