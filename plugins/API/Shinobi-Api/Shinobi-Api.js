@@ -738,7 +738,7 @@ sk.ui = function skGraphic() {
                 for (card of cards) {
                     const data = {};
                     data.previewSection = card.get('.video-section');
-                    data.page = card.get('.scene-card-link').url();
+                    data.page = data.previewSection.get('a').url();
                     data.id = data.page.split('scenes/')[1].split('?')[0];
                     data.thumbnail = card.get('.scene-card-preview-image');
                     data.preview = card.get('.scene-card-preview-video');
@@ -793,7 +793,7 @@ sk.ui = function skGraphic() {
                 for (card of cards) {
                     const data = {};
                     data.previewSection = card.get('.thumbnail-section');
-                    data.page = card.get('.image-card-link').url();
+                    data.page = data.previewSection.get('a').url();
                     data.id = data.page.split('images/')[1];
                     data.image = data.previewSection.get('img');
                     data.studio = card.get('.studio-overlay');
@@ -840,7 +840,7 @@ sk.ui = function skGraphic() {
                 for (card of cards) {
                     const data = {};
                     data.previewSection = card.get('.thumbnail-section');
-                    data.page = card.get('.group-card-header').url();
+                    data.page = data.previewSection.get('a').url();
                     data.id = data.page.split('groups/')[1];
                     data.image = data.previewSection.get('img');
                     data.infoSection = card.get('.card-section');
@@ -881,7 +881,7 @@ sk.ui = function skGraphic() {
                 for (card of cards) {
                     const data = {};
                     data.previewSection = card.get('.video-section');
-                    data.page = card.get('.scene-marker-card-link').url();
+                    data.page = data.previewSection.get('a').url();
                     data.id = data.page.split('scenes/')[1].split('?')[0];
                     data.thumbnail = card.get('.scene-marker-card-preview-image');
                     data.preview = card.get('.scene-marker-card-preview-video');
@@ -926,7 +926,7 @@ sk.ui = function skGraphic() {
                 for (card of cards) {
                     const data = {};
                     data.previewSection = card.get('.thumbnail-section');
-                    data.page = card.get('.gallery-card-link').url();
+                    data.page = data.previewSection.get('a').url();
                     data.id = data.page.split('galleries/')[1];
                     data.image = data.previewSection.get('img');
                     data.studio = card.get('.studio-overlay');

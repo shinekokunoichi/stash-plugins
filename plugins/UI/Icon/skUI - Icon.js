@@ -48,7 +48,7 @@
         };
         await sk.plugin.check(defaultSettings);
         settings = sk.plugin.get(pluginName);
-        if (settings.removeDonate) sk.tool.wait('.donate', () => { sk.tool.get('.donate').element.parentElement.remove(); }, true);
+        if (settings.removeDonate) sk.tool.wait('.donate', () => { sk.tool.getAll('.donate').forEach((e) => { e.element.parentElement.style.display = 'none'; }); }, true);
         sk.tool.wait('svg', replace);
     };
 
