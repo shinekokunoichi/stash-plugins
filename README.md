@@ -36,6 +36,13 @@ Awesomplete with custom style and compatibility with Shinobi-Api
 
 ## Extra
 
+### Most-Used
+<img width="905" height="446" alt="image" src="https://github.com/user-attachments/assets/c1b43029-e88b-4fb8-a457-e392e71a5d3e" />
+
+Add custom stats to stash. Currently add a crown bases on top 3 elements for scenes images groups performers studios in card and page.
+- Enable/disable card and page
+- Can show infinite number of same ranking
+
 ### Multiple-Performer-Images
 <img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/e4edd98b-3548-4ef1-804a-06bf2a831020" />
 <img width="690" height="176" alt="image" src="https://github.com/user-attachments/assets/29f171b0-47a5-4415-bca4-0226d08aeb13" />
