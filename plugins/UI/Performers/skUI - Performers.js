@@ -23,7 +23,7 @@
             name: pluginName,
             options: {
                 cardRemove: 'disambiguation flag gender age',
-                popoversRemove: '',
+                popoversRemove: 'o_counter',
                 popoversCount: true
             }
         };

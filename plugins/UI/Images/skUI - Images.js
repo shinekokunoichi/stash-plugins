@@ -41,7 +41,7 @@
                 pageInfo: 'resolution createdAt updatedAt',
                 cardRemove: 'studio resolution date description',
                 cardOrganized: true,
-                popoversRemove: 'copies organized',
+                popoversRemove: 'copies organized o_counter',
                 popoversCount: true
             }
         };

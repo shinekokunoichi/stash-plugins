@@ -1,3 +1,7 @@
+2.3.2:
+ - Added o_counter to sk.ui.get.card
+ - Fixed some compatibility error with sk.tool.wait
+
 2.3.1:
  - Fixed sk.ui.get.card not setting page url
 

@@ -14,7 +14,7 @@ settings:
       type: STRING
     popoversRemove:
       displayName: Card popovers remover
-      description: Value - scenes, galleries, images, performers, groups. Default - 
+      description: Value - scenes, galleries, images, performers, groups, o_counter. Default - o_counter
       type: STRING
     popoversCount:
       displayName: Card popovers count

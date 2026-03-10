@@ -23,7 +23,7 @@
             name: pluginName,
             options: {
                 cardRemove: 'name',
-                popoversRemove: '',
+                popoversRemove: 'o_counter',
                 popoversCount: true
             }
         };

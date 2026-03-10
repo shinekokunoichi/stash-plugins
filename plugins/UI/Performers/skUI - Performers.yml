@@ -1,7 +1,7 @@
 name: skUI - Performers
 # requires: Shinobi-Api  
 description: Change the aspect of performer cards
-version: 1.0
+version: 1.0.1
 ui:
   javascript:
     - skUI - Performers.js
@@ -14,7 +14,7 @@ settings:
       type: STRING
     popoversRemove:
       displayName: Card popovers remover
-      description: Value - scenes, groups, images, galleries, tags. Default - 
+      description: Value - scenes, groups, images, galleries, tags, o_counter. Default - o_counter
       type: STRING
     popoversCount:
       displayName: Card popovers count

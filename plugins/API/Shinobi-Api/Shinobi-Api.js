@@ -6,9 +6,6 @@ const sk = {};
  * @returns {object} Tool module
  */
 sk.tool = function skTool() {
-    // Store here each watcher to prevent duplication
-    const _watching = {};
-
     /**
      * Wait for a UI element then execute a function
      * @param {string} selector Query selector for the waiting element or a sk.ui.is property
@@ -16,27 +13,16 @@ sk.tool = function skTool() {
      * @param {boolean} [stopWatching] If true remove the observer
     */
     const wait = (selector, callback, stopWatching) => {
-        if (get(selector)) callback();
-        function setObserver() {
-            const observer = new MutationObserver((mutation, obs) => {
-                const wait = get(selector);
-                if (wait) {
-                    if (stopWatching) {
-                        const currentLocation = window.location.pathname;
-                        let locationChanged = false;
-                        if (_watching[selector] !== currentLocation) {
-                            _watching[selector] = currentLocation;
-                            locationChanged = true;
-                        };
-                        if (!locationChanged) return;
-                    };
-                    callback();
-                };
-            });
-            observer.observe(document, { childList: true, subtree: true });
-        };
-        setObserver();
-        if (!_watching[selector]) _watching[selector];
+        let lastPage;
+        const observer = new MutationObserver((mutations) => {
+            currentPage = window.location.pathname;
+            if (get(selector)) {
+                if (stopWatching && lastPage === window.location.pathname) return;
+                callback();
+                lastPage = window.location.pathname;
+            };
+        });
+        observer.observe(document, { childList: true, subtree: true });
     };
 
     /**
@@ -554,6 +540,9 @@ sk.ui = function skGraphic() {
      * @prop {skUI} copies Copies popover
      * @prop {skUI} copiesIcon Copies popover icon
      * @prop {skUI} copiesCount Copies popover count
+     * @prop {skUI} o_counter O-counter popover
+     * @prop {skUI} o_counterIcon O-counter popover icon
+     * @prop {skUI} o_counterCount O-counter popover count
      * @prop {skUI} organized Organized icon
      */
 
@@ -609,6 +598,11 @@ sk.ui = function skGraphic() {
         if (data.copies) {
             data.copiesIcon = data.copies.get('svg');
             data.copiesCount = data.copies.get('span');
+        };
+        data.o_counter = card.get('.count-button');
+        if (data.o_counter) {
+            data.o_counterIcon = data.o_counter.get('svg');
+            data.o_counterCount = data.o_counter.get('span');
         };
         data.organized = card.get('.organized');
         return data;

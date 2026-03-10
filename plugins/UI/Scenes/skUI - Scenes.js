@@ -59,7 +59,7 @@
                 cardRemove: 'studio resolution duration date description',
                 cardWatched: true,
                 cardOrganized: true,
-                popoversRemove: 'copies organized',
+                popoversRemove: 'copies organized o_counter',
                 popoversCount: true
             }
         };

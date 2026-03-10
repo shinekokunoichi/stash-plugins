@@ -22,7 +22,7 @@
             name: pluginName,
             options: {
                 cardRemove: 'date description',
-                popoversRemove: '',
+                popoversRemove: 'o_counter',
                 popoversCount: true
             }
         };

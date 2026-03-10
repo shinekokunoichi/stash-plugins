@@ -1,7 +1,7 @@
 name: skUI - Images
 # requires: Shinobi-Api  
 description: Change the aspect of image cards and page
-version: 1.0
+version: 1.0.1
 ui:
   javascript:
     - skUI - Images.js
@@ -21,7 +21,7 @@ settings:
       type: BOOLEAN
     popoversRemove:
       displayName: Card popovers remover
-      description: Value - tags, performers, galleries, copies, organized. Default - copies organized
+      description: Value - tags, performers, galleries, copies, organized, o_counter. Default - copies organized o_counter
       type: STRING
     popoversCount:
       displayName: Card popovers count

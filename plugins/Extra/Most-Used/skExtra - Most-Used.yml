@@ -1,0 +1,23 @@
+name: skExtra - Most-Used
+# requires: Shinobi-Api
+description: Add custom stats to stash. Currently add a crown bases on top 3 elements for scenes images groups performers studios in card and page.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Most-Used.js
+  requires:
+    - Shinobi-Api
+    - skUI - Assets
+settings:
+    statsCrown:
+      displayName: Crown display
+      description: Value - scenes images groups performers studios. Default - scenes images groups performers studios
+      type: STRING
+    cardCrown:
+      displayName: Crown in cards
+      description: If show the crown icon on card. Default - on
+      type: BOOLEAN
+    pageCrown:
+      displayName: Crown in pages
+      description: IF show the crown icon on page. Default - on
+      type: BOOLEAN
