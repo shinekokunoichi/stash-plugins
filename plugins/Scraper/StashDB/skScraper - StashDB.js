@@ -43,13 +43,15 @@
     };
 
     function finish() {
+        if (!scraped && total === 1) return;
         if (total === searched) sk.tool.notify(pluginName, `Finshed scraping ${category}.\nScraped a total of ${scraped}\nAlready scraped ${alreadyScraped}`);
         if (total !== searched) setTimeout(finish, 200);
     };
 
     //Hook
     async function scrapeOne(data) {
-        category = data.__typename.toLowerCase()
+        category = data.__typename ? data.__typename.toLowerCase() : undefined;
+        if (!category) return;
         await start([data]);
         finish();
     };

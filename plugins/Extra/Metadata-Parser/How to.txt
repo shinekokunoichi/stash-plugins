@@ -1,0 +1,86 @@
+Avaiable fields:
+
+  General: Fields used for remove and match specific string part
+
+    {i}         > Remove any matching words (not case sensitive) from "Ignored Words" setting
+                  Ex:
+                    Ignored - Image Actress
+                    Parser  - {tag}{i}/{i}{performer}
+                    Folder  - Sexy image/Hotty Actress
+                    Parsed  - Tag: Sexy, Performer: Hotty
+
+    {I}         > Remove any matching words (case sensitive) from "Ignored Words" settings
+                  Ex:
+                    Ignored - Image Actress
+                    Parser  - {tag}{I}/{I}{performer}
+                    Folder  - Sexy image/Hotty Actress
+                    Parsed  - Tag: Sexy image, Performer: Hotty
+
+    {d}         > Match any delimiter (.-_)
+                  Ex:
+                    Parser  - {index}{d}{group}{d}{title}{ext}
+                    File    - 05_XXX_Video.mp4
+                    Parsed  - Group: XXX, Scene Index: 05, Title: Video
+
+    {ext}       > Remove the file extension (only for files and as last field)
+                  Ex:
+                    Parser  - {title}{ext}
+                    File    - Hot.png
+                    Parsed  - Title: Hot
+    
+  Metadata: Fields used for taking the metadata. You can't use two metadata fields without {d} between them.
+            Ex: {title}{d}{studio}/{performer} is valid
+                {title}{studio}/{performer} is not valid
+
+    {title}     > Title (as is)
+
+    {Title}     > Title (capitalize)
+
+    {date}      > Date format from "Date Format" setting
+
+    {yyyy}      > Four digit year
+
+    {mm}        > One/Two digit month
+
+    {dd}        > One/Two digit day
+
+    {rating5}   > Based on rating with 5 stars
+
+    {rating10}  > Based on rating with 10 stars
+
+    {rating100} > Based on decimal rating
+
+    {performer} > Performer
+
+    {tag}       > Tag
+
+    {gallery}   > Gallery (placeholder)
+
+    {studio}    > Studio(if multiple studio fields are declared, will set the last one)
+                  Ex:
+                    Parser  - {studio}/{last:group}
+                    Folder  - Studio A/Studio B/XXX
+                    Parsed  - Studio: Studio B, Group: XXX
+
+    {index}     > Scene group index
+
+    {group}     > Group (if multiple group fields are declared, will set the last one)
+                  Ex:
+                    Parser  - {studio}/{group}/{last:performer}
+                    Folder  - Studio A/XXX/ZZZ/Hotty
+                    Parsed  - Studio: Studio A, Group: ZZZ, Performer: Hotty
+  
+  Combined: Add to other fields special effect
+
+    {last:...}  > Set the last field until reach the last one
+                  Ex:
+                    Parser - {studio}/{group}/{last:index}
+                    Path   - Studio A/XXX/ZZZ/YYY/HHH/03
+                    Parsed - Studio: Studio A, Group: YYY, Scene Index: 03
+
+    {&:...}     > Enable checking multiple value in one field based on "Multiple Delimiters" (only for {tag} and {performer})
+                  Ex:
+                    Multi  - and &
+                    Parser - {studio}/{&:performer}
+                    Path   - Studio A/Hotty and Sexy & Cuty
+                    Parsed - Studio: Studio A, Performers: Hotty & Sexy & Cuty

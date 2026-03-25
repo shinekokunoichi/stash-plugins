@@ -93,6 +93,7 @@
     };
 
     function finish() {
+        if (!scraped && total === 1) return;
         if (total === searched) sk.tool.notify(pluginName, `Finished scraping, scraped a total of ${scraped} and ${alreadyscraped} already scraped JAV scenes`);
         if (total !== searched) setTimeout(finish, 200);
     };

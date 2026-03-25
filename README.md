@@ -36,6 +36,13 @@ Awesomplete with custom style and compatibility with Shinobi-Api
 
 ## Extra
 
+### Metadata-Parser
+Apply and create metadata based on path and file name. High customization, read How to.txt to see how to set up.
+- Infinite rule for path exceptions
+- Auto create missing metadata
+- Simple and dynamic field (read How to.txt for details)
+- Support metadata parsing form path and filename
+
 ### Most-Used
 <img width="905" height="446" alt="image" src="https://github.com/user-attachments/assets/c1b43029-e88b-4fb8-a457-e392e71a5d3e" />
 

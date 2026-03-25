@@ -31,9 +31,8 @@ sk.tool = function skTool() {
      * @param {string} message
      */
     const notify = (title, message) => {
-        let _notification;
-        if (Notification.permission === 'granted') _notification = new Notification(title, { body: message });
-        if (Notification.permission === 'denied') console.log(`${title} - ${message}`);
+        if (Notification.permission === 'granted') new Notification(title, { body: message });
+        if (Notification.permission === 'granted' || Notification.permission === 'denied') console.log(`${title} - ${message}`);
         if (Notification.permission === 'default') {
             Notification.requestPermission();
             notify(title, message);
@@ -193,6 +192,12 @@ sk.hook = function skHook() {
 sk.task = function skTask() {
     // Created task list
     let _tasksList = {};
+    // Setted tasks
+    let _settedTasks = [];
+    // Runned
+    let _runnedTask = false;
+    // Plugin card
+    let _pluginCard;
 
     /**
      * @typedef {object} skTaskWatcher Task object
@@ -213,58 +218,70 @@ sk.task = function skTask() {
             if (!_tasksList[task.id]) _tasksList[task.id] = [];
             _tasksList[task.id].push(task);
         });
+        if (_runnedTask && !_settedTasks.includes(tasks[0].id)) {
+            let _temp = {};
+            _temp[tasks[0].id] = tasks;
+            _set.taskCard(_temp);
+        };
     };
 
     /**
      * Set custom tasks inside the tasks UI
      * @returns If is already setted
      */
-    const _set = () => {
-        if (sk.tool.get('.skTask')) return;
-        let pluginCard;
-        const pluginSection = sk.tool.getAll('.form-group');
-        if (pluginSection.length === 3) pluginCard = pluginSection[2];
-        if (!pluginCard) {
-            const panelTasks = sk.tool.get('.tasks-panel-tasks');
-            const hr = sk.ui.make.divider();
-            const formGroup = sk.ui.make.container({ class: 'form-group' });
-            const settingSection = sk.ui.make.container({ class: 'setting-section' });
-            const title = sk.ui.make.title({ text: 'Plugin Tasks' });
-            const card = sk.ui.make.container({ class: 'card' });
-            panelTasks.append([hr, formGroup]);
-            formGroup.append(settingSection);
-            settingSection.append([title, card]);
-            pluginCard = card;
-        };
-        for (taskId in _tasksList) {
-            const group = sk.ui.make.container({ class: 'skTask setting-group collapsible' });
-            const header = sk.ui.make.container({ class: 'setting' });
-            const titleContainer = sk.ui.make.container();
-            const title = sk.ui.make.subTitle({ text: taskId });
-            const buttonContainer = sk.ui.make.container();
-            const button = sk.ui.make.button({ class: 'setting-group-collapse-button btn btn-minimal', event: { type: 'click', callback: function () { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); } } });
-            header.append([titleContainer, buttonContainer]);
-            titleContainer.append(title);
-            buttonContainer.append(button);
-            const section = sk.ui.make.container({ class: 'collapsible-section collapse show' });
-            pluginCard.append(group);
-            group.append([header, section]);
-            _tasksList[taskId].forEach((task) => {
-                const settingTask = sk.ui.make.container({ class: 'setting' });
-                const settingInfo = sk.ui.make.container();
-                const settingTitle = sk.ui.make.subTitle({ text: task.name });
-                const settingDescription = sk.ui.make.container({ class: 'sub-heading', text: task.description });
-                const runContainer = sk.ui.make.container();
-                const runButton = sk.ui.make.button({ class: 'btn btn-secondary btn-sm', text: task.name, event: { type: 'click', callback: () => { task.callback(task.arg) } } });
-                settingTask.append([settingInfo, runContainer]);
-                settingInfo.append([settingTitle, settingDescription]);
-                runContainer.append(runButton);
-                section.append(settingTask);
-            });
-        };
+    const _set = {
+        taskCard: (taskList) => {
+            for (taskId in taskList) {
+                const group = sk.ui.make.container({ class: 'skTask setting-group collapsible' });
+                const header = sk.ui.make.container({ class: 'setting' });
+                const titleContainer = sk.ui.make.container();
+                const title = sk.ui.make.subTitle({ text: taskId });
+                const buttonContainer = sk.ui.make.container();
+                const button = sk.ui.make.button({ class: 'setting-group-collapse-button btn btn-minimal', event: { type: 'click', callback: function () { this.parentElement.parentElement.parentElement.lastChild.classList.toggle('show'); } } });
+                header.append([titleContainer, buttonContainer]);
+                titleContainer.append(title);
+                buttonContainer.append(button);
+                const section = sk.ui.make.container({ id: 'skTaskSection', class: 'collapsible-section collapse show' });
+                _pluginCard.append(group);
+                group.append([header, section]);
+                taskList[taskId].forEach((task) => {
+                    const settingTask = sk.ui.make.container({ class: 'setting' });
+                    const settingInfo = sk.ui.make.container();
+                    const settingTitle = sk.ui.make.subTitle({ text: task.name });
+                    const settingDescription = sk.ui.make.container({ class: 'sub-heading', text: task.description });
+                    const runContainer = sk.ui.make.container();
+                    const runButton = sk.ui.make.button({ class: 'btn btn-secondary btn-sm', text: task.name, event: { type: 'click', callback: () => { task.callback(task.arg) } } });
+                    settingTask.append([settingInfo, runContainer]);
+                    settingInfo.append([settingTitle, settingDescription]);
+                    runContainer.append(runButton);
+                    section.append(settingTask);
+                });
+                _settedTasks.push(taskId);
+            };
+        },
+        firstRun: () => {
+            if (sk.tool.get('.skTask')) return;
+            _pluginCard;
+            const pluginSection = sk.tool.getAll('.form-group');
+            if (pluginSection.length === 3) _pluginCard = pluginSection[2].get('.card');
+            if (!_pluginCard) {
+                const panelTasks = sk.tool.get('.tasks-panel-tasks');
+                const hr = sk.ui.make.divider();
+                const formGroup = sk.ui.make.container({ class: 'form-group' });
+                const settingSection = sk.ui.make.container({ class: 'setting-section' });
+                const title = sk.ui.make.title({ text: 'Plugin Tasks' });
+                const card = sk.ui.make.container({ class: 'card' });
+                panelTasks.append([hr, formGroup]);
+                formGroup.append(settingSection);
+                settingSection.append([title, card]);
+                _pluginCard = card;
+            };
+            _runnedTask = true;
+            _set.taskCard(_tasksList);
+        }
     };
     // Wait for the tasks configuration page
-    sk.tool.wait('#configuration-tabs-tabpane-tasks', _set, true);
+    sk.tool.wait('#configuration-tabs-tabpane-tasks', _set.firstRun, true);
     return { add };
 }();
 
@@ -1703,7 +1720,7 @@ sk.stash = function skStash() {
         images: 'id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {thumbnail preview image} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}',
         groups: 'id name aliases duration date rating100 studio {@studios@} director synopsis urls tags {@tags@} created_at updated_at containing_groups { group {@groups@} description } sub_groups { group {@groups@} description } front_image_path back_image_path scene_count performer_count sub_group_count scenes {@scenes@} o_counter',
         sceneMarkers: 'id scene {@scenes@} title seconds end_seconds primary_tag {@tags@} tags {@tags@} created_at updated_at stream preview screenshot',
-        galleries: 'id title code urls date details photographer rating100 organized created_at updated_at files {id path basename mod_time size created_at updated_at} folder {@folder@} chapters {id  gallery {@galleries@} title image_index created_at updated_at} scenes {@scenes@} studio {@studios@} image_count tags {@tags@} performers {@performers@} cover {id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {@imagePath@} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}} paths {cover preview}',
+        galleries: 'id title code urls date details photographer rating100 organized created_at updated_at files {id path basename mod_time size created_at updated_at} folder {@folder@} chapters {id  gallery {@galleries@} title image_index created_at updated_at} scenes {@scenes@} studio {@studios@} image_count tags {@tags@} performers {@performers@} cover {id title code rating100 urls date details photographer o_counter organized created_at updated_at paths {thumbnail preview image} galleries {@galleries@} studio {@studios@} tags {@tags@} performers {@performers@}} paths {cover preview}',
         performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count performer_count o_counter scenes {@scenes@} stash_ids {@stashID@} rating100 details death_date hair_color weight created_at updated_at groups {@groups@} custom_fields',
         studios: 'id name urls parent_studio {@studios@} child_studios {@studios@} aliases tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count stash_ids {@stashID@} rating100 favorite details created_at updated_at groups {@groups@} o_counter',
         tags: 'id name sort_name description aliases ignore_auto_tag created_at updated_at favorite stash_ids {@stashID@} image_path scene_count scene_marker_count image_count gallery_count performer_count studio_count group_count parent_count child_count parents {@tags@} children {@tags@}',
@@ -1766,11 +1783,9 @@ sk.stash = function skStash() {
         if (!filterName) filterName = `${singular}_filter`;
 
         let filterList;
-        if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter)}`;
-        if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter)}`;
-        if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids)}`;
-        filterList = filterList.replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`);
-        if (filterList.includes("'")) filterList = filterList.replaceAll("'", '"');
+        if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter).replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`) }`;
+        if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter).replaceAll('"', '').replaceAll("'", '"') }`;
+        if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids).replaceAll('"', '').replaceAll("'", '"') }`;
 
         let fields = configuration.fields;
         if (fields && !fields.includes('id')) fields = `${fields} id`;
@@ -2493,8 +2508,8 @@ sk.stash = function skStash() {
 
         /**
          * @typedef {object} stashGroupDescriptionUpdate Stash group description update
-         * @prop {stashGroupDescription[]} groups Groups description
-         * @prop {string} mode SET|ADD|REMOVE
+         * @prop {number|string} group_id Group id
+         * @prop {string} description Group description
          */
 
         /**

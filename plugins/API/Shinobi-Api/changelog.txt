@@ -1,3 +1,10 @@
+2.4:
+ - Changed sk.notify now will always console.log
+ - Reworked sk.task.add to be more stable
+ - Fixed sk.stash.find.gallerie/s not getting paths field
+ - Fixed sk.stash query formatter throwing error with search that includes '
+ - Fixed JSDoc comment for @typedef stashGroupDescription
+
 2.3.2:
  - Added o_counter to sk.ui.get.card
  - Fixed some compatibility error with sk.tool.wait

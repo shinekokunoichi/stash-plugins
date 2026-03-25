@@ -1,3 +1,6 @@
+2.0.4
+ - Fixed notification with 0 scenes.
+
 2.0.3
  - Reduced delay to control tasks end
 

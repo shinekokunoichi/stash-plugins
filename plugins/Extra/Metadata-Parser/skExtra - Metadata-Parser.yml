@@ -1,0 +1,51 @@
+name: skExtra - Metadata-Parser
+# requires: Shinobi-Api
+description: Apply and create metadata based on path and file name. High customization, read How to.txt to see how to set up.
+version: 1.0
+ui:
+  javascript:
+    - Rule.js
+    - skExtra - Metadata-Parser.js
+  requires:
+    - Shinobi-Api
+settings:
+    parsePath:
+      displayName: Parse path
+      description: If parse file path. Default - on
+      type: BOOLEAN
+    pathParser:
+      displayName: Path parser
+      description: General parser settings for file path, the file path must match. See How to.txt for the avaiable fields and examples.
+      type: STRING
+    parseFile:
+      displayName: Parse file
+      description: If parse file name. Default - on
+      type: BOOLEAN
+    fileSceneParser:
+      displayName: Scene file parser
+      description: General parser settings for scene file name, the file name must match. See How to.txt for the avaiable fields and examples.
+      type: STRING
+    fileImageParser:
+      displayName: Image file parser
+      description: General parser settings for image file name, the file name must match. See How to.txt for the avaiable fields and examples.
+      type: STRING
+    whitespace:
+      displayName: Whitespace replacer
+      description: Any characters/words separated by space that will be replace with whitespace for scenes/images title. Ex - _ - replace
+      type: STRING
+    ignoredWords:
+      displayName: Ignored words
+      description: Any characters/words that will be replaced separated by space. Ex - removeMe ReplaceMe
+      type: STRING
+    multipleDelimiters:
+      displayName: Multiple delimiters
+      description: any characters/words used for multiple value separated by space. Avaiable only for {tag} and {performer}. Ex - & and
+      type: STRING
+    dateFormat:
+      displayName: Date format
+      description: Custom date format used for {date} field. Default - yyyy-mm-dd
+      type: STRING
+    create:
+      displayName: Create missing data
+      description: If enabled will create any missing data. Default - on
+      type: BOOLEAN
