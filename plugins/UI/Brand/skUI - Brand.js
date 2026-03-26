@@ -22,14 +22,16 @@
         }).observe(title.element, { childList: true, characterData: true });
         title.write(title.read());
         //Brand
-        const brand = sk.ui.get.navbar().brand;
-        if (!settings.showBrand) brand.remove();
-        if (settings.showBrand && !settings.brandLogo) brand.get('button').write(options.name);
-        if (settings.showBrand && settings.brandLogo) {
-            const img = sk.ui.make.image({ url: '/plugin/skUI - Assets/assets/Core/Brand.png', style: { width: '70px' } });
-            brand.get('button').remove();
-            brand.get('a').append(img);
-        };
+        sk.tool.wait('.navbar-brand', () => {
+            const brand = sk.ui.get.navbar().brand;
+            if (!settings.showBrand) brand.remove();
+            if (settings.showBrand && !settings.brandLogo) brand.get('button').write(options.name);
+            if (settings.showBrand && settings.brandLogo) {
+                const img = sk.ui.make.image({ url: '/plugin/skUI - Assets/assets/Core/Brand.png', style: { width: '70px' } });
+                brand.get('button').remove();
+                brand.get('a').append(img);
+            };
+        }, true)
     };
 
     main();

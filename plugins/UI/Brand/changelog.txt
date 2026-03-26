@@ -1,3 +1,6 @@
+1.0.5
+ - Fixed sometimes not changing stash brand with custom logo
+
 1.0.4
  - Fixed yml file
 
