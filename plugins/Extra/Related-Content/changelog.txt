@@ -1,2 +1,5 @@
-0.1:
+1.1:
+ - Added compatibility for Shinobi-Api 2.4.1 (Error with trueNAS)
+
+1.0:
  - Created (bugs expected)

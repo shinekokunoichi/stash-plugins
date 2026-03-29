@@ -1,4 +1,5 @@
 const sk = {};
+
 // BOOKMARK skTool
 
 /**
@@ -625,6 +626,28 @@ sk.ui = function skGraphic() {
         return data;
     };
 
+    /**
+     * Get a custom field. Only for page
+     * @async
+     * @param {string} name Custom field name
+     * @param {object} data Page data
+     * @param {string} category Page category
+     * @returns {string} Custom field value
+     */
+    _getCustomField = async (name, data, category) => {
+        if (!data.customFields) return;
+        const altName = name.replaceAll('-', '_') // Random Fixes
+        let field = data.customFields.get(`.detail-item-value.${name}`) || data.customFields.get(`.detail-item-value.${altName}`);
+        if (!field) field = data.customFields.get(`.detail-item-value.custom-field-${name}`) || data.customFields.get(`.detail-item-value.custom-field-${altName}`); // DEV BRANCH FIX
+        if (field) field = field.read();
+        if (!field) { // TRUENAS FIX
+            let _customFields = await sk.stash.find[category]({ ids: [data.id], fields: 'custom_fields' });
+            _customFields = _customFields.custom_fields;
+            if (_customFields[name] || _customFields[altName]) field = _customFields[name] || _customFields[altName];
+        };
+        return field ? field : '';
+    };
+
     // UI Selector
     const get = {
         // GENERAL
@@ -1119,6 +1142,13 @@ sk.ui = function skGraphic() {
                 data.playerControls = data.player.get('.vjs-control-bar');
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
                 /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'scene'); };
+                /**
                  * Create a custom tab and return it. (link id - skPPT_{name}, container id - skPPTC_{name})
                  * @param {string} name Tab name
                  * @param {function} [callback] Function to run on tab click
@@ -1179,6 +1209,13 @@ sk.ui = function skGraphic() {
                 data.image = sk.tool.get('.image-container');
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
                 /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'image'); };
+                /**
                  * Create a custom tab and return it. (link id - skPPT_{name}, container id - skPPTC_{name})
                  * @param {string} name Tab name
                  * @param {function} [callback] Function to run on tab click
@@ -1233,6 +1270,13 @@ sk.ui = function skGraphic() {
                 data.navbar = sk.tool.get('.nav.nav-tabs');
                 data.tabContent = sk.tool.get('.tab-content');
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
+                /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'group'); };
                 /**
                  * Get a detail
                  * @param {string} name Detail name
@@ -1301,6 +1345,13 @@ sk.ui = function skGraphic() {
                 data.divider = sk.tool.get('.scene-divider');
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
                 /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'gallery'); };
+                /**
                  * Create a custom tab and return it. (link id - skPPT_{name}, container id - skPPTC_{name})
                  * @param {string} name Tab name
                  * @param {function} [callback] Function to run on tab click
@@ -1360,25 +1411,22 @@ sk.ui = function skGraphic() {
                 data.favorite = isFavorite.element ? isFavorite : notFavorite;
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
                 /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'performer'); };
+                /**
                  * Get a detail
                  * @param {string} name Detail name
                  * @returns {string} Detail value
                  */
                 data.getDetails = (name) => {
+                    if (!data.details) return;
                     name = name.toLowerCase();
-                    return data.details.get(`.detail-item-value.${name}`).read();
-                };
-                /**
-                 * Get a custom field
-                 * @param {string} name Custom field name
-                 * @returns {string} Custom field value
-                 */
-                data.getCustomField = (name) => {
-                    if (!data.customFields) return;
-                    name = name.toLowerCase();
-                    let field = data.customFields.get(`.detail-item-value.${name}`);
-                    if (!field) field = data.customFields.get(`.detail-item-value.custom-field-${name}`); // DEV BRANCH FIX
-                    return field ? field.read() : '';
+                    const detail = data.details.get(`.detail-item-value.${name}`);
+                    return detail ? detail.read() : '';
                 };
                 /**
                  * Create a custom tab and return it. (link id - skPPT_{name}, container id - skPPTC_{name})
@@ -1438,6 +1486,13 @@ sk.ui = function skGraphic() {
                 data.tabContent = sk.tool.get('.tab-content');
                 data.favorite = isFavorite.element ? isFavorite : notFavorite;
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
+                /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'studio'); };
                 /**
                  * Get a detail
                  * @param {string} name Detail name
@@ -1505,6 +1560,13 @@ sk.ui = function skGraphic() {
                 data.tabContent = sk.tool.get('.tab-content');
                 data.favorite = isFavorite.element ? isFavorite : notFavorite;
                 data.rating = ratingStar.element ? ratingStar : ratingDecimal;
+                /**
+                 * Get a custom field
+                 * @async
+                 * @param {string} name Custom field name
+                 * @returns {string} Custom field value
+                 */
+                data.getCustomField = async (name) => { return await _getCustomField(name, data, 'tag'); };
                 /**
                  * Get a detail
                  * @param {string} name Detail name
@@ -1751,7 +1813,10 @@ sk.stash = function skStash() {
      * @prop {string} [fields] Fields to retrieve, default all. Ex. 'id title'
      * @prop {object} [filter] Request filter
      * @prop {string} [filter.q] Search
+     * @prop {number} [filter.page] Page number
      * @prop {number} [filter.per_page] Max result
+     * @prop {string} [filter.sort] Sort field
+     * @prop {string} [filter.direction] DESC|ASC
      * @prop {object} [fieldFilter] Specific category filter
      * @prop {array.<number>} [ids] IDs to get
      */
@@ -1775,6 +1840,7 @@ sk.stash = function skStash() {
             configuration.filter.q = '';
         };
         const search = configuration.filter.q;
+        const sort = configuration.filter.sort;
         let query = _query[action];
 
         let filterName;
@@ -1783,7 +1849,8 @@ sk.stash = function skStash() {
         if (!filterName) filterName = `${singular}_filter`;
 
         let filterList;
-        if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter).replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`) }`;
+        if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter).replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`)}`;
+        if (configuration.filter.sort) filterList = filterList.replace(`sort:${sort}`, `sort:"${sort}"`);
         if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter).replaceAll('"', '').replaceAll("'", '"') }`;
         if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids).replaceAll('"', '').replaceAll("'", '"') }`;
 
@@ -1832,7 +1899,7 @@ sk.stash = function skStash() {
         if (action === 'bulkUpdate') result = response[`bulk${data.sUppercase}Update`];
         if (action === 'update') result = response[`${data.singular}Update`];
         if (action === 'create') result = response[`${data.singular}Create`];
-        if (configuration.ids && configuration.ids.length === 1) result = result.filter((entry) => { if (entry.id === configuration.ids[0]) return entry });
+        if (configuration.ids && configuration.ids.length === 1) result = result.filter((entry) => { if (entry.id == configuration.ids[0]) return entry });
         return result;
     };
 

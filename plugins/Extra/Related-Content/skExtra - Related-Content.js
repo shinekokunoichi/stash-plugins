@@ -89,7 +89,7 @@
                 }
             });
             //Related
-            const ids = sk.ui.get.page.performer().getCustomField('skExtra-Related-Content');
+            const ids = await sk.ui.get.page.performer().getCustomField('skExtra-Related-Content');
             if (ids) {
                 ids.trim().split('|').forEach((id) => {
                     let performer;
@@ -113,7 +113,8 @@
         const name = input.value.trim();
         if (!name || !input.performersMap[name]) return;
         const id = sk.ui.get.page.performer().id;
-        const related = sk.ui.get.page.performer().getCustomField('skExtra-Related-Content').split('|') || [];
+        let related = await sk.ui.get.page.performer().getCustomField('skExtra-Related-Content')
+        related = related.split('|') || [];
         let toAdd;
         performers.forEach((performer) => {
             if (performer.name === name && !related.includes(performer.id)) {

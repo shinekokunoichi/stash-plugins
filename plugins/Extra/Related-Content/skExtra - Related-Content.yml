@@ -2,7 +2,7 @@ name: skExtra - Related-Content
 # requires: Shinobi-Api  
 # requires: skAwesomplete
 description: Add a section inside page category to show related one, automatic and manual (currently only for performers).
-version: 1.0
+version: 1.1
 ui:
   javascript:
     - skExtra - Related-Content.js

@@ -26,7 +26,7 @@
     async function create() {
         if (sk.tool.get('#skMPIGUI')) return;
         const details = sk.ui.get.page.performer();
-        let skMPI = details.getCustomField('skExtra-Multiple-Performer-Images') || '';
+        let skMPI = await details.getCustomField('skExtra-Multiple-Performer-Images') || '';
         skMPI = skMPI.toLowerCase().split('|');
         //Dots
         if (skMPI.length > 0) {

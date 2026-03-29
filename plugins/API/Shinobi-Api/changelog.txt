@@ -1,3 +1,8 @@
+2.4.1
+ - Added _getCustomField for every sk.ui.get.page, adapted for latest dev version
+ - Added new field "page/sort/direction" for @typedef skStashFilters
+ - Loose control for sk.stash._do not working always as expected
+
 2.4:
  - Changed sk.notify now will always console.log
  - Reworked sk.task.add to be more stable
