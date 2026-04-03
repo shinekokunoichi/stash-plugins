@@ -186,3 +186,14 @@ UI customization for tag cards
 - Can remove infos
 - Can remove popovers
 - Can remove popovers count
+
+### Theme
+Customize your stash theme with a simple UI
+<img width="1852" height="51" alt="image" src="https://github.com/user-attachments/assets/85a66e29-9458-407f-89a5-827ad981da1d" />
+<img width="477" height="976" alt="image" src="https://github.com/user-attachments/assets/a35bcec6-1147-4919-bcc4-a0fca3a70786" />
+<img width="507" height="968" alt="image" src="https://github.com/user-attachments/assets/45a0aedf-ba1a-45cc-8534-58fb75d12b52" />
+
+- Easy UI to edit almost all Stash and My plugins,
+- Infinite number of custom themes
+- Abitlity to share one or all theme to other users
+- Simple backup import/export of all themes
