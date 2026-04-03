@@ -1,3 +1,6 @@
+1.1.2
+ - Fixed theme not saving correctly
+
 1.1.1
  - Fixed not displaying save button
 

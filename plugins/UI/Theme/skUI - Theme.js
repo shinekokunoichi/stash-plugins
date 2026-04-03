@@ -157,7 +157,7 @@
                     for (property in cssToUse) {
                         const card = sk.ui.make.container({ flex: true, style: { 'justify-content': 'flex-start', padding: '0 2.5%' } });
                         if (oddBackground) card.style({ background: 'rgba(0,0,0,.25)' });
-                        const name = sk.ui.make.description({ text: property, style: { margin: 'auto 0' }, event: [{ type: 'mouseenter', callback: (e) => { console.log(e); showTooltip(name.attribute('_tooltip'), e.pageX, e.pageY); } }, { type: 'mouseleave', callback: () => showTooltip() }] });
+                        const name = sk.ui.make.description({ text: property, style: { margin: 'auto 0' }, event: [{ type: 'mouseenter', callback: (e) => { showTooltip(name.attribute('_tooltip'), e.pageX, e.pageY); } }, { type: 'mouseleave', callback: () => showTooltip() }] });
                         name.attribute({ _top: name.element.offsetTop, _left: name.element.offsetLeft, _tooltip: cssToUse[property] });
                         const inputs = sk.ui.make.container({ flex: true, style: { 'margin-left': 'auto' } });
                         let input = sk.ui.make.input({ class: 'text-input', attribute: { _plugin: plugin, _category: category, _element: element, _property: property, _selector: selector } });
@@ -355,6 +355,7 @@
                     loadTheme.append(themeCard);
                 };
             };
+            themeManager._loadTheme = loadTheme;
             return loadTheme;
         },
         //Theme saver
@@ -430,8 +431,7 @@
             const themeSave = sk.ui.make.button({
                 text: 'Save theme', class: 'btn btn-success', event: {
                     type: 'click', callback: async () => {
-                        const themePreview = themeImage.url();
-                        if (!themePreview) return;
+                        const themePreview = themeImage.url() || '/plugin/skUI - Assets/assets/Core/Theme.png';
                         themeManager._themes[themeName.value()] = {
                             preview: themePreview,
                             css: liveEdit
@@ -442,7 +442,7 @@
                         const newPreview = sk.ui.make.image({ url: themePreview });
                         const newName = sk.ui.make.subTitle({ text: themeName.value() });
                         newCard.append([newPreview, newName, themeManager._themeOptions(newCard, themeName.value())]);
-                        loadTheme.append(newCard);
+                        themeManager._loadTheme.append(newCard);
                         for (plugin in liveEdit) parseCSS(plugin, liveEdit[plugin], true);
                     }
                 }
@@ -471,7 +471,7 @@
                         const newPreview = sk.ui.make.image({ url: jsonTheme.data.preview });
                         const newName = sk.ui.make.subTitle({ text: jsonTheme.theme });
                         newCard.append([newPreview, newName, themeManager._themeOptions(newCard, `Shared_${lastI} ${jsonTheme.theme}`)]);
-                        loadTheme.append(newCard);
+                        themeManager._loadTheme.append(newCard);
                     }
                 }
             })
