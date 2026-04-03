@@ -475,7 +475,7 @@
                     }
                 }
             })
-            saveThemeContainer.append([themeDataContainer, themeShared]);
+            saveThemeContainer.append([themeDataContainer, themeSave, themeShared]);
             return saveThemeContainer;
         },
         backup: () => {
