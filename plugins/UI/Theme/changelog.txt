@@ -1,2 +1,7 @@
+1.1:
+ - Fixed Star element not giving the right field
+ - Added new way to add an image for created theme
+ - Fixed some element not working as expected
+
 1.0:
  - Created!
