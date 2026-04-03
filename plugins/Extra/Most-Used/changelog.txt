@@ -1,2 +1,7 @@
+1.1:
+ - Now will auto download all requirements
+ - Changed description for statsCrown field to include the path for changing crowns images
+ - Added compatibility to skUI - Theme
+
 1.0:
  - Created

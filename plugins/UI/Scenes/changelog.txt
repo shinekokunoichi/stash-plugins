@@ -1,3 +1,6 @@
+1.2:
+ - Added compatibility to skUI - Theme
+
 1.1.4:
  - Added o_counter as popup remover
 

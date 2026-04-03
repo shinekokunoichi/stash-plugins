@@ -1,0 +1,14 @@
+name: skUI - Theme
+# requires: Shinobi-Api  
+description: Customize your stash theme with a simple UI.
+version: 1.0
+ui:
+  javascript:
+    - skUI - Theme.js
+  requires:
+    - Shinobi-Api
+settings:
+    theme:
+      displayName: Current theme name
+      description: Don't use me please.
+      type: STRING

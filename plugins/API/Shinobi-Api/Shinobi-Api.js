@@ -396,10 +396,14 @@ function skGraphicBase(tag, options = {}) {
     base.write = (text, html) => html ? base.element.innerHTML = text : base.element.innerText = text;
 
     /**
-     * Change the value
+     * Change the value or return it
      * @param {any} value
+     * @return {string} Value
      */
-    base.value = (value) => base.element.value = value;
+    base.value = (value) => {
+        if (!value) return base.element.value;
+        base.element.value = value;
+    }
 
     /**
      * Set or return src or href of the element
@@ -686,7 +690,7 @@ sk.ui = function skGraphic() {
                 const a = make.link({ class: 'minimal p-4 p-xl-2 d-flex d-xl-inline-block flex-column justify-content-between align-items-center btn btn-primary' });
                 a.event({
                     type: 'click', callback: () => {
-                        navbar.nav.get('.active').class('active');
+                        navbar.nav.get('.active') ? navbar.nav.get('.active').class('active') : null;
                         if (callback) callback();
                     }
                 });
@@ -1197,7 +1201,7 @@ sk.ui = function skGraphic() {
                 data.studio = sk.tool.get('.image-studio-image');
                 data.title = sk.tool.get('.image-header');
                 data.subHeader = sk.tool.get('.image-subheader');
-                data.date = data.subHeader.get('.date');
+                data.date = sk.tool.get('.date');
                 data.resolution = sk.tool.get('.resolution');
                 data.toolbar = sk.tool.get('.image-toolbar');
                 data.navbar = sk.tool.get('.nav.nav-tabs');
@@ -1441,8 +1445,8 @@ sk.ui = function skGraphic() {
                     const div = make.container({ id: `skPPTC_${name}`, class: 'fade tab-pane', attribute: { role: 'tabpanel' } });
                     a.event({
                         type: 'click', callback: () => {
-                            data.navbar.get('.nav-link.active').class('active');
-                            sk.tool.get('.fade.tab-pane.active.show').class('active show');
+                            if (data.navbar.get('.nav-link.active')) data.navbar.get('.nav-link.active').class('active');
+                            if (sk.tool.get('.fade.tab-pane.active.show')) sk.tool.get('.fade.tab-pane.active.show').class('active show');
                             a.class('active');
                             div.class('active show');
                             if (callback) callback(div);
@@ -1622,7 +1626,7 @@ sk.ui = function skGraphic() {
          */
         popUp: (options = {}) => {
             for (key in options.style) { options.style[key] = options.style[key].toString(); };
-            const style = options.style;
+            const style = options.style || {};
             style.position = style.position || 'fixed';
             style.width = style.width || '75%';
             style.height = style.height || '50%';
@@ -1786,7 +1790,7 @@ sk.stash = function skStash() {
         performers: 'id name disambiguation urls gender birthdate ethnicity country eye_color height_cm measurements fake_tits penis_length circumcised career_length tattoos piercings alias_list favorite tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count performer_count o_counter scenes {@scenes@} stash_ids {@stashID@} rating100 details death_date hair_color weight created_at updated_at groups {@groups@} custom_fields',
         studios: 'id name urls parent_studio {@studios@} child_studios {@studios@} aliases tags {@tags@} ignore_auto_tag image_path scene_count image_count gallery_count group_count stash_ids {@stashID@} rating100 favorite details created_at updated_at groups {@groups@} o_counter',
         tags: 'id name sort_name description aliases ignore_auto_tag created_at updated_at favorite stash_ids {@stashID@} image_path scene_count scene_marker_count image_count gallery_count performer_count studio_count group_count parent_count child_count parents {@tags@} children {@tags@}',
-        folder: 'id path parent_folder {@folder@} mod_time created_at updated_at',
+        folder: 'id path basename parent_folder {@folder@} parent_folders{@folder@} mod_time created_at updated_at',
         stashID: 'endpoint stash_id updated_at',
         _id: 'id',
         _stashID: 'stashs_id'
@@ -2272,8 +2276,8 @@ sk.stash = function skStash() {
          * @prop {string} fake_tits Performer fake tits
          * @prop {number} penis_length Performer penis length
          * @prop {string} circumcised Performer circumcised (CUT|UNCUT)
-         * @prop {number} career_start Performer career start
-         * @prop {number} career_end Performer career end
+         * @prop {string} career_start Performer career start
+         * @prop {strig} career_end Performer career end
          * @prop {string} tattoos Performer tattoos
          * @prop {string} piercings Performer piercings
          * @prop {array.<string>} alias_list Performer aliases
@@ -3454,7 +3458,8 @@ sk.stashDB = function skStashDB() {
             if (data.breast_type) performer.fake_tits = data.breast_type[0] + data.breast_type.slice(1).toLowerCase();
             if (data.penis_length) performer.penis_length = data.penis_length;
             if (data.circumcised) performer.circumcised = data.circumcised;
-            if (data.career_start_year) performer.career_length = !data.career_end_year ? `${data.career_start_year} -` : `${data.career_start_year} - ${data.career_end_year}`;
+            if (data.career_start_year) performer.career_start = data.career_start_year;
+            if (data.career_end_year) performer.career_end = data.career_end_year;
             if (data.tattoos) performer.tattoos = _get.tattosPiercings(data.tattoos);
             if (data.piercings) performer.piercings = _get.tattosPiercings(data.piercings);
             if (data.aliases) performer.alias_list = data.aliases;

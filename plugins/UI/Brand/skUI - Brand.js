@@ -27,7 +27,8 @@
             if (!settings.showBrand) brand.remove();
             if (settings.showBrand && !settings.brandLogo) brand.get('button').write(options.name);
             if (settings.showBrand && settings.brandLogo) {
-                const img = sk.ui.make.image({ url: '/plugin/skUI - Assets/assets/Core/Brand.png', style: { width: '70px' } });
+                const img = sk.ui.make.image({ class: 'skUI_Brand_Logo', url: '/plugin/skUI - Assets/assets/Core/Brand.png', style: { width: '70px' } });
+                if (!brand.get('button')) return;
                 brand.get('button').remove();
                 brand.get('a').append(img);
             };
@@ -35,4 +36,10 @@
     };
 
     main();
+
+    if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
+        General: {
+            Logo: { selector: 'skUI_Brand_Logo'}
+        }
+    });
 })();

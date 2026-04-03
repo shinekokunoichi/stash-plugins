@@ -9,14 +9,19 @@
         let popoversRemove = settings.popoversRemove.toLowerCase();
         if (popoversRemove.includes(',')) popoversRemove = popoversRemove.replaceAll(',', ' ');
         cards.forEach((card, i) => {
-            const current = scenes[i];
-            if (!current) return;
+            const current = scenes[i] || {};
             //Remover
             cardRemove.split(' ').forEach((filter) => { if (card._data[filter]) card._data[filter].style({ display: 'none' }); });
             popoversRemove.split(' ').forEach((filter) => { if (card._data[filter]) card._data[filter].style({ display: 'none' }); });
             //Filter
-            if (settings.cardWatched && current.play_count > 0) card._data.thumbnail.style({ filter: 'brighteness(.5)' });
-            if (settings.cardOrganized && card._data.organized) card.style({ border: 'rgba(0,0,0,0) 3px solid' });
+            if (settings.cardWatched && current.play_count > 0) {
+                card._data.thumbnail.style({ filter: 'brighteness(.5)' });
+                card.class('skUI_Scenes_Watched');
+            };
+            if (settings.cardOrganized && card._data.organized) {
+                card.style({ border: 'rgba(0,0,0,0) 3px solid' });
+                card.class('skUI_Scenes_Organized');
+            };
             if (!settings.popoversCount) card._data.popovers.getAll('div').forEach((popover) => { popover.get('span').style({ display: 'none' }); });
         });
     };
@@ -70,5 +75,12 @@
         sk.tool.wait(sk.ui.is.scenePage, page, true);
     };
 
-    main()
+    main();
+
+    if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
+        General: {
+            Watched: { selector: '.skUI_Scenes_Watched' },
+            Organized: { selector: '.skUI_Scenes_Organized' }
+        }
+    });
 })();

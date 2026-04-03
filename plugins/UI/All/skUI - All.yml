@@ -1,14 +1,19 @@
 name: skUI - All
 # requires: Shinobi-Api
+# requires: skUI - Assets
+# requires: skUI - Brand
+# requires: skUI - Galleries
+# requires: skUI - Groups
+# requires: skUI - Icon
+# requires: skUI - Images
+# requires: skUI - Markers
+# requires: skUI - Performers
+# requires: skUI - Rating
+# requires: skUI - Scenes
+# requires: skUI - Search
+# requires: skUI - Studios
+# requires: skUI - Tags
+# requires: skUI - Theme  
+  
 description: Install all UI customization at once
-version: 1.0.3
-ui:
-  requires:
-    - Shinobi-Api
-    - skUI - Assets
-    - skUI - Brand
-    - skUI - Icon
-    - skUI - Rating
-    - skUI - Scenes
-    - skUI - Search
-    - skUI - Tags
+version: 1.1

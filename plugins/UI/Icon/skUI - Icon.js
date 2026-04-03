@@ -15,7 +15,7 @@
 
         [].concat(scene, image, group, marker, gallery, performer, studio, tag).forEach((svg) => {
             const icon = iconStyle === 'emoji' ? sk.ui.make.span({ text: settings[`e${svg._type}`], style: { 'font-size': '25px', 'text-shadow': '0, 0 black' } }) : sk.ui.make.image({ url: `/plugin/skUI - Assets/assets/Icon/${svg._type}.png`, style: { width: '35px', height: '35px' } });
-            icon.class('skUIIcon');
+            icon.class('skUI_Icon_Icons');
             svg.element.parentNode.appendChild(icon.element);
             svg.remove();
         });
@@ -25,7 +25,7 @@
 	const navStyle = settings.navStyle.toLowerCase();
         if (navStyle === 'both' && settings.iconStyle === 'default') return;
         if (navStyle === 'text') sk.ui.get.navbar().nav.getAll('svg').forEach((svg) => { svg.remove(); });
-        if (navStyle === 'icon') sk.ui.get.navbar().nav.getAll('span').forEach((text) => { if (!text.class().includes('skUIIcon')) text.remove(); });
+        if (navStyle === 'icon') sk.ui.get.navbar().nav.getAll('span').forEach((text) => { if (!text.class().includes('skUI_Icon_Icons')) text.remove(); });
         if (navStyle !== 'text' && settings.iconStyle !== 'default') create();
     };
 
@@ -53,4 +53,10 @@
     };
 
     main();
+
+    if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
+        General: {
+            Icons: { selector: '.skUI_Icon_Icons' }
+        }
+    });
 })()

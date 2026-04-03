@@ -3,14 +3,17 @@
     let settings, preload, stats;
 
     function card(category) {
-        if (sk.tool.get('.SKES_C')) return;
+        if (sk.tool.get('.skExtra_Most_Used_Crown')) return;
         if (settings.cardCrown) {
             const singular = category.substring(0, category.length - 1).trim();
             const cards = sk.ui.get.cards[singular]();
             cards.forEach((card) => {
                 [1, 2, 3].forEach((position) => {
                     stats.o_counter[category][position].forEach((entry) => {
-                        if (entry.id == card._data.id) card._data.previewSection.append(sk.ui.make.image({ class: 'SKES_C', url: `/plugin/skUI - Assets/assets/Stats/${position}.png`, style: { width: '50px', position: 'absolute', top: 0, left: 0 } }));
+                        if (entry.id == card._data.id) {
+                            card.class(`skExtra_Most_Used_Rank${position}`);
+                            card._data.previewSection.append(sk.ui.make.image({ class: 'skExtra_Most_Used_Crown', url: `/plugin/skUI - Assets/assets/Stats/${position}.png`, style: { width: '50px', position: 'absolute', top: 0, left: 0 } }))
+                        };
                     });
                 });
             });
@@ -18,7 +21,7 @@
     };
 
     function page(category) {
-        if (sk.tool.get('.SKES_C')) return;
+        if (sk.tool.get('.skExtra_Most_Used_Crown')) return;
         if (settings.pageCrown) {
             const singular = category.substring(0, category.length - 1).trim();
             [1, 2, 3].forEach((position) => {
@@ -26,7 +29,7 @@
                     const page = sk.ui.get.page[singular]();
                     if (!page.studio || !page.headers) return;
                     if (entry.id == page.id) {
-                        const img = sk.ui.make.image({ class: 'SKES_C', url: `/plugin/skUI - Assets/assets/Stats/${position}.png`, style: { width: '50px', position: 'absolute', top: 0, left: 0 } });
+                        const img = sk.ui.make.image({ class: 'skExtra_Most_Used_Crown', url: `/plugin/skUI - Assets/assets/Stats/${position}.png`, style: { width: '50px', position: 'absolute', top: 0, left: 0 } });
                         page.studio ? page.studio.append(img) : page.headers.append(img);
                     };
                 });
@@ -104,6 +107,15 @@
             sk.tool.wait(sk.ui.is.scenePage, () => { page('studios') }, true);
         };
     };
-
+    
     main();
+
+    if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
+        General: {
+            Icon: { selector: '.skExtra_Most_Used_Crown' },
+            First: { selector: '.skExtra_Most_Used_Rank1' },
+            Second: { selector: '.skExtra_Most_Used_Rank2' },
+            Third: { selector: '.skExtra_Most_Used_Rank3' }
+        }
+    });
 })()

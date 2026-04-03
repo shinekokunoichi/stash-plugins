@@ -1,3 +1,8 @@
+2.4.2
+ - Adapted some @typedef of Stash based on the latest update 0.31.0
+ - Fixed some bug for sk.ui.get.page
+ - Fixed skGraphicBase.value not returnig it
+
 2.4.1
  - Added _getCustomField for every sk.ui.get.page, adapted for latest dev version
  - Added new field "page/sort/direction" for @typedef skStashFilters

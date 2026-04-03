@@ -1,3 +1,6 @@
+1.1:
+ - Added the newer plugins
+
 1.0.3:
  - Reverted yml file for yml parsing bug
 

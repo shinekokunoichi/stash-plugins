@@ -1,12 +1,13 @@
 name: skUI - Scenes
 # requires: Shinobi-Api  
 description: Change the aspect of scene cards and page
-version: 1.1.4
+version: 1.2
 ui:
   javascript:
     - skUI - Scenes.js
   requires:
     - Shinobi-Api
+    - skUI - Theme
 settings:
     pageHide:
       displayName: Auto hide details
