@@ -1,3 +1,9 @@
+1.1.3
+ - UI rework for Themes section
+ - Added drawback in case clipboard doesn't work
+ - Added new property 'font-weight'
+ - Added new elements under Global > Title/Subtitle/Paragraph
+
 1.1.2
  - Fixed theme not saving correctly
 

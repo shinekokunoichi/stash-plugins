@@ -19,6 +19,7 @@
         'background-repeat',
         'background-position',
         'background-attachment',
+        'background-size',
         'text-align',
         'border-style',
         'border-style-top',
@@ -51,9 +52,11 @@
         'background-repeat': 'Repeat the background image if is too small for the element. Values: no-repeat, repeat',
         'background-position': 'Set the background image position. Values: top, left, right, bottom, center. Note you can mix them: x-position y-position, top center',
         'background-attachment': 'Set the background fixed or scrolls with the rest of the page. Values: fixed, scroll',
+        'background-size': 'Change the background image size. Values: auto, contain, cover',
         'color': 'Text color',
         'font-size': 'Font size',
         'text-align': 'Text alignment. Values: left, center, right, justify',
+        'font-weight': 'Make the text from normal to bold. Values: lighter, normal, bold, bolder',
         'width': 'Element width',
         'min-width': 'Minimum element width',
         'max-width': 'Maximum element width',
@@ -311,11 +314,16 @@
                 }
             });
             const themeShare = sk.ui.make.button({
-                text: 'Share', class: 'btn btn-secondary', event: {
+                text: 'Copy', class: 'btn btn-secondary', event: {
                     type: 'click', callback: async () => {
-                        await navigator.clipboard.write([new ClipboardItem({
+                        if (navigator.permissions.query({ name: "clipboard-write" })) await navigator.clipboard.write([new ClipboardItem({
                             'text/plain': JSON.stringify({ theme: theme, data: themeManager._themes[theme] })
                         })]);
+                        if (!navigator.permissions.query({ name: "clipboard-write" })) {
+                            console.log('%cCopy the wall of text under me!', 'color: red; font-size:15px; font-weight: bold;');
+                            console.log(JSON.stringify({ theme: theme, data: themeManager._themes[theme] }));
+                            window.alert('Your browser does not enable writing to Clipboard. Open developer tools (ctrl + shift + i) go to console and copy the indicated text.')
+                        };
                     }
                 }
             });
@@ -339,17 +347,20 @@
             const load = themeManager.load();
             const save = themeManager.save();
             const backup = themeManager.backup();
-            themeContainer.append([themeManager.load(), themeManager.save(), themeManager.backup()]);
+            const divider = sk.ui.make.divider();
+            const section = sk.ui.make.container({ flex: true, style: {'justify-content': 'space-around', 'align-items': 'flex-start'} });
+            section.append([save, backup]);
+            themeContainer.append([load, divider, section]);
             return themeContainer;
         },
         //Theme loader
         load: () => {
-            const loadTheme = sk.ui.make.container({ flex: true });
+            const loadTheme = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap', 'text-align': 'center' } });
             if (themeManager._themes) {
                 for (theme in themeManager._themes) {
-                    const themeCard = sk.ui.make.container({ class: 'card skTheme_Themes_Card' });
+                    const themeCard = sk.ui.make.container({ class: 'card skTheme_Themes_Card', flex: true });
                     if (theme === settings.theme) themeCard.class('btn-secondary');
-                    const themePreview = sk.ui.make.image({ url: themeManager._themes[theme].preview });
+                    const themePreview = sk.ui.make.image({ url: themeManager._themes[theme].preview, style: {'max-width':'132px'} });
                     const themeName = sk.ui.make.subTitle({ text: theme });
                     themeCard.append([themePreview, themeName, themeManager._themeOptions(themeCard, theme)]);
                     loadTheme.append(themeCard);
@@ -393,11 +404,13 @@
             };
         },
         save: () => {
-            const saveThemeContainer = sk.ui.make.container({ flex: true, style: { 'flex-direction': 'column', gap: '1rem' } });
-            const themeDataContainer = sk.ui.make.container({ flex: true, style: { gap: '1rem' } });
+            const saveThemeContainer = sk.ui.make.container({ flex: true, style: { 'flex-direction': 'column', gap: '1rem', 'margin-top': '5%' } });
+            const saveThemeTitle = sk.ui.make.subTitle({ text: 'Add Theme' });
+            saveThemeContainer.append(saveThemeTitle);
+            const themeDataContainer = sk.ui.make.container({ flex: true, style: { gap: '1rem', 'flex-direction': 'column' } });
             //Theme info preview
             const themePreviewContainer = sk.ui.make.container({ flex: true, style: { 'flex-direction': 'column', gap: '1rem' } });
-            const themeImage = sk.ui.make.image({ style: { 'max-width': '132px', 'max-height': '132px' } });
+            const themeImage = sk.ui.make.image({ style: { 'max-width': '132px' } });
             const themeName = sk.ui.make.input({ attribute: { type: 'text', placeholder: 'Theme name', class: 'text-input' } });
             themePreviewContainer.append([themeImage, themeName]);
             //Theme image loader
@@ -438,7 +451,7 @@
                         };
                         localStorage.setItem('skTheme - Preset', JSON.stringify(themeManager._themes));
                         if (sk.tool.get('.skTheme_Themes_Card.btn-primary')) sk.tool.get('.skTheme_Themes_Card.btn-primary').class('btn-primary');
-                        const newCard = sk.ui.make.container({ class: 'card btn-primary' });
+                        const newCard = sk.ui.make.container({ class: 'card btn-primary', flex: true });
                         const newPreview = sk.ui.make.image({ url: themePreview });
                         const newName = sk.ui.make.subTitle({ text: themeName.value() });
                         newCard.append([newPreview, newName, themeManager._themeOptions(newCard, themeName.value())]);
@@ -449,13 +462,20 @@
             });
             //Shared
             const themeShared = sk.ui.make.button({
-                text: 'Import Shared', class: 'btn btn-secondary', event: {
+                text: 'Paste', class: 'btn btn-secondary', event: {
                     type: 'click', callback: async () => {
-                        const sharedData = await navigator.clipboard.read();
-                        const parsedSharedData = await sharedData[0].getType('text/plain');
-                        let jsonTheme = await parsedSharedData.text();
-                        jsonTheme = JSON.parse(jsonTheme);
-                        if (!jsonTheme.theme || !jsonTheme.data) return;
+                        let sharedData;
+                        if (navigator.permissions.query({ name: "clipboard-read" })) {
+                            sharedData = await navigator.clipboard.read();
+                            sharedData = await sharedData[0].getType('text/plain');
+                            sharedData = await sharedData.text();
+                        };
+                        if (!navigator.permissions.query({ name: "clipboard-read" })) sharedData = window.prompt('Paste there the shared theme');
+                        let jsonTheme = JSON.parse(sharedData);
+                        if (!jsonTheme.theme || !jsonTheme.data) {
+                            window.alert('Not a valid theme');
+                            return;
+                        };
                         let lastI = 1;
                         if (themeManager._themes[jsonTheme.theme]) {
                             for (checkTheme in themeManager._themes) {
@@ -467,19 +487,22 @@
                         }
                         themeManager._themes[`Shared_${lastI} ${jsonTheme.theme}`] = jsonTheme.data;
                         localStorage.setItem('skTheme - Preset', JSON.stringify(themeManager._themes));
-                        const newCard = sk.ui.make.container({ class: 'card' });
-                        const newPreview = sk.ui.make.image({ url: jsonTheme.data.preview });
+                        const newCard = sk.ui.make.container({ class: 'card', flex: true });
+                        const newPreview = sk.ui.make.image({ url: jsonTheme.data.preview, style: { 'max-width': '132px' } });
                         const newName = sk.ui.make.subTitle({ text: jsonTheme.theme });
                         newCard.append([newPreview, newName, themeManager._themeOptions(newCard, `Shared_${lastI} ${jsonTheme.theme}`)]);
                         themeManager._loadTheme.append(newCard);
                     }
                 }
             })
-            saveThemeContainer.append([themeDataContainer, themeSave, themeShared]);
+            themeSaveContainer.append([themeSave, themeShared]);
+            saveThemeContainer.append([themeDataContainer, themeSaveContainer]);
             return saveThemeContainer;
         },
         backup: () => {
-            const importExport = sk.ui.make.container({ flex: true, style: { 'justify-content': 'space-around', 'margin-top': '10%' } });
+            const importExport = sk.ui.make.container({ flex: true, style: { gap: '1rem', 'margin-top': '5%', 'flex-direction': 'column' } });
+            const importExportTitle = sk.ui.make.subTitle({ text: 'Backup' });
+            importExport.append(importExportTitle);
             const importPreset = sk.ui.make.input({
                 style: { display: 'none' }, attribute: { type: 'file' }, event: {
                     type: 'change', callback: async (event) => {
@@ -561,10 +584,10 @@
         const navbar = sk.ui.get.navbar().buttons;
         navbar.style({ display: 'flex' });
         navbar.append(linkUI);
-        ui = sk.ui.make.popUp({ flex: true, class: 'bg-dark', style: { 'flex-direction': 'column', 'align-items': 'flex-start', 'justify-content': 'flex-start', width: '27.5%', height: '100%', padding: '1%', top: 0, right: 0, display: 'none', 'box-shadow': '0 0 5px black', 'overflow-y': 'auto' } });
+        ui = sk.ui.make.popUp({ flex: true, class: 'bg-dark', style: { 'flex-direction': 'column', 'align-items': 'flex-start', 'justify-content': 'flex-start', width: '50%', height: '100%', padding: '1%', top: 0, right: 0, display: 'none', 'box-shadow': '0 0 5px black', 'overflow-y': 'auto' } });
         ui._navigation = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
         ui._content = sk.ui.make.container({ style: { width: '100%', 'text-align': 'left'} });
-        ui._actions = sk.ui.make.container({ flex: true, style: { 'margin-top': 'auto', width: '100%', 'justify-content': 'space-evenly' } });
+        ui._actions = sk.ui.make.container({ flex: true, style: { 'margin-top': 'auto', width: '100%', gap: '1rem' } });
         const hide = sk.ui.make.button({ class: 'btn btn-secondary', text: 'Hide', event: [{ type: 'mouseenter', callback: () => { ui.style({ opacity: 0 }); } }, { type: 'mouseleave', callback: () => { ui.style({ opacity: 1 }); } }]})
         const close = sk.ui.make.button({ class: 'btn btn-danger', text: 'Close', event: { type: 'click', callback: () => { ui.style({ display: 'none' }); } } });
         const themes = sk.ui.make.button({
@@ -592,6 +615,9 @@
         Global: {
             All: { selector: '*' },
             Body: { selector: 'body' },
+            Title: { selector: 'h1' },
+            Subtitle: { selector: 'h3' },
+            Paragraph: {selector: 'p'},
             'Dark background': { selector: '.bg-dark' },
             'Main container': { selector: '.main .container-fluid' },
             'Filter bar': { selector: '.filtered-list-toolar' },
