@@ -80,7 +80,7 @@
                     const current = sk.ui.make.subTitle();
                     const buttons = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
                     const toolButtons = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
-                    const names = settings.preset.includes(',') ? settings.preset.split(',') : settings.preset.split(' ');
+                    const names = settings.preset.split(',');
                     //Tag Filter
                     const tagFilter = sk.ui.make.input({ class: 'text-input', attribute: { placeholder: 'Tag filter' }, event: { type: 'input', callback: () => sk.tool.getAll('.skExtra_Multiple_Performer_Image_Thumbnail').forEach(e => e.attribute('_tags').includes(tagFilter.value()) || tagFilter.value() === '' ? e.style({ display: 'block' }) : e.style({ display: 'none' })) } });
                     //Aspect Ratio
@@ -98,11 +98,18 @@
                         if (type === 'Close' || skMPI.toString().includes(type.toLowerCase())) buttonType = 'primary';
                         if (!buttonType) buttonType = 'secondary'
                         const button = sk.ui.make.button({
-                            id: `skExtra_Multiple_Performer_Image_Subtitle-${type}`, text: type, class: `btn btn-${buttonType}`, style: { margin: '.5%' }, event: {
+                            id: `skExtra_Multiple_Performer_Image_Subtitle-${type.replaceAll(' ','_')}`, text: type, class: `btn btn-${buttonType}`, style: { margin: '.5%' }, event: {
                                 type: 'click', callback: () => {
                                     if (type === 'Close') popUp.remove();
                                     if (type !== 'Close') {
                                         if (type.toLowerCase() === 'custom') type = window.prompt('Custom name');
+                                        if (!names.includes(type)) {
+                                            const updatePresets = {
+                                                name: pluginName,
+                                                options: { preset: `${settings.preset}, ${type}` }
+                                            };
+                                            sk.plugin.update(updatePresets);
+                                        };
                                         type = type.toLowerCase();
                                         selected = type;
                                         current.write(`Selecting image for ${type}`);
@@ -116,7 +123,7 @@
                     const container = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
                     thumbnails.forEach((thumbnail) => {
                         const overlay = sk.ui.make.container({ style: { margin: '.5%' } });
-                        const setted = sk.ui.make.subTitle();
+                        const setted = sk.ui.make.subTitle({ class: 'skExtra_Multiple_Performer_Image_Subtitle' });
                         const isSetted = skMPI.filter((value) => { if (value.split(':')[1] === thumbnail.id) return thumbnail; });
                         if (isSetted[0]) {
                             setted.write(isSetted.map((value) => {
@@ -124,7 +131,6 @@
                                 categoryName = categoryName[0].toUpperCase() + categoryName.slice(1).toLowerCase();
                                 return categoryName;
                             })).join(', ');
-                            setted.class('skExtra_Multiple_Performer_Image_Subtitle');
                         };
                         let tags = '';
                         thumbnail.tags.forEach((tag) => {
@@ -143,7 +149,7 @@
                                         skMPI.push(newValue);
                                         const uSelected = selected[0].toUpperCase() + selected.slice(1).toLowerCase();
                                         setted.read().includes(',') ? setted.write(`${setted.read()}, ${uSelected}`) : setted.write(uSelected);
-                                        sk.tool.get(`#skExtra_Multiple_Performer_Image_Subtitle-${uSelected}`).class('btn btn-primary', true);
+                                        sk.tool.get(`#skExtra_Multiple_Performer_Image_Subtitle-${uSelected.replaceAll(' ', '_') }`).class('btn btn-primary', true);
                                     };
                                     //Remove the category
                                     if (selected === 'remove') {
@@ -218,6 +224,7 @@
             if (selector === '.performer-card') card = card.get('a');
             const id = card.url().replace('/performers/', '');
             if (!images[id]) return;
+            if (!images[id][toGet]) return;
             const url = selector === '.performer-card' ? images[id][toGet].image : images[id][toGet].thumbnail;
             card.get('img').url(url);
         });
@@ -226,8 +233,8 @@
 
     function fastChange() {
         if (window.location.pathname !== '/performers') return;
-        const container = sk.ui.make.container({ flex: true });
-        const names = settings.preset.includes(',') ? settings.preset.split(',') : settings.preset.split(' ');
+        const container = sk.ui.make.container({ flex: true, style: {'flex-wrap':'wrap'} });
+        const names = settings.preset.split(',');
         ['default'].concat(names).forEach((preset) => {
             const button = sk.ui.make.button({ class: 'btn btn-secondary', text: preset, event: { type: 'click', callback: () => { replace(sk.ui.is.performerCard, preset) } } });
             container.append(button);
@@ -241,7 +248,7 @@
         const defaultSettings = {
             name: pluginName,
             options: {
-                preset: 'portrait clothed skimpy nude',
+                preset: 'portrait, clothed, skimpy, nude',
                 useDefault: true,
                 default: 'skimpy',
                 randomCategory: true,
@@ -252,6 +259,7 @@
         };
         await sk.plugin.check(defaultSettings);
         settings = sk.plugin.get(pluginName);
+        if (settings.preset === 'portrait clothed skimpy nude') await sk.plugin.update({ name: pluginName, options: { preset: 'portrait, clothed, skimpy, nude' } }); //Adapt to the new settings
         if (settings.replaceAll && settings.default !== 'default') {
             preloadImages();
             sk.tool.wait('.filtered-list-toolbar', fastChange, true)
