@@ -103,13 +103,6 @@
                                     if (type === 'Close') popUp.remove();
                                     if (type !== 'Close') {
                                         if (type.toLowerCase() === 'custom') type = window.prompt('Custom name');
-                                        if (!names.includes(type)) {
-                                            const updatePresets = {
-                                                name: pluginName,
-                                                options: { preset: `${settings.preset}, ${type}` }
-                                            };
-                                            sk.plugin.update(updatePresets);
-                                        };
                                         type = type.toLowerCase();
                                         selected = type;
                                         current.write(`Selecting image for ${type}`);
