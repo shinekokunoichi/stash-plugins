@@ -52,7 +52,8 @@ Add custom stats to stash. Currently add a crown bases on top 3 elements for sce
 
 ### Multiple-Performer-Images
 <img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/e4edd98b-3548-4ef1-804a-06bf2a831020" />
-<img width="690" height="176" alt="image" src="https://github.com/user-attachments/assets/29f171b0-47a5-4415-bca4-0226d08aeb13" />
+<img width="1274" height="417" alt="Screenshot 2026-04-11 031958" src="https://github.com/user-attachments/assets/4967ca01-193b-448e-a113-6b83f74badec" />
+
 
 Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
 - Simple GUI to choose and change custom images from the performer page
