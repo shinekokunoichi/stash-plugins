@@ -337,11 +337,6 @@ function skGraphicBase(tag, options = {}) {
     base.element = typeof tag === 'string' ? document.createElement(tag) : tag;
 
     /**
-     * Remove the element
-     */
-    base.remove = () => { base.element.remove(); };
-
-    /**
      * Return the selected elements inside skUI.element {@link sk.tool.getAll}
      * @param {string} selector Query selector
      * @returns {skUI[]} Selected elements
@@ -639,16 +634,11 @@ sk.ui = function skGraphic() {
      * @returns {string} Custom field value
      */
     _getCustomField = async (name, data, category) => {
-        if (!data.customFields) return;
+        let field;
         const altName = name.replaceAll('-', '_') // Random Fixes
-        let field = data.customFields.get(`.detail-item-value.${name}`) || data.customFields.get(`.detail-item-value.${altName}`);
-        if (!field) field = data.customFields.get(`.detail-item-value.custom-field-${name}`) || data.customFields.get(`.detail-item-value.custom-field-${altName}`); // DEV BRANCH FIX
-        if (field) field = field.read();
-        if (!field) { // TRUENAS FIX
-            let _customFields = await sk.stash.find[category]({ ids: [data.id], fields: 'custom_fields' });
-            _customFields = _customFields.custom_fields;
-            if (_customFields[name] || _customFields[altName]) field = _customFields[name] || _customFields[altName];
-        };
+        let _customFields = await sk.stash.find[category]({ ids: [data.id], fields: 'custom_fields' });
+        _customFields = _customFields.custom_fields;
+        if (_customFields[name] || _customFields[altName]) field = _customFields[name] || _customFields[altName];
         return field ? field : '';
     };
 
@@ -1855,8 +1845,8 @@ sk.stash = function skStash() {
         let filterList;
         if (configuration.filter) filterList = `filter:${JSON.stringify(configuration.filter).replaceAll('"', '').replace(`q:${search}`, `q:"${search}"`)}`;
         if (configuration.filter.sort) filterList = filterList.replace(`sort:${sort}`, `sort:"${sort}"`);
-        if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter).replaceAll('"', '').replaceAll("'", '"') }`;
-        if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids).replaceAll('"', '').replaceAll("'", '"') }`;
+        if (configuration.fieldFilter) filterList += `,${filterName}:${JSON.stringify(configuration.fieldFilter).replaceAll('"', '').replaceAll("'", '"')}`;
+        if (configuration.ids) filterList += `,ids:${JSON.stringify(configuration.ids).replaceAll('"', '').replaceAll("'", '"')}`;
 
         let fields = configuration.fields;
         if (fields && !fields.includes('id')) fields = `${fields} id`;
@@ -1961,7 +1951,7 @@ sk.stash = function skStash() {
         /**
          * @typedef {stashBaseFile & _stashImageFile} stashImageFile Stash image file
          */
-        
+
         /**
          * @typedef {object} _stashVideoFile Stash Video file
          * @param {string} format Video format
@@ -1977,7 +1967,7 @@ sk.stash = function skStash() {
         /**
          * @typedef {stashBaseFile & _stashVideoFile} stashVideoFile Stash video file
          */
-        
+
         /**
          * @typedef {object} stashScene Stash scene
          * @prop {number} id Scene ID
@@ -1999,7 +1989,7 @@ sk.stash = function skStash() {
          * @prop {date} updated_at Scene updated date
          * @prop {date} last_played_at Scene last played date
          * @prop {number} resume_time Scene time index was left at
-         * @prop {number} play_duration Scene total spent time 
+         * @prop {number} play_duration Scene total spent time
          * @prop {number} play_count Scene play count
          * @prop {array.<date>} play_history  Scene play history
          * @prop {array.<date>} o_history Scene o-counter history
@@ -2024,7 +2014,7 @@ sk.stash = function skStash() {
          * @prop {object[]} sceneStreams Valid scene streams
          * @prop {string} sceneStreams[].url Scene stream url
          * @prop {string} sceneStreams[].mime_type Scene stream mime type
-         * @prop {string} sceneStreams[].label Scene stream label  
+         * @prop {string} sceneStreams[].label Scene stream label
          */
 
         /**
@@ -2644,7 +2634,7 @@ sk.stash = function skStash() {
          * @prop {array.<number>|array.<string>} ids Markers ids to update
          * @prop {string} [title] Markers title
          * @prop {number|string} [primary_file_id] Markers primary file id
-         * @prop {stashBulkUpdateIds} [tag_ids] Markers tags ids 
+         * @prop {stashBulkUpdateIds} [tag_ids] Markers tags ids
          */
 
         /**

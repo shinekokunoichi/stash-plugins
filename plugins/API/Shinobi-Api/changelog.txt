@@ -1,3 +1,6 @@
+2.4.2.1
+ - _getCustomFields is now dynamic
+
 2.4.2
  - Adapted some @typedef of Stash based on the latest update 0.31.0
  - Fixed some bug for sk.ui.get.page

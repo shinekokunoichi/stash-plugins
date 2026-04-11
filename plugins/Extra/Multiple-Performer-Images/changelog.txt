@@ -1,3 +1,11 @@
+1.2.3
+ - Improved code for easy features integration
+ - Added the ability to create presets inside the GUI
+ - Added requested features #5
+
+1.2.2
+ - Bug Fixes
+
 1.2.1:
  - Bug fixed
 

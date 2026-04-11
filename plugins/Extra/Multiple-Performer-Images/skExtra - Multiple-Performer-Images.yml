@@ -1,7 +1,7 @@
 name: skExtra - Multiple-Performer-Images
 # requires: Shinobi-Api
 description: Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
-version: 1.2.2
+version: 1.2.1
 ui:
   javascript:
     - skExtra - Multiple-Performer-Images.js
@@ -9,16 +9,16 @@ ui:
     - Shinobi-Api
     - skUI - Theme
 settings:
-    preset:
+    presets:
       displayName: Preset category
-      description: Default - portrait, clothed, skimpy, nude.
+      description: Default - Portrait, Clothed, Skimpy, Nude.
     useDefault:
       displayName: Use default
       description: If enabled use the default category, otherwise select a random one. Default - off
       type: BOOLEAN
-    default:
+    defaultCategory:
       displayName: Default image category
-      description: Value - portrait, clothed, skimpy, nude, custom. Default - skimpy
+      description: Value - Default, Any preset category. Default - Default
       type: STRING
     randomCategory:
       displayName: Use random category
@@ -34,5 +34,5 @@ settings:
       type: BOOLEAN
     sfwCategory:
       displayName: SFW category
-      description: Category to use if force SFW is active. Default - clothed
-      type: BOOLEAN
+      description: Category to use if force SFW is active. Default - Clothed
+      type: STRING
