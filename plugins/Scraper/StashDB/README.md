@@ -7,8 +7,6 @@
 </details>
 
 Custom metadata scraper for StashDB.
-> [!IMPORTANT]  
-> Need CORS: [Chrome](https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cors-unblock2/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search).
 
 ## Features
 - Auto scrape on scene update
