@@ -6,7 +6,7 @@
   <img width="397" height="501" alt="image" src="https://github.com/user-attachments/assets/91f6ac0a-3ea0-4ae9-8b52-af80a0fb46f8" />
 </details>
 
-Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+Add a section inside page category to show related one, automatic and manual.
 
 ## Features
 - Automatic suggestion based on tags
