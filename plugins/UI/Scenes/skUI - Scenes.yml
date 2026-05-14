@@ -1,12 +1,16 @@
 name: skUI - Scenes
 # requires: Shinobi-Api  
-description: Change the aspect of scene cards and page
-version: 1.2
+# requires: skManager
+description: Change the aspect of scene cards and page.
+version: 2.0
 ui:
+  css:
+    - skUI - Scenes.css
   javascript:
     - skUI - Scenes.js
   requires:
     - Shinobi-Api
+    - skManager
     - skUI - Theme
 settings:
     pageHide:
@@ -15,14 +19,14 @@ settings:
       type: BOOLEAN
     pageInfo:
       displayName: Remove page info
-      description: Value - studio, frameRate, resolution, createdAt, updatedAt. Default - frameRate resolution createdAt updatedAt
+      description: Value - studio, frameRate, resolution, createdAt, updatedAt. Default - frameRate, resolution, createdAt, updatedAt
     pageTheatre:
       displayName: Theatre mode
       description: Value - default, darken (darken the UI to make the video "pop-out"), fake fullscreen (video cover all the screen without setting fullscreen), fullscreen. Default - darken.
       type: STRING
     cardRemove:
       displayName: Card info remover
-      description: Value - studio, resolution, duration, title, date, description. Default - studio resolution duration date description.
+      description: Value - studio, resolution, duration, title, date, description. Default - studio, resolution, duration, date, description.
       type: STRING
     cardWatched:
       displayName: Card watched
@@ -34,7 +38,7 @@ settings:
       type: BOOLEAN
     popoversRemove:
       displayName: Card popovers remover
-      description: Value - tags, performers, groups, markers, galleries, copies, organized, o_counter. Default - copies organized o_counter
+      description: Value - tags, performers, groups, markers, galleries, copies, organized, o_counter. Default - copies, organized, o_counter
       type: STRING
     popoversCount:
       displayName: Card popovers count

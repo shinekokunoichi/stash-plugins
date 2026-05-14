@@ -1,117 +1,532 @@
 (() => {
     const pluginName = 'skScraper - StashDB';
-    let settings, category, total, searched, scraped, alreadyScraped;
+    let scrapeResults, selectedScraperData;
 
-    function canCreate() {
-        const active = settings.autoCreate;
-        const filter = settings.createFilter.toLowerCase().includes(category);
-        const all = settings.createFilter.toLowerCase() === 'all';
-        if (!active) return false;
-        if (!filter && !all) return false;
-        return true;
+    async function initialize() {
+        // Settings
+        await setDefaultSettings();
+
+        // Tasks
+        setTasks();
+
+        // Hooks
+        setHooks();
+
+        // Compatibility
+        skManagerCompatibility();
+        skKeybinderCompatibility();
     };
 
-    async function scrape(data) {
-        const search = data.name || data.title;
-        let dontScrape = false;
-        data.stash_ids.forEach((stashId) => { if (stashId.endpoint === 'https://stashdb.org/graphql' && !settings.forceScrape) dontScrape = true; });
-        if (dontScrape) {
-            alreadyScraped++;
-            return;
-        };
-        const stashDB = await sk.stashDB.find[category](search);
-        if (!stashDB) return;
-        const options = {
-            update: data.id,
-            create: canCreate()
-        };
-        const stash = await sk.stashDB.toStash(stashDB, options);
-        scraped++;
-    };
-
-    async function start(data) {
-        total = data.length;
-        searched = 0;
-        scraped = 0;
-        alreadyScraped = 0;
-        created = 0;
-        for (entry of data) {
-            const find = await scrape(entry);
-            searched++;
-            if (find) scraped++;
-        };
-    };
-
-    function finish() {
-        if (!scraped && total === 1) return;
-        if (total === searched) sk.tool.notify(pluginName, `Finshed scraping ${category}.\nScraped a total of ${scraped}\nAlready scraped ${alreadyScraped}`);
-        if (total !== searched) setTimeout(finish, 200);
-    };
-
-    //Hook
-    async function scrapeOne(data) {
-        category = data.__typename ? data.__typename.toLowerCase() : undefined;
-        if (!category) return;
-        await start([data]);
-        finish();
-    };
-
-    //Task
-    async function scrapeAll(scraping) {
-        category = scraping.substring(0, scraping.length - 1);
-        if (!category === 'all') {
-            const data = await sk.stash.find[scraping];
-            await start(data);
-        } else {
-            const scenes = await sk.stash.find.scenes();
-            const performers = await sk.stash.find.performers();
-            const studios = await sk.stash.find.studios();
-            const tags = await sk.stash.find.tags();
-            await start(scenes);
-            await start(performers);
-            await start(studios);
-            await start(tags);
-        };
-        finish();
-    };
-
-    async function main() {
-        const defaultSettings = {
+    // Settings
+    async function setDefaultSettings(){
+        sk.plugin.check({
             name: pluginName,
             options: {
-                forceScrape: false,
-                autoUpdate: true,
-                updateFilter: 'all',
-                autoCreate: false,
-                createFilter: 'all',
-                genderFilter: 'both'
+                create: false,
+                createFilter: 'performers, studios, tags',
+                autoScrape: true,
+                autoScrapeFilter: 'performers, studios, tags'
             }
-        };
-        await sk.plugin.check(defaultSettings);
-        settings = sk.plugin.get(pluginName);
-        if (!sk.stashDB.canUse()) {
-            sk.tool.notify(pluginName, 'StashDB endpoint is not setted');
-            return;
-        };
-        //Hook
-        if (settings.autoUpdate) {
-            const hookFilter = settings.updateFilter.toLowerCase();
-            let hooks = [];
-            if (hookFilter.includes('scenes') || hookFilter === 'all') hooks.push({ category: 'scene', operation: 'update', callback: scrapeOne });
-            if (hookFilter.includes('performers') || hookFilter === 'all') hooks.push({ category: 'performer', operation: 'update', callback: scrapeOne });
-            if (hookFilter.includes('studios') || hookFilter === 'all') hooks.push({ category: 'studio', operation: 'update', callback: scrapeOne });
-            if (hookFilter.includes('tags') || hookFilter === 'all') hooks.push({ category: 'tag', operation: 'update', callback: scrapeOne });
-            sk.hook.add(hooks);
-        };
-        //Task
-        sk.task.add([
-            { id: pluginName, name: 'Scrape All', description: 'Scrape all Stash library', callback: scrapeAll, arg: 'all' },
-            { id: pluginName, name: 'Scrape Scenes', description: 'Scrape all scenes', callback: scrapeAll, arg: 'scenes' },
-            { id: pluginName, name: 'Scrape Performers', description: 'Scrape all performers', callback: scrapeAll, arg: 'performers' },
-            { id: pluginName, name: 'Scrape Studios', description: 'Scrape all studios', callback: scrapeAll, arg: 'studios' },
-            { id: pluginName, name: 'Scrape Tags', description: 'Scrape all tags', callback: scrapeAll, arg: 'tags' },
-        ]);
+        })
+    }
+
+    // Tasks
+    function setTasks() {
+        sk.task.add(
+            {
+                id: pluginName,
+                name: 'GUI',
+                description: 'Open the scraper GUI',
+                callback: scraperGUI
+            },
+            {
+                id: pluginName,
+                name: 'Scrape All',
+                description: 'Scrape all scenes, performers, studios, tags (without any StashID)',
+                callback: async () => {
+                    await scrapeNoGUI('scenes');
+                    await scrapeNoGUI('performers');
+                    await scrapeNoGUI('studios');
+                    await scrapeNoGUI('tags');
+                }
+            },
+            {
+                id: pluginName,
+                name: 'Force scrape All',
+                description: 'Scrape all scenes, performers, studios, tags (forced)',
+                callback: async () => {
+                    await scrapeNoGUI('scenes', true);
+                    await scrapeNoGUI('performers', true);
+                    await scrapeNoGUI('studios', true);
+                    await scrapeNoGUI('tags', true);
+                }
+            },
+            {
+                id: pluginName,
+                name: 'Scrape scenes',
+                description: 'Scrape all scenes (without any StashID',
+                callback: () => scrapeNoGUI('scenes')
+            },
+            {
+                id: pluginName,
+                name: 'Force scrape scenes',
+                description: 'Scrape all scenes (forced)',
+                callback: () => scrapeNoGUI('scenes', true)
+            },
+            {
+                id: pluginName,
+                name: 'Scrape performers',
+                description: 'Scrape all performers (without any StashID',
+                callback: () => scrapeNoGUI('performers')
+            },
+            {
+                id: pluginName,
+                name: 'Force scrape performers',
+                description: 'Scrape all performers (forced)',
+                callback: () => scrapeNoGUI('performers', true)
+            },
+            {
+                id: pluginName,
+                name: 'Scrape studios',
+                description: 'Scrape all studios (without any StashID',
+                callback: () => scrapeNoGUI('studios')
+            },
+            {
+                id: pluginName,
+                name: 'Force scrape studios',
+                description: 'Scrape all studios (forced)',
+                callback: () => scrapeNoGUI('studios', true)
+            },
+            {
+                id: pluginName,
+                name: 'Scrape tags',
+                description: 'Scrape all tags (without any StashID',
+                callback: () => scrapeNoGUI('tags')
+            },
+            {
+                id: pluginName,
+                name: 'Force scrape tags',
+                description: 'Scrape all tags (forced)',
+                callback: () => scrapeNoGUI('tags', true)
+            }
+        )
     };
 
-    main();
-})();
+    async function scraperGUI() {
+        const gui = sk.ui.make.popUp({
+            id: 'skScraper_StashDB_GUI',
+            class: 'main container-fluid bg-dark',
+            flex: true,
+            style: {
+                'flex-direction': 'column',
+                top: 0,
+                width: '100%',
+                height: '100%'
+            }
+        });
+        const title = sk.ui.make.title({ text: pluginName });
+        const close = sk.ui.make.button({
+            text: 'Close',
+            class: 'btn btn-danger',
+            style: {
+                position: 'absolute',
+                top: 0,
+                right: 0
+            },
+            event: {
+                type: 'click',
+                callback: () => gui.remove()
+            }
+        })
+        const card = sk.ui.make.container({
+            class: 'card',
+            style: {
+                width: '100%',
+                height: '90%',
+                'overflow-y': 'auto'
+            }
+        });
+
+        card.append(await GUIScrape());
+
+        gui.append(close, title, card);
+        document.body.append(gui.element);
+    };
+
+    async function GUIScrape() {
+        const scraperContainer = sk.ui.make.container({
+            flex: true,
+            style: {
+                'flex-direction': 'column',
+                width: '100%',
+                'justify-content': 'flex-start',
+                'align-items': 'flex-start'
+            }
+        });
+        const title = sk.ui.make.title({
+            id: 'skScraper_StashDB_Progress',
+            text: 'Scraper'
+        });
+
+        const card = sk.ui.make.container({
+            flex: true,
+            style: {
+                width: '100%',
+                'flex-direction': 'column',
+                'align-items': 'flex-start'
+            }
+        });
+
+        const searchContainer = sk.ui.make.container({ flex: true });
+        const noEndpointScene = sk.ui.make.button({
+            text: 'Scenes - no endpoint',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('scenes')
+            }
+        });
+        const alsoEndpointScene = sk.ui.make.button({
+            text: 'Scenes - all',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('scenes', true)
+            }
+        });
+        const noEndpointPerformer = sk.ui.make.button({
+            text: 'Performers - no endpoint',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('performers')
+            }
+        });
+        const alsoEndpointPerformer = sk.ui.make.button({
+            text: 'Performers - all',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('performers', true)
+            }
+        });
+        const noEndpointStudio = sk.ui.make.button({
+            text: 'Studios - no endpoint',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('studios')
+            }
+        });
+        const alsoEndpointStudio = sk.ui.make.button({
+            text: 'Studio - all',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('studios', true)
+            }
+        });
+        const noEndpointTag = sk.ui.make.button({
+            text: 'Tags - no endpoint',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('tags')
+            }
+        });
+        const alsoEndpointTag = sk.ui.make.button({
+            text: 'Tags - all',
+            class: 'btn btn-secondary',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: () => searchScraperData('tags', true)
+            }
+        });
+        const updateScraped = sk.ui.make.button({
+            text: 'Update selected scraped data',
+            class: 'btn btn-danger',
+            style: { 'margin-right': '.5rem' },
+            event: {
+                type: 'click',
+                callback: updateSelectedScrapedData
+            }
+        });
+        const selectAllScraped = sk.ui.make.button({
+            text: 'Select all scraped data',
+            class: 'btn btn-success',
+            event: {
+                type: 'click',
+                callback: () => sk.tool.getAll('.skScraper_StashDB_ResultsCard').forEach(entry => entry.click())
+            }
+        });
+        searchContainer.append(noEndpointScene, alsoEndpointScene, noEndpointPerformer, alsoEndpointPerformer, noEndpointStudio, alsoEndpointStudio, noEndpointTag, alsoEndpointTag, updateScraped, selectAllScraped);
+
+
+        const resultsContainer = sk.ui.make.container({
+            id: 'skScraper_StashDB_Results',
+            flex: true,
+            style: {
+                width: '100%',
+                'margin-top': '1rem',
+                'flex-wrap': 'wrap',
+                'align-items': 'flex-start'
+            }
+        });
+
+        card.append(searchContainer, resultsContainer);
+
+        scraperContainer.append(title, card);
+        return scraperContainer;
+    };
+
+    async function searchScraperData(category, forceScrape) {
+        const progress = sk.tool.get('#skScraper_StashDB_Progress');
+        const resultsContainer = sk.tool.get('#skScraper_StashDB_Results');
+        resultsContainer.write('', true);
+
+        progress.write('Scraper - Loading...');
+
+        const fields = category === 'scenes' || category === 'images' ? 'id title stash_ids { endpoint }' : 'id name stash_ids { endpoint }'
+        let data = await sk.stash.find[category]({ fields: fields });
+
+        prepareScrapeResults(data);
+        data = data.filter(entry => canScrape(entry, forceScrape));
+
+        progress.write(`Scraper - Scraping 0/${data.length} ${category}`);
+        sk.tool.notify(pluginName, `Scraping ${data.length} ${category}`);
+
+        const { genderFilter } = sk.plugin.get(pluginName);
+
+        const createInfo = (key, info) => sk.ui.make.description({ text: `${key[0].toUpperCase() + key.slice(1).replace('_', ' ')}: ${info}` });
+        const stashDBLink = id => sk.ui.make.link({
+            text: `StashDB ID`,
+            url: `https://stashdb.org/${category}/${id.stash_id}`,
+            attribute: { target: '_blank' }
+        });
+
+        for (let i = 0; i < data.length; i++) {
+            const entry = data[i];
+            let scrapedData = await sk.stashDB.find[`${category.slice(0, -1)}`](entry.title || entry.name);
+
+            if (scrapedData) {
+                scrapedData.id = entry.id;
+                const card = sk.ui.make.container({
+                    class: 'btn-danger skExtra_Metadata_Parser_ResultsCard',
+                    flex: true,
+                    style: {
+                        width: '32rem',
+                        padding: '1rem',
+                        'min-height': '40rem',
+                        'flex-direction': 'row',
+                        'justify-content': 'space-between',
+                        'aling-items': 'flex-start'
+                    },
+                    event: {
+                        type: 'click',
+                        callback: () => checkScraperData(scrapedData, card)
+                    }
+                });
+
+                const infosContainer = sk.ui.make.container({
+                    style: {
+                        width: '20rem',
+                        'min-height': '40rem',
+                        'text-align': 'left'
+                    }
+                });
+                const infos = sk.ui.make.container();
+
+                const imageContainer = sk.ui.make.container({
+                    style: {
+                        width: '20rem',
+                        'min-height': '40rem',
+                        'background-size': 'contain',
+                        'background-repeat': 'no-repeat',
+                        'background-position': 'top center'
+                    }
+                });
+
+                infosContainer.append(infos);
+                card.append(infosContainer, imageContainer);
+
+                infos.append(sk.ui.make.link({
+                    text: `Scraped from ${entry.title || entry.name}`,
+                    url: `${window.location.origin}/${category}/${entry.id}`,
+                    attribute: { target: '_blank' }
+                }));
+
+                const stashData = await sk.stashDB.toStash(scrapedData);
+                for (const key in stashData) {
+                    const value = typeof stashData[key] === 'number' ? String(stashData[key]) : stashData[key];
+
+                    if (value.includes('stashdb')) imageContainer.style({ 'background-image': `url(${value})` })
+                    else if (key !== 'stash_ids' && key !== 'urls' && Array.isArray(value)) infos.append(createInfo(key, value.join(', ')))
+                    else if (key !== 'stash_ids' && key !== 'urls') infos.append(createInfo(key, value));
+                };
+
+                infos.append(stashDBLink(stashData.stash_ids[0]));
+                resultsContainer.append(card);
+                progress.write(`Scraper - Scraping ${i + 1}/${data.length} ${category}`);
+                checkScraperData(scrapedData, card, category);
+            };
+        };
+
+        dryRun = undefined;
+        whatWillCreate = {};
+        progress.write('Scraper - Scraping completed');
+        sk.tool.notify(pluginName, 'Scraping completed', 'success');
+    };
+
+    function prepareScrapeResults(data) {
+        scrapeResults = {
+            total: data.length,
+            scraped: 0,
+            alreadyScraped: 0,
+            skipped: 0
+        };
+    };
+
+    function canScrape(entry, forceScrape) {
+        let canScrape;
+        
+        entry.stash_ids.forEach((stashId) => {
+            if (!forceScrape && stashId?.endpoint === 'https://stashdb.org/graphql') scrapeResults.alreadyScraped++;
+            if (!forceScrape && stashId?.endpoint !== 'https://stashdb.org/graphql') scrapeResults.skipped++;
+        });
+
+        if (!entry.stash_ids[0] || forceScrape) canScrape = true;
+
+        return canScrape;
+    };
+
+    function checkScraperData(entry, card, category) {
+        if (!selectedScraperData) selectedScraperData = {
+            toUpdate: [],
+            ids: [],
+            _category: category.toLowerCase()
+        };
+
+        if (selectedScraperData.ids.includes(entry.id)) {
+            const index = selectedScraperData.ids.indexOf(entry.id);
+            selectedScraperData.toUpdate.splice(index, 1);
+            selectedScraperData.ids.splice(index, 1);
+            card.class(['btn-success', 'btn-danger']);
+        } else {
+            selectedScraperData.toUpdate.push(entry);
+            selectedScraperData.ids.push(entry.id);
+            card.class(['btn-danger', 'btn-success']);
+        };
+    };
+
+    async function updateSelectedScrapedData() {
+        const progress = sk.tool.get('#skScraper_StashDB_Progress');
+        progress.write(`Scraper - Updating 0/${selectedScraperData.toUpdate.length} ${selectedScraperData._category}`);
+
+        createMissingData = true;
+
+        for (let i = 0; i < selectedScraperData.toUpdate.length; i++) {
+            const { create, createFilter } = sk.plugin.get(pluginName);
+
+            const entry = selectedScraperData.toUpdate[i];
+            await sk.stashDB.toStash(entry, {
+                update: entry.id,
+                create: create && createFilter.includes(selectedScraperData._category)
+            });
+            progress.write(`Scraper - Updating ${i + 1}/${selectedScraperData.toUpdate.length} ${selectedScraperData._category}`);
+        };
+
+        progress.write('Scraper - Updating completed');
+    };
+
+    async function scrapeNoGUI(category, forceScrape) {
+        const fields = category === 'scenes' || category === 'images' ? 'id title stash_ids { endpoint }' : 'id name stash_ids { endpoint }'
+        let data = await sk.stash.find[category]({ fields: fields });
+
+        prepareScrapeResults(data);
+        data = data.filter(entry => canScrape(entry, forceScrape));
+
+        sk.tool.notify(pluginName, `Searching for ${data.length} ${category} in StashDB`);
+
+        const { create, createFilter } = sk.plugin.get(pluginName);
+
+        for (const entry of data) {
+            const scrapedData = await sk.stashDB.find[`${category.slice(0, -1)}`](entry.title || entry.name);
+            if (scrapedData) {
+                scrapeResults.scraped++;
+                await sk.stashDB.toStash(scrapedData, {
+                    update: entry.id,
+                    create: create && createFilter.includes(category)
+                });
+            };
+        };
+
+        const results = `Total: ${scrapeResults.total}
+        Scraped: ${scrapeResults.scraped}
+        Already Scraped: ${scrapeResults.alreadyScraped}
+        Skipped: ${scrapeResults.skipped}
+        `;
+
+        sk.tool.notify(pluginName, results, 'Success');
+    };
+
+    // Hooks
+    function setHooks() {
+        const { autoScrape, autoScrapeFilter } = sk.plugin.get(pluginName);
+
+        if (autoScrape) autoScrapeFilter.split(',').forEach(category => sk.hook.add({
+            category: category,
+            operation: 'update',
+            callback: () => scrapeNoGUI(category)
+        }));
+    };
+
+    // Compatibility
+    function skManagerCompatibility() {
+        if (window._skManager) window._skManager.load({
+            name: pluginName,
+            callback: scraperGUI,
+            updates: [
+                {
+                    version: '1.0',
+                    description: 'Plugin created.'
+                },
+                {
+                    version: '2.0',
+                    description: 'Added compatibility to skManager.'
+                },
+                {
+                    version: '2.1',
+                    description: 'Force update plugin.'
+                }
+            ]
+        });
+    };
+
+    function skKeybinderCompatibility() {
+        if (window._skExtra_Keybinder) window._skExtra_Keybinder.load({
+            [pluginName]: [
+                {
+                    sequence: 's k s g',
+                    action: 'Open the scraper GUI',
+                    callback: scraperGUI
+                },
+                {
+                    sequence: 'esc',
+                    action: 'Close the scraper GUI',
+                    callback: () => sk.tool.get('#skScraper_StashDB_GUI').remove(),
+                    selector: '#skScraper_StashDB_GUI'
+                }
+            ]
+        });
+    };
+
+    initialize();
+})()

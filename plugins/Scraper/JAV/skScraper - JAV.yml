@@ -1,33 +1,29 @@
 name: skScraper - JAV
-# requires: Shinobi-Api  
-description: Custom metadata scraper for JAV. Need CORS
-version: 2.0.4
+# requires: Shinobi-Api
+# requires: skManager
+description: Custom metadata scraper for JAV. Need CORS.
+version: 2.1
 ui:
   javascript:
     - skScraper - JAV.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
   csp:
     connect-src:
       - https://www.javmost.ws
+      - https://img3.javmost.ws
 settings:
-    forceScrape:
-      displayName: Force Scrape
-      description: If enabled will ignore if the scene was already scraped by another provider. Default - off.
-      type: BOOLEAN
-    autoCreate:
-      displayName: Auto create
-      description: Enable the creation of missing data. Default - off.
-      type: BOOLEAN
     create:
-      displayName: Auto create options
-      description: Value - All, performers, studios, groups and tags. Default - All.
-      type: STRING
-    autoUpdate:
-      displayName: Auto update
-      description: Enable auto updating on scene update. Default - on.
+      displayName: Create missing data
+      description: If enabled will create any missing data. Default - off.
       type: BOOLEAN
-    updateFilter:
-      displayName: Update filter
-      description: Value - All, performers, studios, groups and tags. Default - All.
+    createFilter:
+      displayName: Auto create filter
+      description: Value - performers, studios, groups, tags. Default - performers, studios, groups, tags.
       type: STRING
+    autoScrape:
+      displayName: Auto scrape
+      description: Enable auto scraping on scene update. Default - on.
+      type: BOOLEAN

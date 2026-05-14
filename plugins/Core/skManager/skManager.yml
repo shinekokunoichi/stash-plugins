@@ -1,0 +1,11 @@
+name: skManager
+# requires: Shinobi-Api
+# requires: skUI - Assets
+description: GUI for easy handle sk plugins and check updates.
+version: 1.1
+ui:
+  javascript:
+    - skManager.js
+  requires:
+    - Shinobi-Api
+    - skUI - Assets

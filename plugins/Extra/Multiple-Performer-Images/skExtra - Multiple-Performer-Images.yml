@@ -1,12 +1,17 @@
 name: skExtra - Multiple-Performer-Images
 # requires: Shinobi-Api
+# requires: skManager
 description: Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
-version: 1.2.1
+version: 3.0
 ui:
+  css:
+    - skExtra - Multiple-Performer-Images.css  
   javascript:
     - skExtra - Multiple-Performer-Images.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
     - skUI - Theme
 settings:
     presets:

@@ -1,8 +1,0 @@
-name: skAwesomplete
-description: Awesomplete with custom style and compatibility with Shinobi-Api
-version: 1.0
-ui:
-  javascript:
-    - skAwesomplete.js
-  css:
-    - skAwesomplete.css

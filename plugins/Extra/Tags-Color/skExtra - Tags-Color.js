@@ -1,81 +1,391 @@
 (() => {
-    const pluginName = 'skExtra - Tags-Color';
-    let settings;
+	const pluginName = 'skExtra - Tags-Color';
+	let awesomplete, parentTags, tagsColor;
 
-    function userColors(tagsGroup) {
-        const colors = settings.colors.split(',');
-        let options = [];
-        colors.forEach((color) => {
-            const data = color.split(':');
-            options.push({ category: data[0], color: data[1] });
-        });
-        if (!options[0]) return;
-        let find;
-        options.forEach((option, i) => {
-            find = false;
-            tagsGroup.forEach((group) => {
-                if (find) return;
-                if (option.category.toLowerCase() === group.name.toLowerCase()) {
-                    options[i].id = group.id;
-                    find = true;
-                };
-            });
-        });
-        return options;
-    };
+	async function initialize() {
+		// Settings
+		await setDefaultSettings();
 
-    function applyColor(tag, colors) {
-        if (!tag.attribute('data-sort-name')) return;
-        let find = false;
-        let name = tag.element.firstChild.firstChild.innerText.toLowerCase();
-        colors.forEach((color) => {
-            if (find) return;
-            if (name === color.category.toLowerCase()) {
-                tag.style({ 'background-color': color.color });
-                find = true;
-            };
-            color.group.forEach((subTag) => {
-                if (name === subTag.name.toLowerCase()) {
-                    tag.style({'background-color': color.color});
-                    find = true;
-                };
-            });
-        });
-    };
+		// Preloader
+		await preloadTags();
 
-    function colorize(colors) {
-        const tags = sk.ui.get.cards.tagsPopUps();
-        if (!tags[0]) return;
-        tags.forEach((tag) => { applyColor(tag, colors) });
-    };
+		// Watcher
+		setWatcher();
 
-    async function firstRun() {
-        if (settings.colors === '') return;
-        const tagsGroup = await sk.stash.find.tags({ fieldFilter: { children: { modifier: 'NOT_NULL' } }, fields: 'name id' });
-        const colors = await userColors(tagsGroup);
-        for (let i = 0; i < colors.length; i++) {
-            const group = await sk.stash.find.tags({ fieldFilter: { parents: { value: [colors[i].id], modifier: 'INCLUDES_ALL', depth: -1 } }, fields:'name' });
-            colors[i].group = group;
-        };
-        sessionStorage.setItem('skExtra - Tags-Color', JSON.stringify(colors));
-        colorize(colors);
-    };
+		// Compatibility
+		skManagerCompatibility();
+		skExtraKeybinderCompatibility();
+	};
 
-    async function main() {
-        const colors = JSON.parse(sessionStorage.getItem('skExtra - Tags-Color'));
-        if (!colors) {
-            const defaultSettings = {
-                name: pluginName,
-                options: {
-                    colors: ''
-                }
-            };
-            await sk.plugin.check(defaultSettings);
-            settings = sk.plugin.get(pluginName);
-            await firstRun();
-        };
-        if (colors) colorize(colors);
-    };
+	// Settings
+	async function setDefaultSettings() {
+		await sk.plugin.check({
+			name: pluginName,
+			options: {
+				colors: '',
+				cardColor: true
+			}
+		});
+	};
 
-    sk.tool.wait('.tag-item', main);
-})();
+	// Preloader
+	async function preloadTags() {
+		let { colors } = sk.plugin.get(pluginName);
+		if (!colors) return;
+
+		parentTags = await sk.stash.find.tags({
+			fieldFilter: {
+				children: { modifier: 'NOT_NULL' }
+			},
+			fields: 'name id image_path'
+		});
+
+		tagsColor = await getGroupsColor(colors);
+	};
+
+	async function getGroupsColor(colors) {
+		colors = colors.split(',').map((data) => {
+			const [name, color] = data.split(':');
+			return {
+				name: name,
+				color: color
+			};
+		});
+
+		for (let i = 0; i < colors.length; i++) {
+			const { name, color } = colors[i];
+			let find;
+			for (const parentTag of parentTags) {
+				if (!find && name === parentTag.name) {
+					colors[i].subTags = await sk.stash.find.tags({
+						fieldFilter: {
+							parents: {
+								value: [parentTag.id],
+								modifier: 'INCLUDES_ALL',
+								depth: -1
+							}
+						},
+						fields: 'name'
+					});
+					find = true;
+				};
+			};
+		};
+		return colors;
+	};
+
+	// Watcher
+	function setWatcher() {
+		sk.tool.wait('.tag-item', setTagItemColor);
+		if (sk.plugin.get(pluginName).cardColor) sk.tool.wait(sk.ui.is.tagCard, setCardColor);
+	};
+
+	function setTagItemColor() {
+		sk.ui.get.cards.tagsPopUps().forEach((tag) => {
+			const tagName = tag.read().includes('|') ? tag.read().slice(0, -1) : tag.read();
+			const tagColor = getTagColor(tagName);
+			if (tagColor) tag.style({ 'background-color': parentTag.color });
+		});
+	};
+
+	function getTagColor(tagName) {
+		let find;
+
+		tagsColor.forEach((parentTag) => {
+			if (find) return;
+
+			if (tagName === parentTag.name) find = true;
+			if (tagName !== parentTag.name) parentTag.subTags.forEach(subTag => tagName === subTag.name ? find = true : null);
+
+			if (find) return parentTag.color;
+		});
+	};
+
+	function setCardColor() {
+		sk.ui.get.cards.tag().forEach((tag) => {
+			const tagName = tag._data.name;
+			const tagColor = getTagColor(tagName);
+			if (tagColor) tag.style({ 'background-color': parentTag.color });
+		});
+	};
+
+	// Compatibility
+	function skManagerCompatibility() {
+		if (window._skManager) window._skManager.load({
+			name: pluginName,
+			callback: colorChangerGUI,
+			updates: [
+				{
+					version: '1.0',
+					description: 'Plugin created.'
+				},
+				{
+					version: '2.0',
+					description: 'Added compatibility to skManager.'
+				},
+				{
+					version: '2.1',
+					description: 'Force update plugin.'
+				}
+			]
+		});
+	};
+
+	function colorChangerGUI() {
+		const gui = sk.ui.make.popUp({
+			id: 'skExtra_Tags_Color_GUI',
+			class: 'bg-dark',
+			flex: true,
+			style: {
+				width: '50%',
+				height: '100%',
+				top: 0,
+				right: 0,
+				'justify-content': 'space-between',
+				'flex-direction': 'column',
+				'box-shadow': '0 0 5px black',
+				'overflow-y': 'auto'
+			}
+		});
+
+		gui.append(currentColorsSection(), addNewColorSection());
+
+		const close = sk.ui.make.button({
+			text: 'Close',
+			class: 'btn btn-danger',
+			event: {
+				type: 'click',
+				callback: () => gui.remove()
+			}
+		});
+
+		gui.append(close);
+
+		document.body.append(gui.element);
+	};
+
+	function currentColorsSection() {
+		const section = sk.ui.make.container();
+		const title = sk.ui.make.title({ text: 'Current colors' });
+		section.append(title);
+
+		const colorsList = sk.ui.make.container({
+			flex: true,
+			style: { 'flex-wrap': 'wrap' }
+		});
+		tagsColor.forEach((colorData, i) => {
+			const subTagsList = colorData.subTags.map(subTag => `${subTag.name}`).join(', ');
+
+			const card = sk.ui.make.container({
+				class: 'card',
+				style: {
+					cursor: 'pointer',
+					'background-color': colorData.color
+				},
+				event: {
+					type: 'click',
+					callback: () => colorPicker.click()
+				}
+			});
+			const name = sk.ui.make.subTitle({ text: colorData.name });
+			const description = sk.ui.make.description({
+				text: `Applied to ${colorData.subTags.length + 1} tags`,
+				attribute: { title: subTagsList }
+			});
+			const colorPicker = sk.ui.make.input({
+				style: { display: 'none' },
+				attribute: { type: 'color' },
+				event: [
+					{
+						type: 'input',
+						callback: () => card.style({ 'background-color': colorPicker.value() })
+					},
+					{
+						type: 'change',
+						callback: () => changeColor(card, i, colorData, colorPicker.value())
+					}
+				]
+			});
+			const remove = sk.ui.make.button({
+				text: 'Remove',
+				class: 'btn btn-secondary',
+				event: {
+					type: 'click',
+					callback: () => removeColor(card, i, colorData)
+				}
+			});
+
+			card.append(name, description, colorPicker, remove);
+			colorsList.append(card);
+		});
+
+		section.append(colorsList);
+		return section;
+	};
+
+	function changeColor(card, index, colorData, newColor) {
+		const newColorData = `${colorData.name}:${newColor}`;
+		const { colors } = sk.plugin.get(pluginName);
+		const newData = colors.replace(`${colorData.name}:${colorData.color}`, newColorData);
+
+		sk.plugin.update({
+			name: pluginName,
+			options: { colors: newData }
+		});
+
+		tagsColor[index].color = newColor;
+	};
+
+	function removeColor(card, index, colorData) {
+		const toRemove = `${colorData.name}:${colorData.color}`;
+		const { colors } = sk.plugin.get(pluginName);
+		let newData = colors.replace(toRemove, '');
+		if (newData.includes('||')) newData = newData.replace('||', '|');
+
+		sk.plugin.update({
+			name: pluginName,
+			options: { colors: newData }
+		});
+
+		tagsColor.slice(index, 1);
+		card.remove();
+	};
+
+	function addNewColorSection() {
+		const section = sk.ui.make.container({
+			style: {
+				width: '100%',
+				'aling-items': 'flex-start'
+			}
+		});
+		const title = sk.ui.make.title({ text: 'Add color' });
+		const inputSection = sk.ui.make.container({ flex: true });
+		section.append(title, inputSection);
+
+		const tagSection = sk.ui.make.container({ style: { width: '50%' } });
+		tagSection.append(createAwesompleteInput());
+
+		const colorSection = sk.ui.make.container({ style: { width: '25%' } });
+		const titleColor = sk.ui.make.subTitle({ text: 'Color' });
+		const colorPicker = sk.ui.make.input({
+			style: { display: 'none' },
+			attribute: { type: 'color' },
+			event: {
+				type: 'input',
+				callback: () => colorSection.style({ 'background-color': colorPicker.value() })
+			}
+		});
+		const chooseColor = sk.ui.make.button({
+			text: 'Choose',
+			class: 'btn btn-secondary',
+			event: {
+				type: 'click',
+				callback: () => colorPicker.click()
+			}
+		});
+		colorSection.append(titleColor, colorPicker, chooseColor);
+
+		inputSection.append(tagSection, colorSection);
+
+		const save = sk.ui.make.button({
+			class: 'btn btn-success',
+			text: 'Add',
+			event: {
+				type: 'click',
+				callback: () => addNewColor(colorPicker, inputSection)
+			}
+		});
+		section.append(save);
+		return section;
+	};
+
+	function createAwesompleteInput(category) {
+		const group = sk.ui.make.container({
+			class: 'autocomplete-container',
+			style: {
+				width: '50%',
+				'text-align': 'center'
+			}
+		});
+		const label = sk.ui.make.subTitle({
+			text: 'Tag to color',
+			style: { 'text-align': 'center' },
+			attribute: { for: 'tags-autocomplete' }
+		});
+		const input = sk.ui.make.input({
+			id: 'tags-autocomplete',
+			class: 'form-control awesomplete',
+			attribute: { 'data-list': '' },
+			event: {
+				type: 'click',
+				callback: () => filterResults(input.element)
+			}
+		});
+		group.append(label, input);
+
+		awesomplete = new Awesomplete(input.element, {
+			minChars: 1,
+			maxItems: 10,
+			item: (suggestion, input) => {
+				const [name, image_path] = suggestion.split('|');
+				const li = document.createElement('li');
+				const img = document.createElement('img');
+				img.src = image_path.trim();
+				const div = document.createElement('div');
+				div.textContent = name.trim();
+				li.appendChild(img);
+				li.appendChild(div);
+				return li;
+			},
+			replace: (suggestion) => {
+				const [name] = suggestion.split('|');
+				input.value(name.trim());
+			}
+		});
+
+		return group;
+	};
+
+	function filterResults(input) {
+		let tempList = parentTags.map(tag => tag.name.toLowerCase().includes(input.value.toLowerCase()) ? `${tag.name}|${tag.image_path}` : null);
+		awesomplete.list = tempList.filter(tag => tag);
+	};
+
+	async function addNewColor(color, tag) {
+		color = color.value();
+		tag = tag.child()[0].child()[0].child()[1].child()[0].value();
+
+		const newColor = `|${tag}:${color}`;
+		let { colors } = sk.plugin.get(pluginName);
+		colors += newColor;
+
+		sk.plugin.update({
+			name: pluginName,
+			options: { colors: colors }
+		});
+
+		await preloadTags();
+		sk.tool.get('#skExtra_Tags_Color_GUI').remove();
+		colorChangerGUI();
+	};
+
+	function skExtraKeybinderCompatibility() {
+		if (window._skExtra_Keybinder) window._skExtra_Keybinder.load({
+			[pluginName]: [
+				{
+					sequence: 's k t c g',
+					action: 'Open the color changer GUI',
+					callback: () => colorChangerGUI()
+				},
+				{
+					sequence: 'esc',
+					action: 'Close the color changer GUI',
+					callback: () => sk.tool.get('#skExtra_Tags_Color_GUI').remove(),
+					selector: '#skExtra_Tags_Color_GUI'
+				}
+			]
+		});
+	};
+
+	initialize();
+})()

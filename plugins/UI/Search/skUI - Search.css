@@ -1,0 +1,14 @@
+#skUI_Search_Global {
+    position: absolute;
+    top: .5rem;
+    left: 35%;
+    width: 25%;
+    opacity: .25;
+    transition: all .25s ease-in;
+}
+
+#skUI_Search_Global:hover {
+    opacity: 1;
+    left: 25%;
+    width: 50%
+}

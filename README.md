@@ -1,200 +1,237 @@
-# Stash Plugins
-Do you have any plugin ideas? DM to discord or open a issue with your ideas!
+# Installation
+Go to `Settings > Plugins > Available Plugins > Add source`
 
-## Installation
-https://shinekokunoichi.github.io/stash-plugins/main/index.yml
+Name: `ShinekoKunoichi`
+Source URL: `https://shinekokunoichi.github.io/stash-plugins/main/index.yml`
+Local Path: `ShinekoKunoichi`
 
-<img width="443" height="357" alt="image" src="https://github.com/user-attachments/assets/e1b4fe81-e9ff-4f81-a69b-c278d3bc3b18" />
+<details>
+<summary>Screenshot</summary>
+  <img width="443" height="357" alt="image" src="https://github.com/user-attachments/assets/519da9b7-488a-44a7-84af-bc940f8da494" />
+</details>
 
-## Version Legend
-1.2.3.4
-- 1: Rework or major update like speed, big new function, etc
-- 2: Minor update small function
-- 3: Bug fixes
-- 4: Minor fixes typo, micro change in function, description, etc
+# Features & Bugs
+If something is not working for you, or you want to see some new features/plugins open an issue: i will work at it fast as i can!
+You can also reach me on discord and stash discourse under `shinekokunoichi` username.
 
-## Note
-- Change plugins settings after installing them otherwise will use the default settings!
-- Issues/Suggestion: If you have some issues with my plugins, open a new issue with title "{Plugin Name} - Shortened Problem". I will fix it as fast as I can.
-- CORS: When a plugin have the CORS requirement you need a special CORS addon to bypass bad request from website server. I suggest <a href="https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc">this addons</a> as it can be enabled only for stash host. Any request that are not from stash and my plugins to external server will be blocked anyway.
+# Core plugins
+## Shinobi-Api
+Custom Stash API **required** by all my plugins.
+[Download](plugins/Core/Shinobi-Api)
 
-## API
+## skAwesomplete
+Awesomplete with custom style and compatibility with Shinobi-Api.
+[Download](plugins/Core/skAwesomplete)
 
-### Shinobi-Api
-Custom Stash API powers all my plugins. It's free to use for others under the CC-BY-NC-ND-4.0 copyright. The API is fully commented in JSDoc. If I get multiple requests for the API, I'll create a page with instructions for the basic functions.
-- Current Modules:
-  - Tool: Scraper, watcher and custom getter
-  - UI: Graphic manipulator
-  - Stash: Stash interaction
-  - Plugin: Plugins manager
-  - StashDB: StashDB interaction
-  - Hook: Custom hook and watcher
-  - Task: Custom task
+## skManager
+GUI for easy handle sk plugins and check updates.
+[Download](plugins/Core/skManager)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skUI - Assets](plugins/UI/Assets)
 
-### skAwesomplete
-Awesomplete with custom style and compatibility with Shinobi-Api
+<details>
+<summary>Screenshot</summary>
+  <img width="936" height="946" alt="image" src="https://github.com/user-attachments/assets/4fb0d551-908b-42db-aa20-200fab038da6" />
+</details>
 
-## Extra
+# Extra plugins
+## Keybinder
+Customize your Stash and sk plugins keybinding.
+[Download](plugins/Extra/Keybinder)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Metadata-Parser
-Apply and create metadata based on path and file name. High customization, read How to.txt to see how to set up.
-- Infinite rule for path exceptions
-- Auto create missing metadata
-- Simple and dynamic field (read How to.txt for details)
-- Support metadata parsing form path and filename
+<details>
+<summary>Screenshot</summary>
+  <img width="927" height="944" alt="image" src="https://github.com/user-attachments/assets/e4deb55e-dca9-421a-b144-205cb059b2e5" />
+</details>
 
-### Most-Used
-<img width="905" height="446" alt="image" src="https://github.com/user-attachments/assets/c1b43029-e88b-4fb8-a457-e392e71a5d3e" />
+## Metadata Parser
+Apply and create metadata based on path and file name. High customization, read [How to.txt](plugins/Extra/Metadata-Parser) to see how to set up.
+[Download](plugins/Extra/Metadata-Parser)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-Add custom stats to stash. Currently add a crown bases on top 3 elements for scenes images groups performers studios in card and page.
-- Enable/disable card and page
-- Can show infinite number of same ranking
+<details>
+<summary>Screenshot</summary>
+  <img width="1871" height="945" alt="image" src="https://github.com/user-attachments/assets/9483c65d-8f61-4b63-acc0-26859e639a60" />
+</details>
 
-### Multiple-Performer-Images
-<img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/e4edd98b-3548-4ef1-804a-06bf2a831020" />
-<img width="1274" height="417" alt="Screenshot 2026-04-11 031958" src="https://github.com/user-attachments/assets/4967ca01-193b-448e-a113-6b83f74badec" />
+## Most Used
+Add a crown based on top 3 elements based on the O Counter and alter the card style. 
+[Download](plugins/Extra/Most-Used)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skUI - Assets](plugins/UI/Assets)
 
+<details>
+<summary>Screenshot</summary>
+  <img width="905" height="446" alt="image" src="https://github.com/user-attachments/assets/3716224c-bfd7-41a4-8f3e-81d7663825ab" />
+  <img width="1847" height="926" alt="image" src="https://github.com/user-attachments/assets/f09f0785-9a11-4af0-af31-16f6de650324" />
+</details>
 
+## Multiple Performer Images
 Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
-- Simple GUI to choose and change custom images from the performer page
-- Have a set of preset name - portrait, clothed, skimpy and nude
-- Can create and use an unlimited amounts of custom name
-- Change the performer image with dots system
-- Can replace all performer preview with the selected default image
-- If Stash is in SFW mode will auto-change image to clothed if available
-- Can select a random image to display
+[Download](plugins/Extra/Multiple-Performer-Images)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Related-Content
-<img width="397" height="501" alt="image" src="https://github.com/user-attachments/assets/84e59713-9774-4c7d-af22-97bfefbfd8cc" />
+<details>
+<summary>Screenshot</summary>
+  <img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/08ef599b-f3b8-41c6-85cd-150b67a8bd30" />
+  <img width="1274" height="417" alt="image" src="https://github.com/user-attachments/assets/a598b106-031f-4a5b-a649-7268db6b4156" />
+</details>
 
-Add a section inside page category to show related one, automatic and manual (currently only for performers).
-- Automatic suggestion based on tags
-- Manual link creation with dropdown
-- Can auto-link performers
+## Related Content
+Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+[Download](plugins/Extra/Related-Content)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skAwesomplete](plugins/Core/skAwesomplete)
 
-### Tags-Color
-<img width="496" height="298" alt="image" src="https://github.com/user-attachments/assets/580dbda4-77d6-47f6-8c35-75d79d03967c" />
+<details>
+<summary>Screenshot</summary>
+  <img width="397" height="501" alt="image" src="https://github.com/user-attachments/assets/91f6ac0a-3ea0-4ae9-8b52-af80a0fb46f8" />
+</details>
 
+## Tags Color
 Colorize tags based on their parent tag/s.
-- Colorize every tags with colors based on their parents tag
+[Download](plugins/Extra/Tags-Color)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-## Scraper
+<details>
+<summary>Screenshot</summary>
+  <img width="496" height="298" alt="image" src="https://github.com/user-attachments/assets/c880a543-5397-4e2d-be6a-dc8a4df8eadd" />
+  <img width="925" height="646" alt="image" src="https://github.com/user-attachments/assets/d3ca941b-fb06-46ea-bd77-30a3e78fdb6c" />
+</details>
 
-### JAV
-Custom JAV scraper. Require CORS.
-- Can force replace already scraped data
-- Auto updater on scene updating
-- Filter for field during scraping
-- Auto creation missing metadata
-- Filter for auto creation
+# Scraper
+## JAV
+Custom metadata scraper for JAV.
+[Download](plugins/Scraper/JAV)
+> [!IMPORTANT]  
+> Need CORS: [Chrome](https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cors-unblock2/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search).
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### StashDB
-Auto update scenes, performers, groups and tags using StashDB (based on name and title)
-- Can force replace already scraped data
-- Auto update and task update
-- Auto creation missing data
-- Filter for auto creation
-- Filter for performers gender creation
+<details>
+<summary>Screenshot</summary>
+  <img width="1860" height="233" alt="image" src="https://github.com/user-attachments/assets/10d7a19e-fa6d-4239-be78-38bdf61b21ae" />
+</details>
 
-## UI
+## StashDB
+Custom metadata scraper for StashDB.
+[Download](plugins/Scraper/StashDB)
+> [!IMPORTANT]  
+> Need CORS: [Chrome](https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cors-unblock2/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search).
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### All
-Install all UI customization at once. (currently not working until yml parse fix)
+<details>
+<summary>Screenshot</summary>
+  <img width="1854" height="223" alt="image" src="https://github.com/user-attachments/assets/ac875d63-e8b8-4511-b2f4-ab80fe7b07d5" />
+</details>
 
-### Assets
-Assets images used by others skPlugins
+# UI
+## Assets
+Assets images used by others skPlugins.
+[Download](plugins/UI/Assets)
 
-### Brand
-<img width="229" height="36" alt="image" src="https://github.com/user-attachments/assets/1218d3eb-4f14-4892-936c-80e95af045bb" />
-<img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/6b0de6da-cc57-4c4a-b406-833b8ed0d53f" />
+## Brand
+UI customization for Stash name, logo and favicon.
+[Download](plugins/UI/Brand)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skUI - Assets](plugins/UI/Assets)
 
-UI customization for Stash name, logo and icon.
-- Change Brand name with text or a custom logo
-- Remove brand or brand in tabs name
-- Can set a custom icon
+<details>
+<summary>Screenshot</summary>
+  <img width="229" height="36" alt="image" src="https://github.com/user-attachments/assets/013832d3-9d79-419e-9200-9ae90c0a8122" />
+  <img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/4a4f9eb0-6eeb-40b5-b7a4-612a7c9d8f29" />
+</details>
 
-### Galleries
-UI customization for gallery cards and page
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
-- Apply a style when organized
+## Galleries
+Change the aspect of gallery cards and page.
+[Download](plugins/UI/Galleries)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Groups
-UI customization for group cards
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
+## Groups
+Change the aspect of gallery cards and page.
+[Download](plugins/UI/Groups)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Icon
-<img width="690" height="19" alt="image" src="https://github.com/user-attachments/assets/926980be-3b37-43b0-a1e9-dc0abe782c7c" />
-<img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/888fa79e-f049-49ca-9dd0-a0a891f0c43e" />
-
+## Icon
 Customization for icon and navbar.
-- Can set the navbar menu to be: both (default), only text or only icon
-- Can change the default icon with emoji or image
+[Download](plugins/UI/Icon)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skUI - Assets](plugins/UI/Assets)
 
-### Images
-UI customization for image cards and page
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
-- Apply a style when organized
+<details>
+<summary>Screenshot</summary>
+  <img width="690" height="19" alt="image" src="https://github.com/user-attachments/assets/03612f9c-d9b3-4b23-8f7f-ea7de19b11ab" />
+  <img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/8f52fbcb-d319-459b-b08c-0aa74f5c1124" />
+</details>
 
-### Markers
-UI customization for marker cards
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
+## Images
+Change the aspect of image cards and page.
+[Download](plugins/UI/Images)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Performers
-UI customization for performer cards
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
+## Markers
+Change the aspect of marker cards.
+[Download](plugins/UI/Markers)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Rating
-<img width="510" height="500" alt="image" src="https://github.com/user-attachments/assets/48a391cc-8812-4d86-ba17-2cc7099502db" />
+## Performers
+Change the aspect of performer cards.
+[Download](plugins/UI/Performers)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-Style card and page based on rating.
-- Color cards and page based on given color code for each rating
-- Supports decimal rating system mixing the colors. Ex 3.3 will be a mix made by rating 3 and rating 4 with low intensity.
+## Rating
+Style card and banner based on rating.
+[Download](plugins/UI/Rating)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Scenes
-UI customization for scene cards and page
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
-- Apply a style when watched
-- Apply a style when organized
-- Auto hide details in page
-- Different theatre mode for page
+## Scenes
+Change the aspect of scene cards and page.
+[Download](plugins/UI/Scenes)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Search
-<img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/db874e98-94c5-4943-aad0-4c7106999430" />
+## Search
+Add differents custom search.
+[Download](plugins/UI/Search)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-Set a custom search filter by alphabetical order. Note: after selecting a filter you need to double-click the next one! 
-- available for every category.
+<details>
+<summary>Screenshot</summary>
+  <img width="937" height="325" alt="image" src="https://github.com/user-attachments/assets/2b6054ee-127b-4ee6-9b4b-23217fe221aa" />
+  <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/feb9c089-62d8-4f7f-b0ff-0b21d204892c" />
+</details>
 
-### Studios
-UI customization for studio cards
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
+## Studios
+Change the aspect of studio cards.
+[Download](plugins/UI/Studios)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Tags
-UI customization for tag cards
-- Can remove infos
-- Can remove popovers
-- Can remove popovers count
+## Tags
+Change the aspect of tag cards.
+[Download](plugins/UI/Tags)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
-### Theme
-Customize your stash theme with a simple UI
-<img width="1852" height="51" alt="image" src="https://github.com/user-attachments/assets/85a66e29-9458-407f-89a5-827ad981da1d" />
-<img width="477" height="976" alt="image" src="https://github.com/user-attachments/assets/a35bcec6-1147-4919-bcc4-a0fca3a70786" />
-<img width="507" height="968" alt="image" src="https://github.com/user-attachments/assets/45a0aedf-ba1a-45cc-8534-58fb75d12b52" />
+## Theme
+Customize your stash theme with a simple UI.
+[Download](plugins/UI/Theme)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skUI - Assets](plugins/UI/Assets)
 
-- Easy UI to edit almost all Stash and My plugins,
-- Infinite number of custom themes
-- Abitlity to share one or all theme to other users
-- Simple backup import/export of all themes
+<details>
+<summary>Screenshot</summary>
+  <img width="477" height="976" alt="image" src="https://github.com/user-attachments/assets/72cca161-6492-465f-8600-f0dd61d9afe5" />
+  <img width="931" height="595" alt="image" src="https://github.com/user-attachments/assets/2762d87a-9ad6-4184-b378-c3c292846a03" />
+</details>

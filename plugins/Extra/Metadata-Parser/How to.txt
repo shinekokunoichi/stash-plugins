@@ -1,4 +1,4 @@
-Avaiable fields:
+Available fields:
 
   General: Fields used for remove and match specific string part
 
@@ -56,7 +56,7 @@ Avaiable fields:
 
     {gallery}   > Gallery (placeholder)
 
-    {studio}    > Studio(if multiple studio fields are declared, will set the last one)
+    {studio}    > Studio (if multiple studio fields are declared, will set the last one)
                   Ex:
                     Parser  - {studio}/{last:group}
                     Folder  - Studio A/Studio B/XXX

@@ -1,14 +1,21 @@
 name: skUI - Theme
-# requires: Shinobi-Api  
+# requires: Shinobi-Api
+# requires: skManager
 description: Customize your stash theme with a simple UI.
-version: 1.1.3
+version: 2.0
 ui:
   javascript:
     - skUI - Theme.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
 settings:
     theme:
       displayName: Current theme name
       description: Don't use me please.
+      type: STRING
+    themesData:
+      displayName: Saved themes
+      description: Don't use me please. Prevent data loss.
       type: STRING

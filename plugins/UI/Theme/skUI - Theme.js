@@ -105,7 +105,7 @@
         alpha = alpha.value() / 10;
         if (color.includes('#')) {
             const [_, r, g, b] = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
-            return `rgba(${parseInt(r, 16)},${parseInt(g, 16)},${parseInt(b, 16) },${alpha})`;
+            return `rgba(${parseInt(r, 16)},${parseInt(g, 16)},${parseInt(b, 16)},${alpha})`;
         };
         if (!color.includes('rgba')) color = color.replace('rgb', 'rgba');
         let temp = color.split(',');
@@ -122,8 +122,7 @@
         tooltip.style({ display: 'block', top: `${top + 20}px`, left: `${left + 20}px` });
     };
 
-    function create(forceUpdate) {
-        if (ui.style('display') === 'flex' && !forceUpdate) return;
+    async function create(forceUpdate) {
         //Auto generate based on theme itself and other installed plugins
         const defaultCSS = window._skUI_Theme.css;
         if (ui._content.child().length === 0) for (plugin in defaultCSS) {
@@ -199,9 +198,7 @@
                                     input.attribute('_selector').split(',').forEach(a => sk.tool.getAll(a).forEach(e => e.element.style.setProperty(input.attribute('_property'), newValue, 'important')))
                                     updateLiveEdit(input.attribute('_plugin'), input.attribute('_category'), input.attribute('_element'), input.attribute('_property'), input.attribute('_selector'), newValue);
                                 };
-                                input.attribute({ type: 'text', placeholder: 'Duration in seconds' });
-                                input.event({ type: 'change', callback: animationEvent });
-                                const animationType = sk.ui.make.input({ attribute: { type: 'text', placeholder: 'Hover me', title: 'Animation type. Values: linear, ease-in, ease-out, ease-in-out' }, event: { type: 'change', callback: animationEvent } });
+
                             }
                             else if (property === 'background-image') {
                                 input.attribute({ type: 'text', placeholder: 'Image ID/filename' });
@@ -348,7 +345,7 @@
             const save = themeManager.save();
             const backup = themeManager.backup();
             const divider = sk.ui.make.divider();
-            const section = sk.ui.make.container({ flex: true, style: {'justify-content': 'space-around', 'align-items': 'flex-start'} });
+            const section = sk.ui.make.container({ flex: true, style: { 'justify-content': 'space-around', 'align-items': 'flex-start' } });
             section.append([save, backup]);
             themeContainer.append([load, divider, section]);
             return themeContainer;
@@ -360,7 +357,7 @@
                 for (theme in themeManager._themes) {
                     const themeCard = sk.ui.make.container({ class: 'card skTheme_Themes_Card', flex: true });
                     if (theme === settings.theme) themeCard.class('btn-secondary');
-                    const themePreview = sk.ui.make.image({ url: themeManager._themes[theme].preview, style: {'max-width':'132px'} });
+                    const themePreview = sk.ui.make.image({ url: themeManager._themes[theme].preview, style: { 'max-width': '132px' } });
                     const themeName = sk.ui.make.subTitle({ text: theme });
                     themeCard.append([themePreview, themeName, themeManager._themeOptions(themeCard, theme)]);
                     loadTheme.append(themeCard);
@@ -373,6 +370,7 @@
         _screenshot: async () => {
             try {
                 ui.style({ opacity: 0 });
+                sk.tool.get('#skManager_GUI').style({ opacity: 0 });
                 const stream = await navigator.mediaDevices.getDisplayMedia({
                     video: {
                         displaySurface: 'browser',
@@ -396,6 +394,7 @@
                 stream.getTracks().forEach(track => track.stop());
                 const preview = canvas.toDataURL('image/jpeg');
                 ui.style({ opacity: 1 });
+                sk.tool.get('#skManager_GUI').style({ opacity: 1 });
                 return preview;
             }
             catch (e) {
@@ -577,19 +576,32 @@
         };
         await sk.plugin.check(defaultSettings);
         settings = await sk.plugin.get(pluginName);
-        if (loaded) return;
-        tooltip = sk.ui.make.container({ style: { position: 'fixed', background:'#212121', color: 'white', 'z-index': 100000, border: '3px solid #303030', display: 'none'} });
+        tooltip = sk.ui.make.container({ style: { position: 'fixed', background: '#212121', color: 'white', 'z-index': 100000, border: '3px solid #303030', display: 'none' } });
         document.body.append(tooltip.element);
-        const linkUI = sk.ui.make.image({ url: '/plugin/skUI - Assets/assets/Core/skUI - Theme.png', style: { width: '70px', cursor: 'pointer' }, event: { type: 'click', callback: create } });
-        const navbar = sk.ui.get.navbar().buttons;
-        navbar.style({ display: 'flex' });
-        navbar.append(linkUI);
-        ui = sk.ui.make.popUp({ flex: true, class: 'bg-dark', style: { 'flex-direction': 'column', 'align-items': 'flex-start', 'justify-content': 'flex-start', width: '50%', height: '100%', padding: '1%', top: 0, right: 0, display: 'none', 'box-shadow': '0 0 5px black', 'overflow-y': 'auto' } });
+
+        if (window._skManager) window._skManager.load({
+            name: pluginName,
+            callback: startGUI,
+            updates: [
+                {
+                    version: '1.0',
+                    description: 'Plugin created.'
+                },
+                {
+                    version: '1.1',
+                    description: 'Removed permanent GUI.'
+                }
+            ]
+        });
+    };
+
+    async function startGUI() {
+        ui = sk.ui.make.popUp({ flex: true, class: 'bg-dark', style: { 'flex-direction': 'column', 'align-items': 'flex-start', 'justify-content': 'flex-start', width: '50%', height: '100%', padding: '1%', top: 0, right: 0, 'box-shadow': '0 0 5px black', 'overflow-y': 'auto' } });
         ui._navigation = sk.ui.make.container({ flex: true, style: { 'flex-wrap': 'wrap' } });
-        ui._content = sk.ui.make.container({ style: { width: '100%', 'text-align': 'left'} });
+        ui._content = sk.ui.make.container({ style: { width: '100%', 'text-align': 'left' } });
         ui._actions = sk.ui.make.container({ flex: true, style: { 'margin-top': 'auto', width: '100%', gap: '1rem' } });
-        const hide = sk.ui.make.button({ class: 'btn btn-secondary', text: 'Hide', event: [{ type: 'mouseenter', callback: () => { ui.style({ opacity: 0 }); } }, { type: 'mouseleave', callback: () => { ui.style({ opacity: 1 }); } }]})
-        const close = sk.ui.make.button({ class: 'btn btn-danger', text: 'Close', event: { type: 'click', callback: () => { ui.style({ display: 'none' }); } } });
+        const hide = sk.ui.make.button({ class: 'btn btn-secondary', text: 'Hide', event: [{ type: 'mouseenter', callback: () => { ui.style({ opacity: 0 }); sk.tool.get('#skManager_GUI').style({ opacity: 0 }); } }, { type: 'mouseleave', callback: () => { ui.style({ opacity: 1 }); sk.tool.get('#skManager_GUI').style({ opacity: 1 }); } }] })
+        const close = sk.ui.make.button({ class: 'btn btn-danger', text: 'Close', event: { type: 'click', callback: () => { ui.remove(); } } });
         const themes = sk.ui.make.button({
             class: 'btn btn-primary', text: 'Themes', event: {
                 type: 'click', callback: () => {
@@ -600,11 +612,9 @@
         });
         ui._actions.append([hide, close, themes]);
         ui.append([ui._navigation, ui._content, ui._actions]);
+        await create();
         document.body.append(ui.element);
-        loaded = true;
     };
-
-    sk.tool.wait('nav', initialize, true);
 
     window._skUI_Theme = {
         css: {},
@@ -617,14 +627,14 @@
             Body: { selector: 'body' },
             Title: { selector: 'h1' },
             Subtitle: { selector: 'h3' },
-            Paragraph: {selector: 'p'},
+            Paragraph: { selector: 'p' },
             'Dark background': { selector: '.bg-dark' },
             'Main container': { selector: '.main .container-fluid' },
             'Filter bar': { selector: '.filtered-list-toolar' },
             Buttons: { selector: '.btn' },
             'Primary button': { selector: '.btn-primary' },
             'Secondary button': { selector: '.btn-secondary' },
-            'Success button': {selector: '.btn-success'},
+            'Success button': { selector: '.btn-success' },
             'Danger button': { selector: '.btn-danger' },
             'Active button': { selector: '.btn.active' },
             'Disabled button': { selector: '.btn-secondary.disaled,.btn-secondary:disaled' },
@@ -633,9 +643,10 @@
             'Slider dot': { selector: 'input[type=range]::-webkit-slider-thumb,input[type=range]::-mox-range-thumb,input[type=range].zoom-slider::-webkit-slider-thumb,input[type=range].zoom-slider::-mox-range-thumb' },
             'Switch checked': { selector: '.custom-control-input:checked ~ .custom-control-label:before' },
             'Switch unchecked': { selector: '.custom-switch .custom-control-label:before' },
-            'Dropdown': {selector: '.react-select__control'},
+            'Dropdown': { selector: '.react-select__control' },
             Badge: { selector: '.badge' },
-            Star: {selector: '.fa-star path'}
+            Star: { selector: '.fa-star path' },
+            'Sidebar filter': { selector: '.sidebar' }
         },
         Navigation: {
             Nav: { selector: 'nav', },
@@ -660,12 +671,12 @@
             'Marker card': { selector: '.scene-markers-panel .primary-card' },
             'Marker video': { selector: '.scene-markers-panel .wall-item-media' },
             'Marker info': { selector: '.scene-markers-panel .wall-item-text' },
-            'Video player': {selector: '.video-js,.vjs-tech'},
+            'Video player': { selector: '.video-js,.vjs-tech' },
             'Video controls': { selector: '.vjs-control-bar' },
             'Image': { selector: '.image-container .image-image' },
             'Background image': { selector: '.detail-header,.background-image-container,.background-image' },
             'Detail title': { selector: '.detail-item-title' },
-            'Detail value': {selector: '.detail-item-value'}
+            'Detail value': { selector: '.detail-item-value' }
         },
         'All cards': {
             Cards: { selector: '.card' },
@@ -716,4 +727,6 @@
             Tag: { selector: '.tag-item' }
         }
     });
+
+    initialize();
 })();

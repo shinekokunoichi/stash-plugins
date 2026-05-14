@@ -1,37 +1,32 @@
 name: skScraper - StashDB
-# requires: Shinobi-Api  
-description: Auto metadata scraper from StashDB (based on title and name)
-version: 2.0.4
+# requires: Shinobi-Api
+# requires: skManager
+description: Auto metadata scraper from StashDB (based on title and name).
+version: 2.1
 ui:
   javascript:
     - skScraper - StashDB.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
   csp:
     connect-src:
       - https://stashdb.org
 settings:
-    forceScrape:
-      displayName: Force Scrape
-      description: If enabled will ignore if the scene was already scraped by another provider. Default - off.
-      type: BOOLEAN
-    autoUpdate:
-      displayName: Auto update
-      description: Enable auto updating on update. Default - on.
-      type: BOOLEAN
-    updateFilter:
-      displayName: Update
-      description: Value - All, performers, studios and tags. Default - All.
-      type: STRING
-    autoCreate:
-      displayName: Auto create
-      description: Enable the creation of missing data. Default - off.
+    create:
+      displayName: Create missing data
+      description: If enabled will create any missing data. Default - off.
       type: BOOLEAN
     createFilter:
-      displayName: Auto create options
-      description: Value - All, performers, studios and tags. Default - All.
+      displayName: Auto create filter
+      description: Value - performers, studios, tags. Default - performers, studios, tags.
       type: STRING
-    genderFilter:
-      displayName: Gender filter
-      description: Which gender auto create. Value - both, female and male. Default - both.
+    autoScrape:
+      displayName: Auto scrape
+      description: Enable auto scraping on update. Default - on.
+      type: BOOLEAN
+    autoScrapeFilter:
+      displayName: Auto scrape filter
+      description: Value - performers, studios and tags. Default - performers, studios, tags.
       type: STRING

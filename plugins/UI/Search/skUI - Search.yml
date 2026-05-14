@@ -1,9 +1,25 @@
 name: skUI - Search
 # requires: Shinobi-Api  
-description: Apply custom search
-version: 1.0.1
+# requires: skManager
+# requires: skAwesomplete
+description: Add differents custom search.
+version: 2.0
 ui:
+  css:
+    - skUI - Search.css  
   javascript:
     - skUI - Search.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skAwesomplete
+    - skExtra - Keybinder
+settings:
+    globalSearch:
+      displayName: Global search
+      description: Show the global search. Default - on.
+      type: BOOLEAN
+    alphabetSearch:
+      displayName: Alphabet search
+      description: Show the alphabet search. Default - on.
+      type: BOOLEAN

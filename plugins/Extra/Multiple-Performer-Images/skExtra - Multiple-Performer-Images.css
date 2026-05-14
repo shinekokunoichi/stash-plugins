@@ -1,0 +1,20 @@
+.skExtra_Multiple_Performer_Images_Dot {
+    background: rgba(0, 0, 0, .75);
+    width: 15px;
+    height: 15px;
+    border: rgba(0, 0, 0, .75) 2px solid;
+    cursor: pointer;
+    border-radius: 100%;
+    margin-right: .5rem;
+}
+
+.skExtra_Multiple_Performer_Images_Dot.active {
+    border-color: white;
+}
+
+.skExtra_Multiple_Performer_Images_Presets {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .5rem;
+}

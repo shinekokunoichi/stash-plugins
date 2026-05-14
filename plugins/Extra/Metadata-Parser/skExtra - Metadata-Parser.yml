@@ -1,13 +1,16 @@
 name: skExtra - Metadata-Parser
 # requires: Shinobi-Api
+# requires: skManager
 description: Apply and create metadata based on path and file name. High customization, read How to.txt to see how to set up.
-version: 1.0
+version: 2.0
 ui:
   javascript:
     - Rule.js
     - skExtra - Metadata-Parser.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
 settings:
     parsePath:
       displayName: Parse path

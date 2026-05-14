@@ -1,14 +1,23 @@
 name: skExtra - Tags-Color
-# requires: Shinobi-Api  
+# requires: Shinobi-Api
+# requires: skManager
+# requires: skAwesomplete
 description: Colorize tags based on their parent tag/s
-version: 2.0.2
+version: 2.1
 ui:
   javascript:
     - skExtra - Tags-Color.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skAwesomplete
+    - skExtra - Keybinder
 settings:
   colors:
     displayName: Category colors
     description: TagName:Color(any) separated by comma. Ex - Category:red
     type: STRING
+  cardColor:
+    displayName: Card color
+    description: Color the tag card based on category. Default - on
+    type: BOOLEAN

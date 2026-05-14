@@ -1,0 +1,129 @@
+.skExtra_Most_Used_Crown {
+    width: 50px;
+    position: absolute;
+    top: 0;
+    left: 0
+}
+
+/* STATIC */
+
+.sea {
+    background: linear-gradient(135deg, aquamarine, cadetblue);
+}
+
+.ruby {
+    background: linear-gradient(135deg, red, darkred);
+}
+
+.emerald {
+    background: linear-gradient(135deg, green, darkgreen);
+}
+
+.gold {
+    background: linear-gradient(135deg, yellow, gold);
+}
+
+.silver {
+    background: linear-gradient(135deg, lightgray, gray);
+}
+
+.bronze {
+    background: linear-gradient(135deg, chocolate, brown);
+}
+
+/* MOVING */
+
+@keyframes move {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.sea-move {
+    background: linear-gradient(135deg, aquamarine, cadetblue, aquamarine);
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+.ruby-move {
+    background: linear-gradient( 120deg, red 30%, darkred 50%, red 70% );
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+.emerald-move {
+    background: linear-gradient( 120deg, green 30%, darkgreen 50%, green 70% );
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+.gold-move {
+    background: linear-gradient( 120deg, yellow 30%, gold 50%, yellow 70% );
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+.silver-move {
+    background: linear-gradient( 120deg, lightgray 30%, gray 50%, lightgray 70% );
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+.bronze-move {
+    background: linear-gradient( 120deg, chocolate 30%, brown 50%, chocolate 70% );
+    background-size: 600% 600%;
+    animation: move 6s infinite;
+}
+
+/* SHINE */
+
+@keyframes shine {
+    0% {
+        transform: rotate(25deg) translateX(-100%);
+    }
+
+    100% {
+        transform: rotate(25deg) translateX(100%);
+    }
+}
+
+.shine::before, .sea-shine::after, .ruby-shine::before, .emerald-shine::before, .gold-shine::before, .silver-shine::before, .bronze-shine::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    transform: rotate(25deg);
+    animation: shine 3s infinite;
+    pointer-events: none;
+    background: linear-gradient( 120deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 70% );
+}
+
+.sea-shine::after {
+    background: linear-gradient( 120deg, aquamarine 30%, cadetblue 50%, aquamarine 70% );
+}
+
+.ruby-shine::before {
+    background: linear-gradient( 120deg, red 30%, darkred 50%, red 70% );
+}
+
+.emerald-shine::before {
+    background: linear-gradient( 120deg, green 30%, darkgreen 50%, green 70% );
+}
+
+.gold-shine::before {
+    background: linear-gradient( 120deg, yellow 30%, gold 50%, yellow 70% );
+}
+
+.silver-shine::before {
+    background: linear-gradient( 120deg, lightgray 30%, gray 50%, lightgray 70% );
+}
+
+.bronze-shine::before {
+    background: linear-gradient( 120deg, chocolate 30%, brown 50%, chocolate 70% );
+}

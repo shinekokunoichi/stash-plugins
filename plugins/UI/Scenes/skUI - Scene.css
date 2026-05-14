@@ -1,0 +1,7 @@
+.skUI_Scenes_Watched {
+    filter: brightness(.5);
+}
+
+.skUI_Scenes_Organized {
+    border: rgba(0, 0, 0, 0) 3px solid;
+}

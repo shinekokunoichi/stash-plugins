@@ -1,0 +1,16 @@
+name: skExtra - Keybinder
+# requires: Shinobi-Api
+# requires: skManager
+description: Customize your Stash and sk plugins keybinding.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Keybinder.js
+  requires:
+    - Shinobi-Api
+    - skManager
+settings:
+    keybinder:
+      displayName: Keybinder configuration
+      description: Don't use me please.
+      type: STRING

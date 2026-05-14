@@ -1,19 +1,23 @@
 name: skExtra - Most-Used
 # requires: Shinobi-Api
-# requires: skUI - Assets
-description: Add custom stats to stash. Currently add a crown bases on top 3 elements for scenes images groups performers studios in card and page.
-version: 1.1
+# requires: skManager
+# requires: skUI - Assets  
+description: Add a crown based on top 3 elements based on the O Counter and alter the card style. 
+version: 2.0
 ui:
+  css:
+    - skExtra - Most-Used.css
   javascript:
     - skExtra - Most-Used.js
   requires:
     - Shinobi-Api
+    - skManager
     - skUI - Assets
     - skUI - Theme
 settings:
     statsCrown:
       displayName: Crown display
-      description: Value - scenes images groups performers studios. Default - scenes images groups performers studios. You can change the crown icon insid skUI - Assets/Stats folder
+      description: Value - scenes, images, groups, performers, studios. - scenes, images, groups, performers, studios. You can change the crown icon inside "skUI - Assets/Stats" folder
       type: STRING
     cardCrown:
       displayName: Crown in cards
@@ -23,3 +27,11 @@ settings:
       displayName: Crown in pages
       description: IF show the crown icon on page. Default - on
       type: BOOLEAN
+    rankStyle:
+      displayName: Ranking style
+      description: How to (manual, GUI is easier) - For declaring each category rank category:rank:style-animation. For general style global:rank:style-animation. Separated by comma.
+        Categories - scenes, images, groups, performers, studios.
+        Style - shine (doesn't support animation suffix), sea, ruby, emerald, gold, silver, bronze.
+        Animation - move, shine.
+        Default - global:1:gold-shine, global:2:silver-move, global:3:bronze
+      type: STRING

@@ -1,0 +1,9 @@
+name: Shinobi-Api
+description: Master api for easy plugin and ui develop.
+version: 3.0
+ui:
+  javascript:
+  - Shinobi-Api.js
+  csp:
+    connect-src:
+      - https://stashdb.org

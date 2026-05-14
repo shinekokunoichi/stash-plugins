@@ -1,36 +1,21 @@
 (() => {
     const pluginName = 'skUI - Icon';
-    let settings;
 
-    function create() {
-	const iconStyle = settings.iconStyle.toLowerCase();
-        const scene = sk.tool.getAll('svg.fa-circle-play').map((svg) => { svg._type = 'Scene'; return svg; });
-        const image = sk.tool.getAll('svg.fa-image').map((svg) => { svg._type = 'Image'; return svg; });
-        const group = sk.tool.getAll('svg.fa-film').map((svg) => { svg._type = 'Group'; return svg; });
-        const marker = sk.tool.getAll('svg.fa-location-dot').map((svg) => { svg._type = 'Marker'; return svg; });
-        const gallery = sk.tool.getAll('svg.fa-images').map((svg) => { svg._type = 'Gallery'; return svg; });
-        const performer = sk.tool.getAll('svg.fa-user').map((svg) => { svg._type = 'Performer'; return svg; });
-        const studio = sk.tool.getAll('svg.fa-video').map((svg) => { svg._type = 'Studio'; return svg; });
-        const tag = sk.tool.getAll('svg.fa-tag').map((svg) => { svg._type = 'Tag'; return svg; });
+    async function initialize() {
+        // Settings
+        await setDefaultSettings();
 
-        [].concat(scene, image, group, marker, gallery, performer, studio, tag).forEach((svg) => {
-            const icon = iconStyle === 'emoji' ? sk.ui.make.span({ text: settings[`e${svg._type}`], style: { 'font-size': '25px', 'text-shadow': '0, 0 black' } }) : sk.ui.make.image({ url: `/plugin/skUI - Assets/assets/Icon/${svg._type}.png`, style: { width: '35px', height: '35px' } });
-            icon.class('skUI_Icon_Icons');
-            svg.element.parentNode.appendChild(icon.element);
-            svg.remove();
-        });
+        // Watcher
+        setWatcher();
+
+        // Compatibility
+        skManagerCompatibility();
+        skThemeCompatibility();
     };
 
-    function replace() {
-	const navStyle = settings.navStyle.toLowerCase();
-        if (navStyle === 'both' && settings.iconStyle === 'default') return;
-        if (navStyle === 'text') sk.ui.get.navbar().nav.getAll('svg').forEach((svg) => { svg.remove(); });
-        if (navStyle === 'icon') sk.ui.get.navbar().nav.getAll('span').forEach((text) => { if (!text.class().includes('skUI_Icon_Icons')) text.remove(); });
-        if (navStyle !== 'text' && settings.iconStyle !== 'default') create();
-    };
-
-    async function main() {
-        const defaultSettings = {
+    // Settings
+    async function setDefaultSettings() {
+        await sk.plugin.check({
             name: pluginName,
             options: {
                 removeDonate: true,
@@ -45,18 +30,106 @@
                 eStudio: '🎥',
                 eTag: '🪧'
             }
-        };
-        await sk.plugin.check(defaultSettings);
-        settings = sk.plugin.get(pluginName);
-        if (settings.removeDonate) sk.tool.wait('.donate', () => { sk.tool.getAll('.donate').forEach((e) => { e.element.parentElement.style.display = 'none'; }); }, true);
-        sk.tool.wait('svg', replace);
+        });
     };
 
-    main();
+    // Watcher
+    function setWatcher() {
+        if (sk.plugin.get(pluginName).removeDonate) sk.tool.wait('.donate', removeDonateButton, true);
+        sk.tool.wait('svg', replaceIcons);
+    };
 
-    if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
-        General: {
-            Icons: { selector: '.skUI_Icon_Icons' }
-        }
-    });
+    function removeDonateButton() {
+        sk.tool.getAll('.donate').forEach(button => button.style({ display: 'none' }));
+    };
+
+    function replaceIcons() {
+        let { navStyle, iconStyle } = sk.plugin.get(pluginName);
+        navStyle = navStyle.toLowerCase();
+        iconStyle = iconStyle.toLowerCase();
+
+        const nav = sk.ui.get.navbar().nav;
+
+        if (navStyle === 'both' && iconStyle === 'default') return;
+        if (navStyle === 'icon') nav.getAll('span').forEach(span => !span.class().includes('skUI_Icon') ? span.remove() : null);
+        if (navStyle === 'text') nav.getAll('svg').forEach(svg => svg.remove());
+        if (navStyle !== 'text' && iconStyle !== 'default') createCustomIcons();
+    };
+
+    function createCustomIcons() {
+        const settings = sk.plugin.get(pluginName);
+        const iconStyle = settings.iconStyle.toLowerCase();
+
+        const scenes = sk.tool.getAll('svg.fa-circle-play');
+        const images = sk.tool.getAll('svg.fa-image');
+        const groups = sk.tool.getAll('svg.fa-film');
+        const markers = sk.tool.getAll('svg.fa-location-dot');
+        const galleries = sk.tool.getAll('svg.fa-images');
+        const performers = sk.tool.getAll('svg.fa-user');
+        const studios = sk.tool.getAll('svg.fa-video');
+        const tags = sk.tool.getAll('svg.fa-tag');
+
+        [scenes, images, groups, markers, galleries, performers, studios, tags].forEach(svg => {
+            const createEmoji = type => sk.ui.make.span({
+                class: 'skUI_Icon_Emoji',
+                text: settings[`e${type}`]
+            });
+
+            const createImage = type => sk.ui.make.image({
+                class: 'skUI_Icon_Image',
+                url: `/plugin/skUI - Assets/assets/Icon/${type}.png`
+            });
+
+            const iconType = getIconType(svg);
+            const icon = iconStyle === 'emoji' ? createEmoji(iconType) : createImage(iconType);
+
+            svg.element.parentNode.appendChild(icon.element);
+            svg.remove();
+        });
+    };
+
+    function getIconType(icon) {
+        const className = icon.class();
+
+        if (className.includes('fa-circle-play')) return 'Scene';
+        if (className.includes('fa-image')) return 'Image';
+        if (className.includes('fa-film')) return 'Group';
+        if (className.includes('fa-location-dot')) return 'Marker';
+        if (className.includes('fa-images')) return 'Gallery';
+        if (className.includes('fa-user')) return 'Performer';
+        if (className.includes('fa-video')) return 'Studio';
+        if (className.includes('fa-tag')) return 'Tag';
+    };
+
+    // Compatibility
+    function skManagerCompatibility() {
+        if (window._skManager) window._skManager.load({
+            name: pluginName,
+            updates: [
+                {
+                    version: '1.0',
+                    description: 'Plugin created.'
+                },
+                {
+                    version: '1.1',
+                    description: 'Added compatibility to skUI - Theme.'
+                },
+                {
+                    version: '2.0',
+                    description: 'Added compatibility to skManager.'
+                }
+            ]
+        });
+    };
+
+    function skThemeCompatibility() {
+        if (window._skUI_Theme) window._skUI_Theme.load(pluginName, {
+            Global: {
+                Emoji: { selector: '.skUI_Icon_Emoji' },
+                Image: { selector: '.skUI_Icon_Image' }
+            }
+        });
+    };
+
+    initialize();
 })()

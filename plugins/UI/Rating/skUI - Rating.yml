@@ -1,12 +1,15 @@
 name: skUI - Rating
-# requires: Shinobi-Api  
-description: Style card based on rating
-version: 2.1
+# requires: Shinobi-Api
+# requires: skManager
+description: Style card and banner based on rating.
+version: 3.0
 ui:
   javascript:
     - skUI - Rating.js
   requires:
     - Shinobi-Api
+    - skManager
+    - skExtra - Keybinder
 settings:
     card:
       displayName: Card rating
@@ -19,6 +22,10 @@ settings:
     banner:
       displayName: Enable default banner
       description: Enable the default rating banner. Default - off
+      type: BOOLEAN
+    changeBanner:
+      displayName: Style banner
+      description: Apply rating style to banner. Default - off
       type: BOOLEAN
     transition:
       displayName: Enable transition
