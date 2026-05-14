@@ -2,7 +2,7 @@ name: skUI - Scenes
 # requires: Shinobi-Api  
 # requires: skManager
 description: Change the aspect of scene cards and page.
-version: 2.0
+version: 2.0.1
 ui:
   css:
     - skUI - Scenes.css
