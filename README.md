@@ -82,7 +82,7 @@ Enable the possibility to have multiple performer images by a custom GUI inside 
 </details>
 
 ## Related Content
-Enable the possibility to have multiple performer images by a custom GUI inside the performer page.
+Add a section inside page category to show related one, automatic and manual.
 [Download](plugins/Extra/Related-Content)
 > [!IMPORTANT]  
 > Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skAwesomplete](plugins/Core/skAwesomplete)
