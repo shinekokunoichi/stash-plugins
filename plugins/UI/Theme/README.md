@@ -12,5 +12,5 @@ Customize your stash theme with a simple UI.
 ## Features
 - Easy UI to edit almost all Stash and My plugins,
 - Infinite number of custom themes
-- Abitlity to share one or all theme to other users (also [here](https://github.com/shinekokunoichi/temp/discussions/categories/theme))
+- Ability to share one or all theme to other users (also [here](https://github.com/shinekokunoichi/temp/discussions/categories/theme))
 - Simple backup import/export of all themes
