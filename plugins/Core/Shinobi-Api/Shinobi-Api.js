@@ -1877,7 +1877,7 @@ sk.stash = function skStash() {
         };
         query = query.replaceAll('@uppercase@', uppercase);
         query = query.replaceAll('@sUppercase@', sUppercase);
-        query = query.replaceAll('@category@', category);
+        query = query.replaceAll('@category@', category === 'sceneMarkers' ? 'scene_markers' : category);
         query = query.replaceAll('@singular@', singular);
         query = query.replace('@filters@', filterList);
         query = query.replace('@fields@', fields);
@@ -2020,7 +2020,7 @@ sk.stash = function skStash() {
          * @prop {string} paths.interactive_heatmap Interactive heatmap path
          * @prop {string} paths.caption Caption path
          * @prop {stashSceneMarker[]} scene_markers Scene markers
-         * @prop {stashGalleries[]} galleries Scene galleries
+         * @prop {stashGallery[]} galleries Scene galleries
          * @prop {stashStudio} studio Scene studio
          * @prop {stashGroup[]} groups Scene groups
          * @prop {stashTag[]} tags Scene tags
