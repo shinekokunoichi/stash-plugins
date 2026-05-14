@@ -121,7 +121,6 @@ Custom metadata scraper for JAV.
 Custom metadata scraper for StashDB.
 [Download](plugins/Scraper/StashDB)
 > [!IMPORTANT]  
-> Need CORS: [Chrome](https://chromewebstore.google.com/detail/cors-unblock/odkadbffomicljkjfepnggiibcjmkogc), [Firefox](https://addons.mozilla.org/en-US/firefox/addon/cors-unblock2/?utm_source=addons.mozilla.org&utm_medium=referral&utm_content=search).
 > Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
 <details>
