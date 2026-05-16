@@ -35,6 +35,12 @@ GUI for easy handle sk plugins and check updates.
 </details>
 
 # Extra plugins
+## Image Upscaler
+Upscale lightbox images (2x). Use UpscalerJS.
+[Download](plugin/Extra/Image-Upscaler)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
+
 ## Keybinder
 Customize your Stash and sk plugins keybinding.
 [Download](plugins/Extra/Keybinder)

@@ -1,0 +1,19 @@
+name: skExtra - Image-Upscaler
+# requires: Shinobi-Api
+# requires: skManager
+description: Upscale lightbox images (2x). Use UpscalerJS.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Image-Upscaler.js
+  requires:
+    - Shinobi-Api
+    - skManager
+  csp:
+    connect-src:
+      - https://cdn.jsdelivr.net
+settings:
+    sizeRequirements:
+      displayName: Size requirements
+      description: If the image have the width or height are equals or less than those will be upscaled. Value - widthxheight. Default - 600x300
+      type: STRING
