@@ -660,7 +660,7 @@
         const currentBinding = sk.ui.make.subTitle({ text: sequence });
         const description = sk.ui.make.description({ text: action });
 
-        card.append(currentBinding, description);debugger
+        card.append(currentBinding, description);
         return card;
     };
 

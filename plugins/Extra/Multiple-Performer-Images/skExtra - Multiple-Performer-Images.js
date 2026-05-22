@@ -468,7 +468,6 @@
         let orderedPresets = [];
         performerImages.forEach(value => orderedPresets[presets.indexOf(value.split(':')[0].trim())] = value);
         orderedPresets = orderedPresets.filter(value => value);
-        debugger
 
         await sk.stash.update.performer({
             id: performer.id,

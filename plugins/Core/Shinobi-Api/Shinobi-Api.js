@@ -468,7 +468,7 @@ sk.element = (tag, options = {}) => {
     base.style = (styles, important = false) => {
         if (typeof styles === 'string') return base.element.style.getPropertyValue(styles);
         important = important ? 'important' : '';
-        for (style in styles) { base.element.style.setProperty(style, styles[style], important) };
+        for (const _style in styles) { base.element.style.setProperty(_style, styles[_style], important) };
     };
 
     /**
@@ -478,7 +478,7 @@ sk.element = (tag, options = {}) => {
      */
     base.attribute = (attributes) => {
         if (typeof attributes === 'string') return base.element.getAttribute(attributes);
-        for (attribute in attributes) { base.element.setAttribute(attribute, attributes[attribute]) };
+        for (const _attribute in attributes) { base.element.setAttribute(_attribute, attributes[_attribute]) };
     };
 
     /**
