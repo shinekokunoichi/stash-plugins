@@ -37,7 +37,7 @@ GUI for easy handle sk plugins and check updates.
 # Extra plugins
 ## Image Upscaler
 Upscale lightbox images (2x). Use UpscalerJS.
-[Download](plugin/Extra/Image-Upscaler)
+[Download](plugins/Extra/Image-Upscaler)
 > [!IMPORTANT]  
 > Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
