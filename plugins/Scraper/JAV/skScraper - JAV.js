@@ -347,10 +347,10 @@
 
         if (!title.includes('-') && !code.includes('-')) return;
 
-        let [titleCode, titleId] = title.split('-');
+        let [titleCode = '', titleId = ''] = title.split('-');
         titleId = titleId.split(' ')[0];
 
-        const [sceneCode, sceneId] = code.split('-');
+        const [sceneCode = '', sceneId = ''] = code.split('-');
 
         const isJAVCode = (code, id) => isNaN(code) && !isNaN(id) ? `${code.trim().toUpperCase()}-${id.trim()}` : false;
         return isJAVCode(titleCode, titleId) || isJAVCode(sceneCode, sceneId);
@@ -554,6 +554,10 @@
                 {
                     version: '2.1',
                     description: 'Force update plugin.'
+                },
+                {
+                    version: '2.1.1',
+                    description: 'Fixed error when scene does not have title and code.'
                 }
             ]
         });
