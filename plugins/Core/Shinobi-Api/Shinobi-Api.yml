@@ -1,6 +1,6 @@
 name: Shinobi-Api
 description: Master api for easy plugin and ui develop.
-version: 3.0.2
+version: 3.0.3
 ui:
   javascript:
   - Shinobi-Api.js

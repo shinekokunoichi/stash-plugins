@@ -3121,6 +3121,7 @@ sk.stashDB = function skStashDB() {
         };
         const uppercase = category[0].toUpperCase() + category.slice(1);
         const query = _formatQuery(category);
+        if (!options.term) options.term = '';
         const response = await _gql(query, options);
         return response[`search${uppercase}`];
     };
