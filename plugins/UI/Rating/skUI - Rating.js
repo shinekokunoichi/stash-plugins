@@ -20,9 +20,12 @@
             name: pluginName,
             options: {
                 card: true,
+                cardAlpha: 1,
                 page: true,
+                pageAlpha: 0.25,
                 banner: false,
                 changeBanner: false,
+                bannerAlpha: 0.75,
                 transition: true,
                 rating1: 'black',
                 rating2: 'darkgreen',
@@ -35,26 +38,33 @@
 
     // Watcher
     function setWatcher() {
-        const { page } = sk.plugin.get(pluginName);
+        const { card, page, banner, changeBanner } = sk.plugin.get(pluginName);
         const categories = ['scene', 'image', 'group', 'gallery', 'performer', 'studio', 'tag'];
 
-        sk.tool.wait('.rating-banner', setCardStyle);
+        if (card || !banner || (banner && changeBanner)) sk.tool.wait('.rating-banner', setCardStyle);
         if (page) categories.forEach(category => sk.tool.wait(sk.ui.is[`${category}Page`], () => setPageStyle(category)));
     };
 
     function setCardStyle() {
-        const { banner, changeBanner } = sk.plugin.get(pluginName);
+        const { card, cardAlpha, banner, changeBanner, bannerAlpha } = sk.plugin.get(pluginName);
 
         if (!banner) sk.tool.getAll('.rating-banner').forEach(el => el.style({ display: 'none' }));
 
         if (isFullRating()) {
             [1, 2, 3, 4, 5].forEach(star => {
-                const cards = sk.tool.getAll(`.card:has(.rating-${star})`);
-                if (cards[0]) cards.forEach(card => fullRatingStyle(card, star));
+                if (card) {
+                    const cards = sk.tool.getAll(`.card:has(.rating-${star})`);
+                    if (cards[0]) cards.forEach(card => fullRatingStyle(card, star, cardAlpha));
+                };
+
+                if (banner && changeBanner) {
+                    const banners = sk.tool.getAll(`.rating-banner.rating-${star}`);
+                    if (banners[0]) banners.forEach(banner => fullRatingStyle(banner, star, bannerAlpha));
+                };
             });
         };
 
-        if (!isFullRating()) halfRatingStyle();
+        if (!isFullRating()) halfRatingStyle(false);
     };
 
     function isFullRating() {
@@ -63,14 +73,14 @@
         if (type === 'decimal' || starPrecision !== 'full') return false;
     };
 
-    function fullRatingStyle(element, star) {
+    function fullRatingStyle(element, star, alpha) {
         const settings = sk.plugin.get(pluginName);
 
-        const color = getRGB(settings[`rating${star}`]);
+        const color = getRGB(settings[`rating${star}`], alpha);
         element.style({ 'background-color': color }, true);
     };
 
-    function getRGB(color, alpha = 1) {
+    function getRGB(color, alpha) {
         if (color.includes('rgb') && !alpha) return color;
 
         if (color.includes('rgb') && alpha) {
@@ -101,19 +111,19 @@
 
             if (page) {
                 const i = rating.indexOf(page.rating.read());
-                const color = settings.transition && (min.includes('rgb') && max.includes('rgb')) ? getTransitionColor(modifiers[i], min, max, 0.25) : max;
-                page.info.style({ 'background-color': color }, true);
+                const pageColor = settings.transition && (min.includes('rgb') && max.includes('rgb')) ? getTransitionColor(modifiers[i], min, max, settings.pageAlpha) : max;
+                page.info.style({ 'background-color': pageColor }, true);
             };
 
             if (!page) {
                 rating.forEach((value, i) => {
-                    const color = settings.transition && (min.includes('rgb') && max.includes('rgb')) ? getTransitionColor(modifiers[i], min, max, 0.25) : max;
+                    const cardColor = settings.transition && (min.includes('rgb') && max.includes('rgb')) ? getTransitionColor(modifiers[i], min, max, settings.cardAlpha) : max;
+                    const bannerColor = settings.transition && (min.includes('rgb') && max.includes('rgb')) ? getTransitionColor(modifiers[i], min, max, settings.bannerAlpha) : max;
 
                     const cards = sk.tool.getAll(`.card:has(.rating-100-${value})`);
                     if (cards[0]) cards.forEach(card => {
-                        if (settings.card) card.style({ 'background-color': color }, true);
-                        if (settings.banner && settings.changeBanner) card.ratingBanner.style({ 'background-color': color }, true);
-                        if (!settings.banner) card.ratingBanner.style({ display: 'none' });
+                        if (settings.card) card.style({ 'background-color': cardColor }, true);
+                        if (settings.banner && settings.changeBanner) card.ratingBanner.style({ 'background-color': bannerColor }, true);
                     });
                 });
             };
@@ -140,7 +150,7 @@
 
         if (!rating) return;
 
-        if (isFullRating()) fullRatingStyle(page.info, rating);
+        if (isFullRating()) fullRatingStyle(page.info, rating, 0.25);
         if (!isFullRating()) halfRatingStyle(page);
     };
 
@@ -161,6 +171,10 @@
                 {
                     version: '3.0',
                     description: 'Added compatibility to skManager.'
+                },
+                {
+                    version: '3.1',
+                    description: 'Added the ability to change page and card alpha color.'
                 }
             ]
         });

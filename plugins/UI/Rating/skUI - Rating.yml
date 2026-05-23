@@ -2,7 +2,7 @@ name: skUI - Rating
 # requires: Shinobi-Api
 # requires: skManager
 description: Style card and banner based on rating.
-version: 3.0
+version: 3.1
 ui:
   javascript:
     - skUI - Rating.js
@@ -15,10 +15,18 @@ settings:
       displayName: Card rating
       description: Apply styles to cards. Default - on
       type: BOOLEAN
+    cardAlpha:
+      displayName: Card alpha
+      description: How much alpha apply to the card color. Value - from 0.00 to 1. Default - 1
+      type: STRING
     page:
       displayName: Page rating
       description: Apply styles to pages. Default - on
       type: BOOLEAN
+    pageAlpha:
+      displayName: Page alpha
+      description: How much alpha apply to the page color. Value - from 0.00 to 1. Default - 0.25
+      type: STRING
     banner:
       displayName: Enable default banner
       description: Enable the default rating banner. Default - off
@@ -27,6 +35,10 @@ settings:
       displayName: Style banner
       description: Apply rating style to banner. Default - off
       type: BOOLEAN
+    bannerAlpha:
+      displayName: Banner alpha
+      description: How much alpha apply to the banner color. Value - from 0.00 to 1. Default - 0.75
+      type: STRING
     transition:
       displayName: Enable transition
       description: Enable transition between rating color for decimal ratings. NOTE - if enabled color value must be rgb/rgba/hex. Default - true
