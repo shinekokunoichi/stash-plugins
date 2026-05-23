@@ -1,10 +1,10 @@
 # skUI - Search
-<img width="500" height="500" alt="skUI - Search" src="https://github.com/user-attachments/assets/18ada9ba-4212-4ad6-af82-a6143ed38c61" />
+<img width="500" height="500" alt="skUI - Search" src="/plugins/UI/Assets/Core/skUI - Search.png" />
 
 <details>
 <summary>Screenshot</summary>
-  <img width="937" height="325" alt="image" src="https://github.com/user-attachments/assets/2b6054ee-127b-4ee6-9b4b-23217fe221aa" />
-  <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/feb9c089-62d8-4f7f-b0ff-0b21d204892c" />
+  <img width="937" height="325" alt="image" src="/assets/screenshots/skUI Search 1.png" />
+  <img width="1268" height="118" alt="image" src="/assets/screenshots/skUI Search 2.png" />
 </details>
 
 Add differents custom search.

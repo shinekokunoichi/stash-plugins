@@ -1,10 +1,10 @@
 # skUI - Icon
-<img width="500" height="500" alt="skUI - Icon" src="https://github.com/user-attachments/assets/266e2250-463f-433f-8e0b-23367d101e35" />
+<img width="500" height="500" alt="skUI - Icon" src="/plugins/UI/Assets/Core/skUI - Icon.png" />
 
 <details>
 <summary>Screenshot</summary>
-  <img width="690" height="19" alt="image" src="https://github.com/user-attachments/assets/03612f9c-d9b3-4b23-8f7f-ea7de19b11ab" />
-  <img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/8f52fbcb-d319-459b-b08c-0aa74f5c1124" />
+  <img width="690" height="19" alt="image" src="/assets/screenshots/skUI Icon 1.png" />
+  <img width="690" height="22" alt="image" src="/assets/screenshots/skUI Icon 2.png" />
 </details>
 
 Customization for icon and navbar.

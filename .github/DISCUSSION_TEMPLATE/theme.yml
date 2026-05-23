@@ -1,0 +1,17 @@
+title: '[Theme] Name'
+body:
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Theme screenshot
+      description: Paste here theme screeshot
+  - type: textarea
+    id: description
+    attributes:
+      label: Theme description
+      description: Your theme description
+  - type: textarea
+    id: json
+    attributes:
+      label: Theme data
+      description: Paste here copied theme data

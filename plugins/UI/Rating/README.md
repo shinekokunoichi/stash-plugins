@@ -1,5 +1,10 @@
 # skUI - Rating
-<img width="500" height="500" alt="skUI - Rating" src="https://github.com/user-attachments/assets/827589f1-6221-4e4c-95db-f388becea450" />
+<img width="500" height="500" alt="skUI - Rating" src="/plugins/UI/Assets/Core/skUI - Rating.png" />
+
+<details>
+<summary>Screenshot</summary>
+  <img width="690" height="19" alt="image" src="/assets/screenshots/skUI Rating.png" />
+</details>
 
 Style card and banner based on rating.
 

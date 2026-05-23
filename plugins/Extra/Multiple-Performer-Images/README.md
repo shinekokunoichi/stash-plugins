@@ -1,11 +1,11 @@
 # skExtra - Multiple-Performer-Images
-<img width="500" height="500" alt="skExtra - Multiple-Performer-Images" src="https://github.com/user-attachments/assets/7b925195-ed46-47e9-a5a4-8ff8169eb694" />
+<img width="500" height="500" alt="skExtra - Multiple-Performer-Images" src="/plugins/UI/Assets/Core/skExtra - Multiple-Performer-Images.png" />
 
 
 <details>
 <summary>Screenshot</summary>
-  <img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/08ef599b-f3b8-41c6-85cd-150b67a8bd30" />
-  <img width="1274" height="417" alt="image" src="https://github.com/user-attachments/assets/a598b106-031f-4a5b-a649-7268db6b4156" />
+  <img width="690" height="167" alt="image" src="/assets/screenshots/skExtra Multiple Performer Images 1.png" />
+  <img width="1274" height="417" alt="image" src="/assets/screenshots/skExtra Multiple Performer Images 2.png" />
 </details>
 
 Enable the possibility to have multiple performer images by a custom GUI inside the performer page.

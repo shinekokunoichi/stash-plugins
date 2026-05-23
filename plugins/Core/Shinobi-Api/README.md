@@ -1,5 +1,5 @@
 # Shinobi-Api
-<img width="500" height="500" alt="Shinobi-Api" src="https://github.com/user-attachments/assets/c2c79ce9-c13a-4d1d-a74e-702f276d56a9" />
+<img width="500" height="500" alt="Shinobi-Api" src="/assets/core/Shinobi-Api.png" />
 
 Custom Stash API powers all my plugins. The API is fully commented in JSDoc. If I get multiple requests for the API, I'll create a page with instructions for the basic functions.
 

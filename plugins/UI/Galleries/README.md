@@ -1,5 +1,5 @@
 # skUI - Galleries
-<img width="500" height="500" alt="skUI - Galleries" src="https://github.com/user-attachments/assets/e61900e4-1b90-48ef-b0a5-c811124488e2" />
+<img width="500" height="500" alt="skUI - Galleries" src="/plugins/UI/Assets/Core/skUI - Galleries.png" />
 
 Change the aspect of gallery cards and page.
 

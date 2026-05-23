@@ -1,5 +1,5 @@
 # skUI - Performers
-<img width="500" height="500" alt="skUI - Performers" src="https://github.com/user-attachments/assets/545bc5da-65fc-41d8-b351-98144ebb310e" />
+<img width="500" height="500" alt="skUI - Performers" src="/plugins/UI/Assets/Core/skUI - Performers.png" />
 
 Change the aspect of performer cards.
 

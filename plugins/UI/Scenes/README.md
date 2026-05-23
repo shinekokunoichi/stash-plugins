@@ -1,5 +1,5 @@
 # skUI - Scenes
-<img width="500" height="500" alt="skUI - Scenes" src="https://github.com/user-attachments/assets/048872b8-e2ab-4ce0-b3df-4b80264ace05" />
+<img width="500" height="500" alt="skUI - Scenes" src="/plugins/UI/Assets/Core/skUI - Scenes.png" />
 
 Change the aspect of scene cards and page.
 

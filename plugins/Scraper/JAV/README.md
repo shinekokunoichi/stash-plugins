@@ -1,9 +1,9 @@
 # skScraper - JAV
-<img width="500" height="500" alt="skScraper - JAV" src="https://github.com/user-attachments/assets/86798f93-9c31-4773-ad1e-803a1c6c3502" />
+<img width="500" height="500" alt="skScraper - JAV" src="/plugins/UI/Assets/Core/skScraper - JAV.png" />
 
 <details>
 <summary>Screenshot</summary>
-<img width="1860" height="233" alt="image" src="https://github.com/user-attachments/assets/10d7a19e-fa6d-4239-be78-38bdf61b21ae" />
+<img width="1860" height="233" alt="image" src="/assets/screenshots/skScraper JAV.png" />
 </details>
 
 Custom metadata scraper for JAV.

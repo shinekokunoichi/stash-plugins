@@ -7,7 +7,7 @@ Local Path: `ShinekoKunoichi`
 
 <details>
 <summary>Screenshot</summary>
-  <img width="443" height="357" alt="image" src="https://github.com/user-attachments/assets/519da9b7-488a-44a7-84af-bc940f8da494" />
+  <img width="443" height="357" alt="image" src="/assets/core/Installation.png" />
 </details>
 
 # Features & Bugs
@@ -31,7 +31,7 @@ GUI for easy handle sk plugins and check updates.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="936" height="946" alt="image" src="https://github.com/user-attachments/assets/4fb0d551-908b-42db-aa20-200fab038da6" />
+  <img width="936" height="946" alt="image" src="/assets/screenshots/skManager.png" />
 </details>
 
 # Extra plugins
@@ -49,7 +49,7 @@ Customize your Stash and sk plugins keybinding.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="927" height="944" alt="image" src="https://github.com/user-attachments/assets/e4deb55e-dca9-421a-b144-205cb059b2e5" />
+  <img width="927" height="944" alt="image" src="/assets/screenshots/skExtra Keybinder.png" />
 </details>
 
 ## Metadata Parser
@@ -60,7 +60,7 @@ Apply and create metadata based on path and file name. High customization, read 
 
 <details>
 <summary>Screenshot</summary>
-  <img width="1871" height="945" alt="image" src="https://github.com/user-attachments/assets/9483c65d-8f61-4b63-acc0-26859e639a60" />
+  <img width="1871" height="945" alt="image" src="/assets/screenshots/skExtra Metadata Parser.png" />
 </details>
 
 ## Most Used
@@ -71,8 +71,8 @@ Add a crown based on top 3 elements based on the O Counter and alter the card st
 
 <details>
 <summary>Screenshot</summary>
-  <img width="905" height="446" alt="image" src="https://github.com/user-attachments/assets/3716224c-bfd7-41a4-8f3e-81d7663825ab" />
-  <img width="1847" height="926" alt="image" src="https://github.com/user-attachments/assets/f09f0785-9a11-4af0-af31-16f6de650324" />
+  <img width="905" height="446" alt="image" src="/assets/screenshots/skExtra Most Used 1.png" />
+  <img width="1847" height="926" alt="image" src="/assets/screenshots/skExtra Most Used 2.png" />
 </details>
 
 ## Multiple Performer Images
@@ -83,8 +83,8 @@ Enable the possibility to have multiple performer images by a custom GUI inside 
 
 <details>
 <summary>Screenshot</summary>
-  <img width="690" height="167" alt="image" src="https://github.com/user-attachments/assets/08ef599b-f3b8-41c6-85cd-150b67a8bd30" />
-  <img width="1274" height="417" alt="image" src="https://github.com/user-attachments/assets/a598b106-031f-4a5b-a649-7268db6b4156" />
+  <img width="690" height="167" alt="image" src="/assets/screenshots/skExtra Multiple Performer Images 1.png" />
+  <img width="1274" height="417" alt="image" src="/assets/screenshots/skExtra Multiple Performer Images 2.png" />
 </details>
 
 ## Related Content
@@ -95,7 +95,7 @@ Add a section inside page category to show related one, automatic and manual.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="397" height="501" alt="image" src="https://github.com/user-attachments/assets/91f6ac0a-3ea0-4ae9-8b52-af80a0fb46f8" />
+  <img width="397" height="501" alt="image" src="/assets/screenshots/skExtra Related Content.png" />
 </details>
 
 ## Tags Color
@@ -106,8 +106,8 @@ Colorize tags based on their parent tag/s.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="496" height="298" alt="image" src="https://github.com/user-attachments/assets/c880a543-5397-4e2d-be6a-dc8a4df8eadd" />
-  <img width="925" height="646" alt="image" src="https://github.com/user-attachments/assets/d3ca941b-fb06-46ea-bd77-30a3e78fdb6c" />
+  <img width="496" height="298" alt="image" src="/assets/screenshots/skExtra Tags Color 1.png" />
+  <img width="925" height="646" alt="image" src="/assets/screenshots/skExtra Tags Color 2.png" />
 </details>
 
 # Scraper
@@ -120,7 +120,7 @@ Custom metadata scraper for JAV.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="1860" height="233" alt="image" src="https://github.com/user-attachments/assets/10d7a19e-fa6d-4239-be78-38bdf61b21ae" />
+  <img width="1860" height="233" alt="image" src="/assets/screenshots/skScraper JAV.png" />
 </details>
 
 ## StashDB
@@ -131,7 +131,7 @@ Custom metadata scraper for StashDB.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="1854" height="223" alt="image" src="https://github.com/user-attachments/assets/ac875d63-e8b8-4511-b2f4-ab80fe7b07d5" />
+  <img width="1854" height="223" alt="image" src="/assets/screenshots/skScraper StashDB.png" />
 </details>
 
 # UI
@@ -147,8 +147,8 @@ UI customization for Stash name, logo and favicon.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="229" height="36" alt="image" src="https://github.com/user-attachments/assets/013832d3-9d79-419e-9200-9ae90c0a8122" />
-  <img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/4a4f9eb0-6eeb-40b5-b7a4-612a7c9d8f29" />
+  <img width="229" height="36" alt="image" src="/assets/screenshots/skUI Brand 1.png" />
+  <img width="690" height="22" alt="image" src="/assets/screenshots/skUI Brand 2.png" />
 </details>
 
 ## Galleries
@@ -171,8 +171,8 @@ Customization for icon and navbar.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="690" height="19" alt="image" src="https://github.com/user-attachments/assets/03612f9c-d9b3-4b23-8f7f-ea7de19b11ab" />
-  <img width="690" height="22" alt="image" src="https://github.com/user-attachments/assets/8f52fbcb-d319-459b-b08c-0aa74f5c1124" />
+  <img width="690" height="19" alt="image" src="/assets/screenshots/skUI Icon 1.png" />
+  <img width="690" height="22" alt="image" src="/assets/screenshots/skUI Icon 2.png" />
 </details>
 
 ## Images
@@ -199,6 +199,11 @@ Style card and banner based on rating.
 > [!IMPORTANT]  
 > Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
 
+<details>
+<summary>Screenshot</summary>
+  <img width="690" height="19" alt="image" src="/assets/screenshots/skUI Rating.png" />
+</details>
+
 ## Scenes
 Change the aspect of scene cards and page.
 [Download](plugins/UI/Scenes)
@@ -213,8 +218,8 @@ Add differents custom search.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="937" height="325" alt="image" src="https://github.com/user-attachments/assets/2b6054ee-127b-4ee6-9b4b-23217fe221aa" />
-  <img width="1268" height="118" alt="image" src="https://github.com/user-attachments/assets/feb9c089-62d8-4f7f-b0ff-0b21d204892c" />
+  <img width="937" height="325" alt="image" src="/assets/screenshots/skUI Search 1.png" />
+  <img width="1268" height="118" alt="image" src="/assets/screenshots/skUI Search 2.png" />
 </details>
 
 ## Studios
@@ -237,6 +242,6 @@ Customize your stash theme with a simple UI.
 
 <details>
 <summary>Screenshot</summary>
-  <img width="477" height="976" alt="image" src="https://github.com/user-attachments/assets/72cca161-6492-465f-8600-f0dd61d9afe5" />
-  <img width="931" height="595" alt="image" src="https://github.com/user-attachments/assets/2762d87a-9ad6-4184-b378-c3c292846a03" />
+  <img width="477" height="976" alt="image" src="/assets/screenshots/skUI Theme 1.png" />
+  <img width="931" height="595" alt="image" src="/assets/screenshots/skUI Theme 2.png" />
 </details>

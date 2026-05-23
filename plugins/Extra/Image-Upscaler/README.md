@@ -1,5 +1,5 @@
 # skExtra - Image-Upscaler
-<img width="500" height="500" alt="skExtra - Image-Upscaler" src="https://github.com/user-attachments/assets/3e801f07-c709-45af-bf41-99e683945279" />
+<img width="500" height="500" alt="skExtra - Image-Upscaler" src="/plugins/UI/Assets/Core/skExtra - Image-Upscaler.png" />
 
 Upscale lightbox images (2x). Use UpscalerJS.
 

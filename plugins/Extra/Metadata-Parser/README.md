@@ -1,9 +1,9 @@
 # skExtra - Metadata-Parser
-<img width="500" height="500" alt="skExtra - Metadata-Parser" src="https://github.com/user-attachments/assets/b7be3244-731a-4dd8-b21a-ca08bccfbfef" />
+<img width="500" height="500" alt="skExtra - Metadata-Parser" src="/plugins/UI/Assets/Core/skExtra - Metadata-Parser.png" />
 
 <details>
 <summary>Screenshot</summary>
-  <img width="1871" height="945" alt="image" src="https://github.com/user-attachments/assets/9483c65d-8f61-4b63-acc0-26859e639a60" />
+  <img width="1871" height="945" alt="image" src="/assets/screenshots/skExtra Metadata Parser.png" />
 </details>
 
 Apply and create metadata based on path and file name. High customization, read How to.txt to see how to set up.
