@@ -314,7 +314,8 @@
 
         for (let i = 0; i < data.length; i++) {
             const entry = data[i];
-            let scrapedData = await sk.stashDB.find[`${category.slice(0, -1)}`](entry.title || entry.name);
+            let scrapedData;
+            if (entry.title || entry.name) scrapedData = await sk.stashDB.find[`${category.slice(0, -1)}`](entry.title || entry.name || '');
 
             if (scrapedData) {
                 scrapedData.id = entry.id;
@@ -367,16 +368,19 @@
                 for (const key in stashData) {
                     const value = typeof stashData[key] === 'number' ? String(stashData[key]) : stashData[key];
 
-                    if (value.includes('stashdb')) imageContainer.style({ 'background-image': `url(${value})` })
-                    else if (key !== 'stash_ids' && key !== 'urls' && Array.isArray(value)) infos.append(createInfo(key, value.join(', ')))
-                    else if (key !== 'stash_ids' && key !== 'urls') infos.append(createInfo(key, value));
+                    if (value){
+                        if (value.includes('stashdb')) imageContainer.style({ 'background-image': `url(${value})` })
+                        else if (key !== 'stash_ids' && key !== 'urls' && Array.isArray(value)) infos.append(createInfo(key, value.join(', ')))
+                        else if (key !== 'stash_ids' && key !== 'urls') infos.append(createInfo(key, value));
+                    };
                 };
 
                 infos.append(stashDBLink(stashData.stash_ids[0]));
                 resultsContainer.append(card);
-                progress.write(`Scraper - Scraping ${i + 1}/${data.length} ${category}`);
                 checkScraperData(scrapedData, card, category);
             };
+
+            progress.write(`Scraper - Scraping ${i + 1}/${data.length} ${category}`);
         };
 
         dryRun = undefined;

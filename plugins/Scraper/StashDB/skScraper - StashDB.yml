@@ -2,7 +2,7 @@ name: skScraper - StashDB
 # requires: Shinobi-Api
 # requires: skManager
 description: Auto metadata scraper from StashDB (based on title and name).
-version: 2.1
+version: 2.1.1
 ui:
   javascript:
     - skScraper - StashDB.js
