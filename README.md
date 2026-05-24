@@ -87,6 +87,18 @@ Enable the possibility to have multiple performer images by a custom GUI inside 
   <img width="1274" height="417" alt="image" src="/assets/screenshots/skExtra Multiple Performer Images 2.png" />
 </details>
 
+## Multiple Studios
+Enable the possibility to have multiple studios for images.
+[Download](plugins/Extra/Multiple-Studios)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
+
+<details>
+<summary>Screenshot</summary>
+  <img src="/assets/screenshots/skExtra Multiple Studios 1.png" />
+  <img src="/assets/screenshots/skExtra Multiple Studios 2.png" />
+</details>
+
 ## Related Content
 Add a section inside page category to show related one, automatic and manual.
 [Download](plugins/Extra/Related-Content)
