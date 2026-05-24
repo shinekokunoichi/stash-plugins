@@ -230,7 +230,7 @@
 
         progress.write('Scraper - Loading...');
 
-        let scenes = await sk.stash.find.scenes({ fields: 'id title code stash_ids { endpoint }' });
+        let scenes = await sk.stash.find.scenes({ fields: 'id title code stash_ids { endpoint } files { basename }' });
         prepareScrapeResults(scenes);
         scenes = scenes.filter(scene => canScrape(scene, forceScrape));
 
@@ -242,68 +242,71 @@
         for (let i = 0; i < scenes.length; i++) {
             const scene = scenes[i];
             const scrapedData = await stashIdToName(await scrapeJAV(scene));
+
+            if (scrapedData){
+                const row = sk.ui.make.container({
+                    class: 'btn-danger skScraper_JAV_ResultsRow',
+                    flex: true,
+                    style: {
+                        width: '100%',
+                        padding: '1rem 0',
+                        cursor: 'pointer',
+                        'justify-content': 'space-around',
+                        'border-top': '.25rem solid rgba(0,0,0,0.1)'
+                    },
+                    event: {
+                        type: 'click',
+                        callback: () => checkScraperData(scene, row)
+                    }
+                });
+                const fixedWidth = { width: '150px' };
+                const resultsId = sk.ui.make.description({
+                    text: scene.id,
+                    style: fixedWidth,
+                    event: {
+                        type: 'click',
+                        callback: () => window.open(`${window.location.origin}/scenes/${scene.id}`, '_blank').focus()
+                    }
+                });
+                const resultsTitle = sk.ui.make.description({
+                    text: scrapedData.title || '',
+                    style: fixedWidth
+                });
+                const resultsCode = sk.ui.make.description({
+                    text: scrapedData.code || '',
+                    style: fixedWidth
+                });
+                const resultsDate = sk.ui.make.description({
+                    text: scrapedData.date || '',
+                    style: fixedWidth
+                });
+                const resultsPerformers = sk.ui.make.description({
+                    text: `Find: ${scrapedData._performers || ''}\nCreate: ${whatWillCreate.performer || ''}`,
+                    style: fixedWidth
+                });
+                const resultsTags = sk.ui.make.description({
+                    text: `Find: ${scrapedData._tags || ''}\nCreate: ${whatWillCreate.tag || ''}`,
+                    style: fixedWidth
+                });
+                const resultsStudio = sk.ui.make.description({
+                    text: `Find: ${scrapedData._studio || ''}\nCreate: ${whatWillCreate.studio || ''}`,
+                    style: fixedWidth
+                });
+                const resultsIndex = sk.ui.make.description({
+                    text: scrapedData.groups ? scrapedData.groups[scrapedData.groups.length - 1].scene_index || '' : '',
+                    style: fixedWidth
+                });
+                const resultsGroups = sk.ui.make.description({
+                    text: `Find: ${scrapedData._groups || ''}\nCreate: ${whatWillCreate.group || ''}`,
+                    style: fixedWidth
+                });
             
-            const row = sk.ui.make.container({
-                class: 'btn-danger skScraper_JAV_ResultsRow',
-                flex: true,
-                style: {
-                    width: '100%',
-                    padding: '1rem 0',
-                    cursor: 'pointer',
-                    'justify-content': 'space-around',
-                    'border-top': '.25rem solid rgba(0,0,0,0.1)'
-                },
-                event: {
-                    type: 'click',
-                    callback: () => checkScraperData(scene, row)
-                }
-            });
-            const fixedWidth = { width: '150px' };
-            const resultsId = sk.ui.make.description({
-                text: scene.id,
-                style: fixedWidth,
-                event: {
-                    type: 'click',
-                    callback: () => window.open(`${window.location.origin}/scenes/${scene.id}`, '_blank').focus()
-                }
-            });
-            const resultsTitle = sk.ui.make.description({
-                text: scrapedData.title || '',
-                style: fixedWidth
-            });
-            const resultsCode = sk.ui.make.description({
-                text: scrapedData.code || '',
-                style: fixedWidth
-            });
-            const resultsDate = sk.ui.make.description({
-                text: scrapedData.date || '',
-                style: fixedWidth
-            });
-            const resultsPerformers = sk.ui.make.description({
-                text: `Find: ${scrapedData._performers || ''}\nCreate: ${whatWillCreate.performer || ''}`,
-                style: fixedWidth
-            });
-            const resultsTags = sk.ui.make.description({
-                text: `Find: ${scrapedData._tags || ''}\nCreate: ${whatWillCreate.tag || ''}`,
-                style: fixedWidth
-            });
-            const resultsStudio = sk.ui.make.description({
-                text: `Find: ${scrapedData._studio || ''}\nCreate: ${whatWillCreate.studio || ''}`,
-                style: fixedWidth
-            });
-            const resultsIndex = sk.ui.make.description({
-                text: scrapedData.groups ? scrapedData.groups[scrapedData.groups.length - 1].scene_index || '' : '',
-                style: fixedWidth
-            });
-            const resultsGroups = sk.ui.make.description({
-                text: `Find: ${scrapedData._groups || ''}\nCreate: ${whatWillCreate.group || ''}`,
-                style: fixedWidth
-            });
-            
-            row.append(resultsId, resultsTitle, resultsCode, resultsDate, resultsPerformers, resultsTags, resultsStudio, resultsIndex, resultsGroups);
-            resultsContainer.append(row);
+                row.append(resultsId, resultsTitle, resultsCode, resultsDate, resultsPerformers, resultsTags, resultsStudio, resultsIndex, resultsGroups);
+                resultsContainer.append(row);
+                checkScraperData(scene, row);
+            };
+
             progress.write(`Scraper - Scraping ${i + 1}/${scene.length}`);
-            checkScraperData(scene, row);
         };
 
         dryRun = undefined;
@@ -344,16 +347,18 @@
 
     function isJAV(scene) {
         const { title = '', code = '' } = scene;
+        const fileName = scene.files[0].basename.split('.')[0];
 
-        if (!title.includes('-') && !code.includes('-')) return;
+        if (!title.includes('-') && !code.includes('-') && !fileName.includes('-')) return;
 
-        let [titleCode = '', titleId = ''] = title.split('-');
+        let [titleCode, titleId] = title.split('-');
         titleId = titleId.split(' ')[0];
 
-        const [sceneCode = '', sceneId = ''] = code.split('-');
+        const [sceneCode, sceneId] = code.split('-');
+        const [fileNameCode, fileNameId] = fileName.split('-');
 
         const isJAVCode = (code, id) => isNaN(code) && !isNaN(id) ? `${code.trim().toUpperCase()}-${id.trim()}` : false;
-        return isJAVCode(titleCode, titleId) || isJAVCode(sceneCode, sceneId);
+        return isJAVCode(titleCode, titleId) || isJAVCode(sceneCode, sceneId) || isJAVCode(fileNameCode, fileNameId);
     };
 
     async function scrapeJAV(scene) {
@@ -437,6 +442,8 @@
     };
 
     async function stashIdToName(data) {
+        if (!data) return;
+
         if (data.performer_ids) {
             const performers = await sk.stash.find.performers({
                 ids: data.performer_ids.filter(performer => performer),
@@ -554,10 +561,6 @@
                 {
                     version: '2.1',
                     description: 'Force update plugin.'
-                },
-                {
-                    version: '2.1.1',
-                    description: 'Fixed error when scene does not have title and code.'
                 }
             ]
         });
