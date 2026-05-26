@@ -31,7 +31,10 @@
 	// Preloader
 	async function preloadTags() {
 		let { colors } = sk.plugin.get(pluginName);
-		if (!colors) return;
+		if (!colors) {
+			tagsColor = [];
+			return;
+		};
 
 		parentTags = await sk.stash.find.tags({
 			fieldFilter: {
@@ -71,6 +74,7 @@
 				};
 			};
 		};
+
 		return colors;
 	};
 
@@ -126,6 +130,10 @@
 				{
 					version: '2.1',
 					description: 'Force update plugin.'
+				},
+				{
+					version: '2.1.1',
+					description: "Fixed error when there aren't any colors declared."
 				}
 			]
 		});
@@ -173,6 +181,7 @@
 			flex: true,
 			style: { 'flex-wrap': 'wrap' }
 		});
+
 		tagsColor.forEach((colorData, i) => {
 			const subTagsList = colorData.subTags.map(subTag => `${subTag.name}`).join(', ');
 
