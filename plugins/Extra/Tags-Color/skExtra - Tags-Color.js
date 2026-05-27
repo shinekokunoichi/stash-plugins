@@ -31,10 +31,6 @@
 	// Preloader
 	async function preloadTags() {
 		let { colors } = sk.plugin.get(pluginName);
-		if (!colors) {
-			tagsColor = [];
-			return;
-		};
 
 		parentTags = await sk.stash.find.tags({
 			fieldFilter: {
@@ -43,12 +39,13 @@
 			fields: 'name id image_path'
 		});
 
-		tagsColor = await getGroupsColor(colors);
+		tagsColor = colors ? await getGroupsColor(colors) : [];
 	};
 
 	async function getGroupsColor(colors) {
 		colors = colors.split(',').map((data) => {
-			const [name, color] = data.split(':');
+			let [name, color] = data.split(':');
+			if (name[0] === '|') name = name.slice(1);
 			return {
 				name: name,
 				color: color
@@ -69,7 +66,7 @@
 							}
 						},
 						fields: 'name'
-					});
+					}) || [];
 					find = true;
 				};
 			};
@@ -80,15 +77,22 @@
 
 	// Watcher
 	function setWatcher() {
-		sk.tool.wait('.tag-item', setTagItemColor);
+		sk.tool.wait('.tag-item', () => setTagItemColor(true));
+		sk.tool.wait('.skExtra_Easy_Tagger_TagSelector', setTagItemColor);
+
 		if (sk.plugin.get(pluginName).cardColor) sk.tool.wait(sk.ui.is.tagCard, setCardColor);
 	};
 
-	function setTagItemColor() {
-		sk.ui.get.cards.tagsPopUps().forEach((tag) => {
+	function setTagItemColor(popUps) {
+		if (popUps) sk.ui.get.cards.tagsPopUps().forEach((tag) => {
 			const tagName = tag.read().includes('|') ? tag.read().slice(0, -1) : tag.read();
 			const tagColor = getTagColor(tagName);
-			if (tagColor) tag.style({ 'background-color': parentTag.color });
+			if (tagColor) tag.style({ 'background-color': tagColor });
+		});
+
+		if (!popUps) sk.tool.getAll('.skExtra_Easy_Tagger_TagSelector').forEach(tag => {
+			const tagColor = getTagColor(tag.read());
+			if (tagColor) tag.style({ 'background-color': tagColor });
 		});
 	};
 
@@ -96,13 +100,13 @@
 		let find;
 
 		tagsColor.forEach((parentTag) => {
-			if (find) return;
-
-			if (tagName === parentTag.name) find = true;
-			if (tagName !== parentTag.name) parentTag.subTags.forEach(subTag => tagName === subTag.name ? find = true : null);
-
-			if (find) return parentTag.color;
+			if (!find) {
+				if (tagName === parentTag.name) find = parentTag.color;
+				if (tagName !== parentTag.name) parentTag.subTags.forEach(subTag => tagName === subTag.name ? find = parentTag.color : null);
+			};
 		});
+
+		return find;
 	};
 
 	function setCardColor() {
@@ -134,6 +138,10 @@
 				{
 					version: '2.1.1',
 					description: "Fixed error when there aren't any colors declared."
+				},
+				{
+					version: '2.1.2',
+					description: 'Fixed error not showing the first declared color.\nAdded compatibility to future plugins.'
 				}
 			]
 		});
