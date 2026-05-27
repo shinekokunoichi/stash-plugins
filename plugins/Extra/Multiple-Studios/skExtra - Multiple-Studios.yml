@@ -2,7 +2,7 @@ name: skExtra - Multiple-Studios
 # requires: Shinobi-Api
 # requires: skManager
 description: Enable the possibility to have multiple studios for images.
-version: 1.0
+version: 1.0.1
 ui:
   javascript:
     - skExtra - Multiple-Studios.js

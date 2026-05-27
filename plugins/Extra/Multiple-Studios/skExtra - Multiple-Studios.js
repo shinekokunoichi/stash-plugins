@@ -17,7 +17,7 @@
     };
 
     async function createOtherStudios() {
-        if (sk.tool.get('#skExtra_Multiple_Studios_Input')) return;
+        if (sk.tool.get('#skExtra_Multiple_Studios_Input') || !sk.tool.get(sk.ui.is.imagePage)) return;
 
         if (!studios) studios = await sk.stash.find.studios({ fields: 'id name image_path custom_fields' });
 
@@ -157,7 +157,7 @@
 
                     const studio = studios.filter(entry => entry.id == studioId)[0];
                     let studioExtraImages = studio.custom_fields[pluginName];
-                    
+
                     if (!studioExtraImages) studioExtraImages = '';
                     if (studioExtraImages.split('|').includes(page.id)) return;
 
@@ -176,7 +176,7 @@
                     }
                 });
             }
-        })
+        });
     };
 
     async function createExtraImagesTab() {
