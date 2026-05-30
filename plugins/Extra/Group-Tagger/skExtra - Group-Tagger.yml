@@ -1,0 +1,22 @@
+name: skExtra - Group-Tagger
+# requires: Shinobi-Api
+# requires: skManager
+# requires: skAwesomplete
+description: Set tags based on tags category with 2 different styles.
+version: 1.0
+ui:
+  javascript:
+    - skExtra - Group-Tagger.js
+  requires:
+    - Shinobi-Api
+    - skManager
+    - skAwesomplete
+settings:
+    viewType:
+      displayName: Tagger view
+      description: Value - Nested, List. Default - Nested
+      type: STRING
+    onlyChild:
+      displayName: Tag parent
+      description: If on tag only tags without any child. Default - on (you can bypass this by holding shift while clicking)
+      type: BOOLEAN

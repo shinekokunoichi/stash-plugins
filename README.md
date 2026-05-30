@@ -35,6 +35,18 @@ GUI for easy handle sk plugins and check updates.
 </details>
 
 # Extra plugins
+## Group Tagger
+Set tags based on tags category with 2 different styles.
+[Download](plugins/Extra/Group-Tagger)
+> [!IMPORTANT]  
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skAwesomplete](plugins/Core/skAwesomplete)
+
+<details>
+<summary>Screenshot</summary>
+  <img src="/assets/screenshots/skExtra Group Tagger 1.png" />
+  <img src="/assets/screenshots/skExtra Group Tagger 2.png" />
+</details>
+
 ## Image Upscaler
 Upscale lightbox images (2x). Use UpscalerJS.
 [Download](plugins/Extra/Image-Upscaler)
@@ -91,7 +103,7 @@ Enable the possibility to have multiple performer images by a custom GUI inside 
 Enable the possibility to have multiple studios for images.
 [Download](plugins/Extra/Multiple-Studios)
 > [!IMPORTANT]  
-> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager)
+> Require [Shinobi-Api](plugins/Core/Shinobi-Api), [skManager](plugins/Core/skManager), [skAwesomplete](plugins/Core/skAwesomplete)
 
 <details>
 <summary>Screenshot</summary>
