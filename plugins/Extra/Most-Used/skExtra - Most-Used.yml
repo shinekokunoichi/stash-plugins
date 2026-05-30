@@ -3,7 +3,7 @@ name: skExtra - Most-Used
 # requires: skManager
 # requires: skUI - Assets  
 description: Add a crown based on top 3 elements based on the O Counter and alter the card style. 
-version: 2.0
+version: 2.0.1
 ui:
   css:
     - skExtra - Most-Used.css

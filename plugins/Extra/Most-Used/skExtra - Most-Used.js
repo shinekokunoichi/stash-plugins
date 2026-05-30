@@ -110,7 +110,7 @@
                         sk.plugin.get(pluginName).rankStyle.split(',').forEach((style) => {
                             let [styleCategory, styleRank, styleSelector] = style.split(':');
                             styleCategory = styleCategory.trim().toLowerCase();
-                            if ((styleCategory === category.toLowerCase() || styleCategory === 'global') && styleRank == rank) element.class(styleSelector);
+                            if ((styleCategory === category.toLowerCase() || styleCategory === 'global') && styleRank == rank) where === 'card' ? element.class(styleSelector) : element.info.class(styleSelector);
                         });
                     };
                 });
