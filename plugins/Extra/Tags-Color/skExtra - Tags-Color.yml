@@ -3,7 +3,7 @@ name: skExtra - Tags-Color
 # requires: skManager
 # requires: skAwesomplete
 description: Colorize tags based on their parent tag/s
-version: 2.1.3
+version: 2.1.4
 ui:
   javascript:
     - skExtra - Tags-Color.js

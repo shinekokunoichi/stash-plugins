@@ -46,10 +46,10 @@
 		colors = colors.split('|').map((data) => {
 			let [name, color] = data.split(':');
 			return {
-			 name: name || '',
-			 color: color || ''
+			 name: name,
+			 color: color
 			};
-		});
+		}).filter(color => color.name && color.color ? color : null);
 
 		for (let i = 0; i < colors.length; i++) {
 			const { name, color } = colors[i];
@@ -141,6 +141,10 @@
 				{
 					version: '2.1.2',
 					description: 'Fixed error not showing the first declared color.\nAdded compatibility to future plugins.'
+				},
+				{
+					version: '2.1.4',
+					description: 'Fixed not apply colors when added with the GUI.'
 				}
 			]
 		});
