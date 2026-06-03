@@ -45,10 +45,9 @@
 	async function getGroupsColor(colors) {
 		colors = colors.split('|').map((data) => {
 			let [name, color] = data.split(':');
-			if (name[0] === '|') name = name.slice(1);
 			return {
-				name: name,
-				color: color
+			 name: name || '',
+			 color: color || ''
 			};
 		});
 
