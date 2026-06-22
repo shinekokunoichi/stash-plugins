@@ -25,14 +25,14 @@
 
     // Settings
     async function setDefaultSettings() {
-        // Remove me next update
-        const currentSettings = sk.plugin.get(pluginName);
+
+        const currentSettings = sk.plugin.get(pluginName) || {};
         await sk.plugin.check({
             name: pluginName,
             options: {
-                presets: currentSettings.preset || 'Portrait, Clothed, Skimpy, Nude',
+                presets: currentSettings?.preset || 'Portrait, Clothed, Skimpy, Nude',
                 useDefault: true,
-                defaultCategory: currentSettings.default || 'Default',
+                defaultCategory: currentSettings?.default || 'Default',
                 randomCategory: true,
                 replaceAll: true,
                 useSFW: true,
