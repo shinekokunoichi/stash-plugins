@@ -351,11 +351,11 @@
 
         if (!title.includes('-') && !code.includes('-') && !fileName.includes('-')) return;
 
-        let [titleCode, titleId] = title.split('-');
+        let [titleCode = '', titleId = ''] = title.split('-');
         titleId = titleId.split(' ')[0];
 
-        const [sceneCode, sceneId] = code.split('-');
-        const [fileNameCode, fileNameId] = fileName.split('-');
+        const [sceneCode = '', sceneId = ''] = code.split('-');
+        const [fileNameCode = '', fileNameId = ''] = fileName.split('-');
 
         const isJAVCode = (code, id) => isNaN(code) && !isNaN(id) ? `${code.trim().toUpperCase()}-${id.trim()}` : false;
         return isJAVCode(titleCode, titleId) || isJAVCode(sceneCode, sceneId) || isJAVCode(fileNameCode, fileNameId);
@@ -366,6 +366,7 @@
         const [code, id] = javCode.split('-');
 
         const javData = await sk.tool.scrape(`https://www.javmost.ws/search/${javCode}/`, { html: true });
+
         const results = javData.get('.card');
         if (!results) {
             scrapeResults.skipped++;
@@ -384,9 +385,9 @@
 
         scrapedData.id = scene.id;
         scrapedData.cover_image = `https://img3.javmost.ws/images/${javCode}.webp`;
-        scrapedData.title = results.get('h2').read();
+        scrapedData.title = results.get('h1') ? results.get('h1').read() : results.get('h2').read();
         scrapedData.code = javCode;
-        scrapedData.date = results.get('p').read().replaceAll(' ', '').split('Release')[1].split('Time')[0];
+        scrapedData.date = results.get('p').read().includes('Release') ? results.get('p').read().replaceAll(' ', '').split('Release')[1].split('Time')[0] : '';
 
         let toSearch = { group: [code] };
 
@@ -398,10 +399,10 @@
         });
 
         const stashData = await getStashData(toSearch);
-        if (stashData?.performer[0]) scrapedData.performer_ids = stashData.performer;
-        if (stashData?.tag[0]) scrapedData.tag_ids = stashData.tag;
-        if (stashData?.studio[0]) scrapedData.studio_id = stashData.studio[0];
-        if (stashData?.group[0]) scrapedData.groups = [{
+        if (stashData?.performer?.[0]) scrapedData.performer_ids = stashData.performer;
+        if (stashData?.tag?.[0]) scrapedData.tag_ids = stashData.tag;
+        if (stashData?.studio?.[0]) scrapedData.studio_id = stashData.studio[0];
+        if (stashData?.group?.[0]) scrapedData.groups = [{
             group_id: stashData.group[0],
             scene_index: code
         }];
@@ -421,20 +422,20 @@
             whatWillCreate[category] = '';
             
             for (const name of scene[category]) {
-                const exist = await sk.stash.find[category]({
+                const Exist = await sk.stash.find[category]({
                     filter: { q: name },
                     fields: 'id'
                 });
                 
-                if (!exist && createFilter.includes(category) && dryRun) whatWillCreate[category] += `${name}, `;
+                if (!Exist && createFilter.includes(category) && dryRun) whatWillCreate[category] += `${name}, `;
 
-                if (!exist && create && createFilter.includes(category) && !dryRun) {
-                    exist = await sk.stash.create[category]({ name: name });
+                if (!Exist && create && createFilter.includes(category) && !dryRun) {
+                    Exist = await sk.stash.create[category]({ name: name });
 
                     scrapeResults.created[`${category}s`]++;
                 };
 
-                if (exist?.id) findData[category].push(exist.id);
+                if (Exist?.id) findData[category].push(Exist.id);
             };
         };
 
